@@ -20,15 +20,28 @@ let demoBase: Promise<string> | undefined;
 function demoServer(): Promise<string> {
   demoBase ??= new Promise((resolve) => {
     const server = http.createServer(async (req, res) => {
-      const rel = decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname).replace(/^\/demo\//, "");
-      let file = path.resolve(DEMO_DIR, "." + path.posix.normalize("/" + rel));
-      if (!file.startsWith(DEMO_DIR + path.sep)) { res.writeHead(404).end(); return; }
+      // Never let a bad request reject this handler: an unhandled rejection would kill the MCP process.
       try {
-        if ((await stat(file)).isDirectory()) file = path.join(file, "index.html");
-        const type = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)] ?? "application/octet-stream";
-        res.writeHead(200, { "content-type": `${type}; charset=utf-8` }).end(await readFile(file));
-      } catch {
-        res.writeHead(404).end("Not found");
+        let rel: string;
+        try {
+          rel = decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname).replace(/^\/demo\//, "");
+        } catch {
+          res.writeHead(400).end("Bad request");
+          return;
+        }
+        let file = path.resolve(DEMO_DIR, "." + path.posix.normalize("/" + rel));
+        if (!file.startsWith(DEMO_DIR + path.sep)) { res.writeHead(404).end(); return; }
+        try {
+          if ((await stat(file)).isDirectory()) file = path.join(file, "index.html");
+          const type = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)] ?? "application/octet-stream";
+          res.writeHead(200, { "content-type": `${type}; charset=utf-8` }).end(await readFile(file));
+        } catch {
+          res.writeHead(404).end("Not found");
+        }
+      } catch (err) {
+        console.error("demo server error", err);
+        if (!res.headersSent) res.writeHead(500);
+        res.end();
       }
     });
     server.listen(0, "127.0.0.1", () => resolve(`http://127.0.0.1:${(server.address() as AddressInfo).port}`));

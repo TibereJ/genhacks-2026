@@ -71,5 +71,10 @@ describe("HTTP server", () => {
     expect((await post("/api/runs", "{}", { ...json, origin: "https://blindspot.example", "x-forwarded-host": "blindspot.example" })).status).toBe(400);
   });
 
+  it("answers 400 to malformed escapes in static paths", async () => {
+    expect((await fetch(`${base}/demo/%E0%A4%A`)).status).toBe(400);
+    expect((await fetch(`${base}/%E0%A4%A`)).status).toBe(400);
+    expect((await fetch(`${base}/demo/bad/index.html`)).status).toBe(200);
+  });
 
 });

@@ -27,9 +27,15 @@ function send(res: http.ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body));
 }
 
-/** Serve a file from `base`, refusing anything that resolves outside it. */
+/** Serve a file from `base`, refusing anything that resolves outside it. Answers 400 to malformed escapes. */
 async function serveStatic(res: http.ServerResponse, base: string, rel: string): Promise<boolean> {
-  const decoded = decodeURIComponent(rel);
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(rel);
+  } catch {
+    send(res, 400, { error: "Malformed URL" });
+    return true;
+  }
   const file = path.resolve(base, "." + path.posix.normalize("/" + decoded));
   if (file !== base && !file.startsWith(base + path.sep)) return false;
   let target = file;
