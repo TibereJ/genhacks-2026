@@ -1,3 +1,4 @@
+import { readdirSync } from "node:fs";
 // The read-only static demo (src/build-static.ts, published to GitHub Pages by .github/workflows/pages.yml):
 // build it into a temp dir, check the files, then serve it under a sub-path like GitHub Pages does
 // (https://tiberej.github.io/genhacks-2026/) and click through it in Chromium.
@@ -10,6 +11,9 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { chromium, type Browser } from "playwright";
 import { buildStatic, injectStaticMarker, type RunSummary } from "../src/build-static.js";
+
+// One folder per example run in examples/reports/.
+const EXAMPLE_COUNT = readdirSync(new URL("../examples/reports/", import.meta.url)).filter((d) => /^[a-z0-9-]+$/i.test(d)).length;
 
 const SUB_PATH = "/genhacks-2026/";
 const BAD_CLINIC = "20261104164439-947unj";
@@ -96,10 +100,11 @@ describe("static build files", () => {
 
   it("writes the run list like GET /api/reports, newest first", async () => {
     const list = JSON.parse(await readFile(path.join(outDir, "data", "reports.json"), "utf8")) as RunSummary[];
-    expect(list).toHaveLength(4);
+    expect(list).toHaveLength(EXAMPLE_COUNT);
     expect(list).toEqual(reports);
     expect(list.map((r) => r.startedAt)).toEqual([...list.map((r) => r.startedAt)].sort().reverse());
-    for (const r of list) expect(Object.keys(r).sort()).toEqual(["id", "score", "startedAt", "status", "task", "url"]);
+    // score is absent for unscored runs (inconclusive or error).
+    for (const r of list) expect(Object.keys(r).filter((k) => k !== "score").sort()).toEqual(["id", "startedAt", "status", "task", "url"]);
     // Report data is published untouched.
     const original = await readFile(path.resolve("examples/reports", BAD_CLINIC, "report.json"), "utf8");
     expect(await readFile(path.join(outDir, "data", "reports", BAD_CLINIC, "report.json"), "utf8")).toBe(original);
@@ -170,10 +175,10 @@ describe("static demo in a browser, under a sub-path", () => {
     const shots = process.env.BLINDSPOT_STATIC_SHOTS;
     if (shots) await mkdir(shots, { recursive: true });
 
-    // Home: the 4 example runs, the read-only notice instead of the form, presets linking to the demo sites.
+    // Home: every example run, the read-only notice instead of the form, presets linking to the demo sites.
     await page.goto(base);
     await page.locator(".run-row").nth(3).waitFor();
-    expect(await page.locator(".run-row").count()).toBe(4);
+    expect(await page.locator(".run-row").count()).toBe(EXAMPLE_COUNT);
     expect(await page.locator("#run-url").count()).toBe(0);
     await expect(page.locator(".static-notice").innerText()).resolves.toContain(
       "This is a read-only demo with real example runs. Run BlindSpot locally to test your own site",

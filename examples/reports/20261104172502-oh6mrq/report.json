@@ -1,0 +1,141 @@
+{
+  "id": "20261104172502-oh6mrq",
+  "url": "https://nodejs.org/",
+  "task": "Find out which version of Node.js is the current LTS (long-term support) release, and get to the page where I can download it for Windows.",
+  "model": "Claude Code (session brain)",
+  "status": "success",
+  "summary": "The current LTS release is v26.13.0, announced clearly as the default value of combobox \"Version\" on the Download page. I reached the Windows downloads: choosing Windows in the custom \"Operating System\" list worked with a screen reader, and the page then offered \"Windows Installer (.msi)\" and \"Standalone Binary (.zip)\". Overall a good experience: skip link, landmarks, named controls. Minor issues: two drop-downs share the name \"Operating System\", the popup list and a code block have no name.",
+  "startedAt": "2026-11-04T17:25:02.219Z",
+  "steps": [
+    {
+      "index": 0,
+      "url": "https://nodejs.org/en",
+      "reason": "In the main navigation I hear link \"Download\"; it should lead to the download page.",
+      "heard": "Page: Node.js — Run JavaScript Everywhere\n[1] link \"Skip to content\"\nregion \"Warning notification\"\n  [2] link \"New security releases to be made available Wednesday, November 11, 2026\"\n  [3] button \"Close banner\"\nnavigation\n  [4] link \"Home\"\n  [5] checkbox \"Toggle navigation menu\" (not checked)\n  [6] link \"Learn\"\n  [7] link \"About\"\n  [8] link \"Download\"\n  [9] link \"Blog\"\n  [10] link \"Docs\"\n  [11] link \"Beta Docs\"\n  [12] link \"Contribute\"\n  [13] button \"Start typing... ⌘ K\"\n  [14] button \"Select theme\" (collapsed)\n  [15] button \"Choose Language\" (collapsed)\n  [16] link \"Node.js Github\"\nmain\n  heading level 1 \"Run JavaScript Everywhere\"\n  text \"Node.js® is a free, open-source, cross-platform JavaScript runtime environment that lets developers create servers, web apps, command line tools and scripts.\"\n  [17] button \"Get Node.js®\"\n  [18] button \"Get security support for EOL Node.js versions\"\n  [19] button \"DigitalOcean\"\n  [20] button \"NodeSource\"\n  [21] button \"Vercel\"\n  [22] button \"TuxCare\"\n  [23] button \"Cloudflare\"\n  [24] button \"Microsoft Azure\"\n  [25] button \"HeroDevs\"\n  [26] button \"MacStadium\"\n  text \"Node.js is proudly supported by the partners above\"\n  [27] link \"and more\"\n  text \".\"\n  [28] tab \"Create an HTTP Server\" (selected)\n  [29] tab \"Write Tests\"\n  [30] tab \"Read and Hash a File\"\n  [31] tab \"Streams Pipeline\"\n  [32] tab \"Work with Threads\"\n  [33] generic (focusable) \"\"\n  text \"JavaScript\"\n  [34] button \"Copy to clipboard\"\n  text \"Learn more what Node.js is able to offer with our\"\n  [35] link \"Learning materials\"\n  text \".\"\ncontentinfo\n  [36] link \"v26.13.0 Latest LTS\"\n  [37] link \"v27.0.0-alpha.0.0.0 Latest Alpha\"\n  [38] link \"https://github.com/nodejs/node\"\n  [39] link \"https://discord.gg/nodejs\"\n  [40] link \"https://bsky.app/profile/nodejs.org\"\n  [41] link \"https://twitter.com/nodejs\"\n  [42] link \"https://slack-invite.openjsf.org/\"\n  [43] link \"https://www.linkedin.com/company/node-js\"\n  text \"Copyright\"\n  [44] link \"OpenJS Foundation\"\n  text \"and Node.js contributors. All rights reserved. The\"\n  [45] link \"OpenJS Foundation\"\n  text \"has registered trademarks and uses trademarks. For a list of trademarks of the\"\n  [46] link \"OpenJS Foundation\"\n  text \", please see our\"\n  [47] link \"Trademark Policy\"\n  text \"and\"\n  [48] link \"Trademark List\"\n  text \". Trademarks and logos not indicated on the\"\n  [49] link \"list of OpenJS Foundation trademarks\"\n  text \"are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.\"\n  [50] link \"OpenJS Foundation\"\n  [51] link \"AI Coding Assistants Policy\"\n  [52] link \"Bylaws\"\n  [53] link \"Code of Conduct\"\n  [54] link \"Cookie Policy\"\n  [55] link \"Privacy Policy\"\n  [56] link \"Security Policy\"\n  [57] link \"Terms of Use\"\n  [58] link \"Trademark List\"\n  [59] link \"Trademark Policy\"\nalert \"\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 8,
+          "role": "link",
+          "name": "Download"
+        }
+      },
+      "result": "New page loaded: \"Node.js — Download Node.js®\". Announced: \"Node.js — Download Node.js®\".",
+      "ok": true,
+      "screenshot": "step-0.png"
+    },
+    {
+      "index": 1,
+      "url": "https://nodejs.org/en/download",
+      "reason": "The LTS version is v26.13.0. In \"Or get a prebuilt Node.js for\" I choose Windows in combobox \"Operating System\".",
+      "heard": "Page: Node.js — Download Node.js®\n[1] link \"Skip to content\"\nregion \"Warning notification\"\n  [2] link \"New security releases to be made available Wednesday, November 11, 2026\"\n  [3] button \"Close banner\"\nnavigation\n  [4] link \"Home\"\n  [5] checkbox \"Toggle navigation menu\" (not checked)\n  [6] link \"Learn\"\n  [7] link \"About\"\n  [8] link \"Download\"\n  [9] link \"Blog\"\n  [10] link \"Docs\"\n  [11] link \"Beta Docs\"\n  [12] link \"Contribute\"\n  [13] button \"Start typing... ⌘ K\"\n  [14] button \"Select theme\" (collapsed)\n  [15] button \"Choose Language\" (collapsed)\n  [16] link \"Node.js Github\"\nmain\n  heading level 1 \"Download Node.js®\"\n  text \"Get Node.js®\"\n  [17] combobox \"Version\" value \"v26.13.0 LTS\" (collapsed)\n  text \"for\"\n  [18] combobox \"Operating System\" value \"Linux\" (collapsed)\n  text \"using\"\n  [19] combobox \"Platform\" value \"nvm\" (collapsed)\n  text \"with\"\n  [20] combobox \"Package Manager\" value \"npm\" (collapsed)\n  text \"Info\"\n  text \"Want new features sooner? Get the\"\n  [21] link \"latest Node.js version\"\n  text \"instead and try the latest improvements!\"\n  [22] generic (focusable) \"\"\n  text \"Bash\"\n  [23] button \"Copy to clipboard\"\n  text \"\\\"nvm\\\" is a cross-platform Node.js version manager.\"\n  text \"If you encounter any issues please visit\"\n  [24] link \"nvm's website\"\n  text \"Or get a prebuilt Node.js® for\"\n  [25] combobox \"Operating System\" value \"Linux\" (collapsed)\n  text \"running a\"\n  [26] combobox \"Platform\" value \"x64\" (collapsed)\n  text \"architecture.\"\n  [27] button \"Standalone Binary (.xz)\"\n  text \"Read the\"\n  [28] link \"changelog\"\n  text \"or\"\n  [29] link \"blog post\"\n  text \"for this version.\"\n  text \"Learn more about\"\n  [30] link \"Node.js releases\"\n  text \", including the release schedule and LTS status.\"\n  text \"Learn how to\"\n  [31] link \"verify\"\n  text \"signed SHASUMS.\"\n  text \"Looking for Node.js source? Download a signed\"\n  [32] link \"Node.js source\"\n  text \"tarball.\"\n  text \"Check out our\"\n  [33] link \"nightly\"\n  text \"binaries or all\"\n  [34] link \"previous releases\"\n  text \"or the\"\n  [35] link \"unofficial\"\n  text \"binaries for other platforms.\"\n  heading level 2 \"Proudly supported by the partners below:\"\n  text \"We are able to serve Node.js's downloads and maintain our infrastructure proudly due to the support of these partners,\"\n  [36] link \"and more\"\n  text \".\"\n  [37] button \"DigitalOcean\"\n  [38] button \"Vercel\"\n  [39] button \"Cloudflare\"\ncontentinfo\n  [40] link \"v26.13.0 Latest LTS\"\n  [41] link \"v27.0.0-alpha.0.0.0 Latest Alpha\"\n  [42] link \"https://github.com/nodejs/node\"\n  [43] link \"https://discord.gg/nodejs\"\n  [44] link \"https://bsky.app/profile/nodejs.org\"\n  [45] link \"https://twitter.com/nodejs\"\n  [46] link \"https://slack-invite.openjsf.org/\"\n  [47] link \"https://www.linkedin.com/company/node-js\"\n  text \"Copyright\"\n  [48] link \"OpenJS Foundation\"\n  text \"and Node.js contributors. All rights reserved. The\"\n  [49] link \"OpenJS Foundation\"\n  text \"has registered trademarks and uses trademarks. For a list of trademarks of the\"\n  [50] link \"OpenJS Foundation\"\n  text \", please see our\"\n  [51] link \"Trademark Policy\"\n  text \"and\"\n  [52] link \"Trademark List\"\n  text \". Trademarks and logos not indicated on the\"\n  [53] link \"list of OpenJS Foundation trademarks\"\n  text \"are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.\"\n  [54] link \"OpenJS Foundation\"\n  [55] link \"AI Coding Assistants Policy\"\n  [56] link \"Bylaws\"\n  [57] link \"Code of Conduct\"\n  [58] link \"Cookie Policy\"\n  [59] link \"Privacy Policy\"\n  [60] link \"Security Policy\"\n  [61] link \"Terms of Use\"\n  [62] link \"Trademark List\"\n  [63] link \"Trademark Policy\"\nalert \"Node.js — Download Node.js®\"",
+      "action": {
+        "type": "select",
+        "target": {
+          "id": 25,
+          "role": "combobox",
+          "name": "Operating System"
+        },
+        "value": "Windows"
+      },
+      "result": "combobox \"Operating System\" is not a list you can choose from. Try click instead.",
+      "ok": false,
+      "screenshot": "step-1.png"
+    },
+    {
+      "index": 2,
+      "url": "https://nodejs.org/en/download",
+      "reason": "It is not a native list, so I activate combobox \"Operating System\" to open it, as I would with Enter.",
+      "heard": "Page: Node.js — Download Node.js®\n[1] link \"Skip to content\"\nregion \"Warning notification\"\n  [2] link \"New security releases to be made available Wednesday, November 11, 2026\"\n  [3] button \"Close banner\"\nnavigation\n  [4] link \"Home\"\n  [5] checkbox \"Toggle navigation menu\" (not checked)\n  [6] link \"Learn\"\n  [7] link \"About\"\n  [8] link \"Download\"\n  [9] link \"Blog\"\n  [10] link \"Docs\"\n  [11] link \"Beta Docs\"\n  [12] link \"Contribute\"\n  [13] button \"Start typing... ⌘ K\"\n  [14] button \"Select theme\" (collapsed)\n  [15] button \"Choose Language\" (collapsed)\n  [16] link \"Node.js Github\"\nmain\n  heading level 1 \"Download Node.js®\"\n  text \"Get Node.js®\"\n  [17] combobox \"Version\" value \"v26.13.0 LTS\" (collapsed)\n  text \"for\"\n  [18] combobox \"Operating System\" value \"Linux\" (collapsed)\n  text \"using\"\n  [19] combobox \"Platform\" value \"nvm\" (collapsed)\n  text \"with\"\n  [20] combobox \"Package Manager\" value \"npm\" (collapsed)\n  text \"Info\"\n  text \"Want new features sooner? Get the\"\n  [21] link \"latest Node.js version\"\n  text \"instead and try the latest improvements!\"\n  [22] generic (focusable) \"\"\n  text \"Bash\"\n  [23] button \"Copy to clipboard\"\n  text \"\\\"nvm\\\" is a cross-platform Node.js version manager.\"\n  text \"If you encounter any issues please visit\"\n  [24] link \"nvm's website\"\n  text \"Or get a prebuilt Node.js® for\"\n  [25] combobox \"Operating System\" value \"Linux\" (collapsed)\n  text \"running a\"\n  [26] combobox \"Platform\" value \"x64\" (collapsed)\n  text \"architecture.\"\n  [27] button \"Standalone Binary (.xz)\"\n  text \"Read the\"\n  [28] link \"changelog\"\n  text \"or\"\n  [29] link \"blog post\"\n  text \"for this version.\"\n  text \"Learn more about\"\n  [30] link \"Node.js releases\"\n  text \", including the release schedule and LTS status.\"\n  text \"Learn how to\"\n  [31] link \"verify\"\n  text \"signed SHASUMS.\"\n  text \"Looking for Node.js source? Download a signed\"\n  [32] link \"Node.js source\"\n  text \"tarball.\"\n  text \"Check out our\"\n  [33] link \"nightly\"\n  text \"binaries or all\"\n  [34] link \"previous releases\"\n  text \"or the\"\n  [35] link \"unofficial\"\n  text \"binaries for other platforms.\"\n  heading level 2 \"Proudly supported by the partners below:\"\n  text \"We are able to serve Node.js's downloads and maintain our infrastructure proudly due to the support of these partners,\"\n  [36] link \"and more\"\n  text \".\"\n  [37] button \"DigitalOcean\"\n  [38] button \"Vercel\"\n  [39] button \"Cloudflare\"\ncontentinfo\n  [40] link \"v26.13.0 Latest LTS\"\n  [41] link \"v27.0.0-alpha.0.0.0 Latest Alpha\"\n  [42] link \"https://github.com/nodejs/node\"\n  [43] link \"https://discord.gg/nodejs\"\n  [44] link \"https://bsky.app/profile/nodejs.org\"\n  [45] link \"https://twitter.com/nodejs\"\n  [46] link \"https://slack-invite.openjsf.org/\"\n  [47] link \"https://www.linkedin.com/company/node-js\"\n  text \"Copyright\"\n  [48] link \"OpenJS Foundation\"\n  text \"and Node.js contributors. All rights reserved. The\"\n  [49] link \"OpenJS Foundation\"\n  text \"has registered trademarks and uses trademarks. For a list of trademarks of the\"\n  [50] link \"OpenJS Foundation\"\n  text \", please see our\"\n  [51] link \"Trademark Policy\"\n  text \"and\"\n  [52] link \"Trademark List\"\n  text \". Trademarks and logos not indicated on the\"\n  [53] link \"list of OpenJS Foundation trademarks\"\n  text \"are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.\"\n  [54] link \"OpenJS Foundation\"\n  [55] link \"AI Coding Assistants Policy\"\n  [56] link \"Bylaws\"\n  [57] link \"Code of Conduct\"\n  [58] link \"Cookie Policy\"\n  [59] link \"Privacy Policy\"\n  [60] link \"Security Policy\"\n  [61] link \"Terms of Use\"\n  [62] link \"Trademark List\"\n  [63] link \"Trademark Policy\"\nalert \"Node.js — Download Node.js®\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 25,
+          "role": "combobox",
+          "name": "Operating System"
+        }
+      },
+      "result": "Focus moved to option \"Linux\".",
+      "ok": true,
+      "screenshot": "step-2.png"
+    },
+    {
+      "index": 3,
+      "url": "https://nodejs.org/en/download",
+      "reason": "In the open list I choose option \"Windows\".",
+      "heard": "Page: Node.js — Download Node.js®\n[1] listbox \"\" options: \"Windows\", \"macOS\", \"Linux\", \"AIX\"\n  [2] option \"Windows\"\n  [3] option \"macOS\"\n  [4] option \"Linux\" ← focus\n  [5] option \"AIX\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 2,
+          "role": "option",
+          "name": "Windows"
+        }
+      },
+      "result": "Announced: \"Node.js — Download Node.js®\". Focus moved to combobox \"Operating System\".",
+      "ok": true,
+      "screenshot": "step-3.png"
+    },
+    {
+      "index": 4,
+      "url": "https://nodejs.org/en/download",
+      "reason": "The current LTS release is v26.13.0, announced clearly as the default value of combobox \"Version\" on the Download page. I reached the Windows downloads: choosing Windows in the custom \"Operating System\" list worked with a screen reader, and the page then offered \"Windows Installer (.msi)\" and \"Standalone Binary (.zip)\". Overall a good experience: skip link, landmarks, named controls. Minor issues: two drop-downs share the name \"Operating System\", the popup list and a code block have no name.",
+      "heard": "Page: Node.js — Download Node.js®\n[1] link \"Skip to content\"\nregion \"Warning notification\"\n  [2] link \"New security releases to be made available Wednesday, November 11, 2026\"\n  [3] button \"Close banner\"\nnavigation\n  [4] link \"Home\"\n  [5] checkbox \"Toggle navigation menu\" (not checked)\n  [6] link \"Learn\"\n  [7] link \"About\"\n  [8] link \"Download\"\n  [9] link \"Blog\"\n  [10] link \"Docs\"\n  [11] link \"Beta Docs\"\n  [12] link \"Contribute\"\n  [13] button \"Start typing... ⌘ K\"\n  [14] button \"Select theme\" (collapsed)\n  [15] button \"Choose Language\" (collapsed)\n  [16] link \"Node.js Github\"\nmain\n  heading level 1 \"Download Node.js®\"\n  text \"Get Node.js®\"\n  [17] combobox \"Version\" value \"v26.13.0 LTS\" (collapsed)\n  text \"for\"\n  [18] combobox \"Operating System\" value \"Linux\" (collapsed)\n  text \"using\"\n  [19] combobox \"Platform\" value \"nvm\" (collapsed)\n  text \"with\"\n  [20] combobox \"Package Manager\" value \"npm\" (collapsed)\n  text \"Info\"\n  text \"Want new features sooner? Get the\"\n  [21] link \"latest Node.js version\"\n  text \"instead and try the latest improvements!\"\n  [22] generic (focusable) \"\"\n  text \"Bash\"\n  [23] button \"Copy to clipboard\"\n  text \"\\\"nvm\\\" is a cross-platform Node.js version manager.\"\n  text \"If you encounter any issues please visit\"\n  [24] link \"nvm's website\"\n  text \"Or get a prebuilt Node.js® for\"\n  [25] combobox \"Operating System\" value \"Windows\" (collapsed) ← focus\n  text \"running a\"\n  [26] combobox \"Platform\" value \"x64\" (collapsed)\n  text \"architecture.\"\n  [27] button \"Windows Installer (.msi)\"\n  [28] button \"Standalone Binary (.zip)\"\n  text \"Read the\"\n  [29] link \"changelog\"\n  text \"or\"\n  [30] link \"blog post\"\n  text \"for this version.\"\n  text \"Learn more about\"\n  [31] link \"Node.js releases\"\n  text \", including the release schedule and LTS status.\"\n  text \"Learn how to\"\n  [32] link \"verify\"\n  text \"signed SHASUMS.\"\n  text \"Looking for Node.js source? Download a signed\"\n  [33] link \"Node.js source\"\n  text \"tarball.\"\n  text \"Check out our\"\n  [34] link \"nightly\"\n  text \"binaries or all\"\n  [35] link \"previous releases\"\n  text \"or the\"\n  [36] link \"unofficial\"\n  text \"binaries for other platforms.\"\n  heading level 2 \"Proudly supported by the partners below:\"\n  text \"We are able to serve Node.js's downloads and maintain our infrastructure proudly due to the support of these partners,\"\n  [37] link \"and more\"\n  text \".\"\n  [38] button \"DigitalOcean\"\n  [39] button \"Vercel\"\n  [40] button \"Cloudflare\"\ncontentinfo\n  [41] link \"v26.13.0 Latest LTS\"\n  [42] link \"v27.0.0-alpha.0.0.0 Latest Alpha\"\n  [43] link \"https://github.com/nodejs/node\"\n  [44] link \"https://discord.gg/nodejs\"\n  [45] link \"https://bsky.app/profile/nodejs.org\"\n  [46] link \"https://twitter.com/nodejs\"\n  [47] link \"https://slack-invite.openjsf.org/\"\n  [48] link \"https://www.linkedin.com/company/node-js\"\n  text \"Copyright\"\n  [49] link \"OpenJS Foundation\"\n  text \"and Node.js contributors. All rights reserved. The\"\n  [50] link \"OpenJS Foundation\"\n  text \"has registered trademarks and uses trademarks. For a list of trademarks of the\"\n  [51] link \"OpenJS Foundation\"\n  text \", please see our\"\n  [52] link \"Trademark Policy\"\n  text \"and\"\n  [53] link \"Trademark List\"\n  text \". Trademarks and logos not indicated on the\"\n  [54] link \"list of OpenJS Foundation trademarks\"\n  text \"are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.\"\n  [55] link \"OpenJS Foundation\"\n  [56] link \"AI Coding Assistants Policy\"\n  [57] link \"Bylaws\"\n  [58] link \"Code of Conduct\"\n  [59] link \"Cookie Policy\"\n  [60] link \"Privacy Policy\"\n  [61] link \"Security Policy\"\n  [62] link \"Terms of Use\"\n  [63] link \"Trademark List\"\n  [64] link \"Trademark Policy\"\nalert \"Node.js — Download Node.js®\"",
+      "action": {
+        "type": "finish",
+        "value": "success"
+      },
+      "result": "Task completed.",
+      "ok": true
+    }
+  ],
+  "issues": [
+    {
+      "id": "agent-1",
+      "severity": "moderate",
+      "title": "Two different drop-downs are both named \"Operating System\"",
+      "description": "The download page has two comboboxes called \"Operating System\" (one for the install command, one for prebuilt downloads), plus two called \"Platform\". In a list of form controls they sound identical, so it is not clear which one changes which download.",
+      "wcag": [
+        "2.4.6 Headings and Labels",
+        "1.3.1 Info and Relationships"
+      ],
+      "fix": "Give each control a distinct name, e.g. aria-label=\"Operating system for the install command\" and aria-label=\"Operating system for the prebuilt download\", or group each set in a <fieldset> with its own <legend>.",
+      "stepIndex": 4,
+      "element": {
+        "role": "combobox",
+        "name": "Operating System"
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-2",
+      "severity": "minor",
+      "title": "Open option list has no name",
+      "description": "When I opened the \"Operating System\" drop-down, the list was announced as an unnamed listbox. The options themselves were clear, so it did not stop me.",
+      "wcag": [
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "Link the popup list to its trigger label: <div role=\"listbox\" aria-labelledby=\"os-label\">…</div>",
+      "stepIndex": 4,
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-3",
+      "severity": "minor",
+      "title": "Focusable code block has no name",
+      "description": "The command example is a focusable region announced only as an unnamed element, so a keyboard or screen reader user tabbing through the page hears a stop with no explanation.",
+      "wcag": [
+        "4.1.2 Name, Role, Value",
+        "2.4.6 Headings and Labels"
+      ],
+      "fix": "<pre tabindex=\"0\" role=\"region\" aria-label=\"Install command (Bash)\">…</pre>",
+      "stepIndex": 4,
+      "source": "agent",
+      "blocking": false
+    }
+  ],
+  "finishedAt": "2026-11-04T17:25:36.431Z",
+  "score": 91
+}

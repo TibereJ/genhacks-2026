@@ -74,7 +74,14 @@ versions, with different barriers: a cookie banner that silently disables every 
 no name, quantity and add buttons named just "+" and "Add", cart updates that are never announced, a delivery
 choice that never says which option is selected, and a terms checkbox that is a plain `<div>`. Claude was
 **blocked at checkout (0/100, 8 issues)** on the inaccessible version and **placed the order (100/100)** on the
-fixed one. All four reports ship in the repo: `npm run examples`.
+fixed one.
+
+**On real websites.** From a cloud sandbox where most sites were blocked, BlindSpot tested two real public sites.
+On **nodejs.org** ("find the current LTS and the Windows download") the agent succeeded with 91/100 and reported
+real, minor issues (two drop-downs both named "Operating System", an unnamed popup list and code block). On
+**pypi.org** the search triggered a bot check: BlindSpot noted that it offers an audio CAPTCHA, reported that its
+field label only mentions the image, and ended the test as *inconclusive* instead of trying to bypass it. All six
+reports ship in the repo: `npm run examples`.
 
 ## How we built it
 

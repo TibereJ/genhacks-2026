@@ -42,8 +42,15 @@ accessibility tree differs.
 | `demo-site/shop/bad/` (GreenCart grocery checkout) | **Blocked** after 13 steps: "Terms of sale cannot be accepted" | 0/100 | 8 |
 | `demo-site/shop/fixed/` | **Success**: order placed | 100/100 | 0 |
 
+**On real websites** (run from a cloud sandbox where most sites are blocked, so only two could be reached):
+
+| Site | Task | Result |
+|---|---|---|
+| nodejs.org | Find the current LTS version and the Windows download | **Success**, 91/100: two drop-downs share the name "Operating System", an unnamed popup list and code block |
+| pypi.org | Find a package's latest version and license | **Inconclusive**: the search triggered a bot check. It offers an audio CAPTCHA (good), but its field only mentions the image. BlindSpot never tries to bypass a CAPTCHA |
+
 These are real runs where Claude (in Claude Code) played the screen reader user through BlindSpot's external-agent
-API. All four reports ship in `examples/reports/`: run `npm run examples` and open http://localhost:3000 to browse
+API. All six reports ship in `examples/reports/`: run `npm run examples` and open http://localhost:3000 to browse
 them without an API key. On the clinic, the time
 slots are clickable `<div>`s: a screen reader announces them as plain text, and pressing Tab jumps from the date
 field straight to "Full name". Submitting anyway shows a red "Please choose a time slot" message that is never
@@ -189,7 +196,7 @@ downloaded as Markdown or copied as a GitHub issue.
 npm run examples
 ```
 
-Opens the UI on `examples/reports/` (the four real agent runs above).
+Opens the UI on `examples/reports/` (the six real agent runs above).
 
 The same reports are published as a static, read-only site (the [live demo](https://tiberej.github.io/genhacks-2026/)):
 `npm run build:static` writes it to `dist-static/`, and `.github/workflows/pages.yml` deploys it to GitHub Pages

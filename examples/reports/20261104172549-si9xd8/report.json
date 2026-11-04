@@ -1,0 +1,80 @@
+{
+  "id": "20261104172549-si9xd8",
+  "url": "https://pypi.org/",
+  "task": "Find the package \"requests\", and tell me its latest version number and its license.",
+  "model": "Claude Code (session brain)",
+  "status": "inconclusive",
+  "summary": "I searched PyPI for \"requests\" with the labelled search field, which worked well: the home page has clear landmarks, a skip link and named controls. The search then triggered a bot check (a CAPTCHA image with an audio alternative). I did not try to solve it, so I could not reach the package page; this is not an accessibility verdict. The bot check itself is mostly accessible: it has an audio CAPTCHA, but its field label only mentions the image.",
+  "startedAt": "2026-11-04T17:25:49.177Z",
+  "steps": [
+    {
+      "index": 0,
+      "url": "https://pypi.org/",
+      "reason": "In the \"search\" landmark there is textbox \"Search PyPI\"; I type the package name.",
+      "heard": "Page: PyPI · The Python Package Index\n[1] link \"Skip to main content\"\nbanner\n  [2] link \"PyPI\"\n  navigation \"Main navigation\"\n    [3] link \"Blog\"\n    [4] link \"Docs\"\n    [5] link \"Log in\"\n    [6] link \"Register\"\n  navigation \"Localization\"\n    [7] button \"Change language\" (collapsed)\n    form\nmain\n  heading level 1 \"Find, install and publish Python packages with the Python Package Index\"\n  search\n    text \"Search PyPI\"\n    [8] textbox \"Search PyPI\"\n    [9] button \"Search\"\n  text \"Or\"\n  [10] link \"browse projects\"\n  text \"Publishing as a team? Use an\"\n  [11] link \"organization account\"\n  text \"933,581 projects\"\n  text \"10,093,831 releases\"\n  text \"22,621,430 files\"\n  text \"1,137,741 users\"\n  text \"The Python Package Index (PyPI) is a repository of software for the Python programming language.\"\n  text \"PyPI helps you find and install software developed and shared by the Python community.\"\n  [12] link \"Learn about installing packages\"\n  text \".\"\n  text \"Package authors use PyPI to distribute their software.\"\n  [13] link \"Learn how to package your Python code for PyPI\"\n  text \".\"\ncontentinfo\n  [14] link \"PyPI\"\n  text \"Developed and maintained by the\"\n  [15] link \"Python Software Foundation\"\n  text \"and Python community, for the Python community.\"\n  [16] link \"Status: all systems operational\"\n  [17] link \"Donate today!\"\n  heading level 2 \"Help\"\n  navigation \"Help navigation\"\n    [18] link \"PyPI documentation\"\n    [19] link \"Getting help\"\n    [20] link \"Installing packages\"\n    [21] link \"Uploading packages\"\n    [22] link \"Packaging user guide\"\n  heading level 2 \"About PyPI\"\n  navigation \"About PyPI navigation\"\n    [23] link \"PyPI blog\"\n    [24] link \"Infrastructure dashboard\"\n    [25] link \"Statistics\"\n    [26] link \"Logos & trademarks\"\n    [27] link \"Our sponsors\"\n  heading level 2 \"Contributing to PyPI\"\n  navigation \"How to contribute navigation\"\n    [28] link \"Bugs and feedback\"\n    [29] link \"Contribute on GitHub\"\n    [30] link \"Translate PyPI\"\n    [31] link \"Sponsor PyPI\"\n    [32] link \"Development credits\"\n  heading level 2 \"Using PyPI\"\n  navigation \"Using PyPI navigation\"\n    [33] link \"Terms of Service\"\n    [34] link \"Report security issue\"\n    [35] link \"Code of conduct\"\n    [36] link \"Privacy Notice\"\n    [37] link \"Acceptable Use Policy\"\n[38] link \"Anthropic, PBC Visionary sponsor\"\n[39] link \"Bloomberg Visionary sponsor\"\n[40] link \"Hudson River Trading Visionary sponsor\"\n[41] link \"Meta Visionary sponsor\"\n[42] link \"NVIDIA Visionary sponsor\"\n[43] link \"Microsoft Sustainability sponsor\"\n[44] link \"Depot Continuous Integration\"\n[45] link \"AWS Cloud computing and Security Sponsor\"\n[46] link \"Datadog Monitoring\"\n[47] link \"Fastly CDN\"\n[48] link \"Google Download Analytics\"\n[49] link \"Sentry Error logging\"\n[50] link \"StatusPage Status page\"\ntext \"\\\"PyPI\\\", \\\"Python Package Index\\\", and the blocks logos are registered\"\n[51] link \"trademarks\"\ntext \"of the\"\n[52] link \"Python Software Foundation\"\ntext \".\"\ntext \"© 2026\"\n[53] link \"Python Software Foundation\"\n[54] link \"Site map\"\ntext \"Deployed from\"\n[55] link \"92e14e3\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 8,
+          "role": "textbox",
+          "name": "Search PyPI"
+        },
+        "value": "requests"
+      },
+      "result": "textbox \"Search PyPI\" now has value \"requests\". Focus moved to textbox \"Search PyPI\".",
+      "ok": true,
+      "screenshot": "step-0.png"
+    },
+    {
+      "index": 1,
+      "url": "https://pypi.org/",
+      "reason": "Button \"Search\" right after the search field submits the search.",
+      "heard": "Page: PyPI · The Python Package Index\n[1] link \"Skip to main content\"\nbanner\n  [2] link \"PyPI\"\n  navigation \"Main navigation\"\n    [3] link \"Blog\"\n    [4] link \"Docs\"\n    [5] link \"Log in\"\n    [6] link \"Register\"\n  navigation \"Localization\"\n    [7] button \"Change language\" (collapsed)\n    form\nmain\n  heading level 1 \"Find, install and publish Python packages with the Python Package Index\"\n  search\n    text \"Search PyPI\"\n    [8] textbox \"Search PyPI\" value \"requests\" ← focus\n    [9] button \"Search\"\n  text \"Or\"\n  [10] link \"browse projects\"\n  text \"Publishing as a team? Use an\"\n  [11] link \"organization account\"\n  text \"933,581 projects\"\n  text \"10,093,831 releases\"\n  text \"22,621,430 files\"\n  text \"1,137,741 users\"\n  text \"The Python Package Index (PyPI) is a repository of software for the Python programming language.\"\n  text \"PyPI helps you find and install software developed and shared by the Python community.\"\n  [12] link \"Learn about installing packages\"\n  text \".\"\n  text \"Package authors use PyPI to distribute their software.\"\n  [13] link \"Learn how to package your Python code for PyPI\"\n  text \".\"\ncontentinfo\n  [14] link \"PyPI\"\n  text \"Developed and maintained by the\"\n  [15] link \"Python Software Foundation\"\n  text \"and Python community, for the Python community.\"\n  [16] link \"Status: all systems operational\"\n  [17] link \"Donate today!\"\n  heading level 2 \"Help\"\n  navigation \"Help navigation\"\n    [18] link \"PyPI documentation\"\n    [19] link \"Getting help\"\n    [20] link \"Installing packages\"\n    [21] link \"Uploading packages\"\n    [22] link \"Packaging user guide\"\n  heading level 2 \"About PyPI\"\n  navigation \"About PyPI navigation\"\n    [23] link \"PyPI blog\"\n    [24] link \"Infrastructure dashboard\"\n    [25] link \"Statistics\"\n    [26] link \"Logos & trademarks\"\n    [27] link \"Our sponsors\"\n  heading level 2 \"Contributing to PyPI\"\n  navigation \"How to contribute navigation\"\n    [28] link \"Bugs and feedback\"\n    [29] link \"Contribute on GitHub\"\n    [30] link \"Translate PyPI\"\n    [31] link \"Sponsor PyPI\"\n    [32] link \"Development credits\"\n  heading level 2 \"Using PyPI\"\n  navigation \"Using PyPI navigation\"\n    [33] link \"Terms of Service\"\n    [34] link \"Report security issue\"\n    [35] link \"Code of conduct\"\n    [36] link \"Privacy Notice\"\n    [37] link \"Acceptable Use Policy\"\n[38] link \"Anthropic, PBC Visionary sponsor\"\n[39] link \"Bloomberg Visionary sponsor\"\n[40] link \"Hudson River Trading Visionary sponsor\"\n[41] link \"Meta Visionary sponsor\"\n[42] link \"NVIDIA Visionary sponsor\"\n[43] link \"Microsoft Sustainability sponsor\"\n[44] link \"Depot Continuous Integration\"\n[45] link \"AWS Cloud computing and Security Sponsor\"\n[46] link \"Datadog Monitoring\"\n[47] link \"Fastly CDN\"\n[48] link \"Google Download Analytics\"\n[49] link \"Sentry Error logging\"\n[50] link \"StatusPage Status page\"\ntext \"\\\"PyPI\\\", \\\"Python Package Index\\\", and the blocks logos are registered\"\n[51] link \"trademarks\"\ntext \"of the\"\n[52] link \"Python Software Foundation\"\ntext \".\"\ntext \"© 2026\"\n[53] link \"Python Software Foundation\"\n[54] link \"Site map\"\ntext \"Deployed from\"\n[55] link \"92e14e3\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 9,
+          "role": "button",
+          "name": "Search"
+        }
+      },
+      "result": "New page loaded: \"Client Challenge\". Focus moved to textbox \"Enter the characters seen in the image below: Answer\".",
+      "ok": true,
+      "screenshot": "step-1.png"
+    },
+    {
+      "index": 2,
+      "url": "https://pypi.org/search/?q=requests",
+      "reason": "I searched PyPI for \"requests\" with the labelled search field, which worked well: the home page has clear landmarks, a skip link and named controls. The search then triggered a bot check (a CAPTCHA image with an audio alternative). I did not try to solve it, so I could not reach the package page; this is not an accessibility verdict. The bot check itself is mostly accessible: it has an audio CAPTCHA, but its field label only mentions the image.",
+      "heard": "Page: Client Challenge\nimage \"Fastly Logo\"\ntext \"Enter the characters seen in the image below:\"\nimage \"CAPTCHA image challenge\"\ngroup \"Audio CAPTCHA controls\"\n  [1] button \"Play audio CAPTCHA\"\n  [2] link \"Download audio CAPTCHA\"\nform\n  text \"Answer\"\n  [3] textbox \"Enter the characters seen in the image below: Answer\" (required) ← focus\n  [4] button \"Submit\"",
+      "action": {
+        "type": "finish",
+        "value": "inconclusive"
+      },
+      "result": "The test could not be carried out (not an accessibility verdict).",
+      "ok": true
+    }
+  ],
+  "issues": [
+    {
+      "id": "agent-1",
+      "severity": "minor",
+      "title": "Bot check instructions only mention the image",
+      "description": "After searching, PyPI showed a \"Client Challenge\" bot check. It does offer an accessible alternative (button \"Play audio CAPTCHA\" and a download link), which is good. But the answer field is named \"Enter the characters seen in the image below\", so a screen reader user lands in a field that asks about an image they cannot see, and has to discover the audio option above it on their own.",
+      "wcag": [
+        "1.1.1 Non-text Content",
+        "1.3.3 Sensory Characteristics",
+        "3.3.2 Labels or Instructions"
+      ],
+      "fix": "Name the field for both options, e.g. <label for=\"answer\">Enter the characters from the image or the audio challenge</label>, and place the audio button right before the field.",
+      "stepIndex": 2,
+      "element": {
+        "role": "textbox",
+        "name": "Enter the characters seen in the image below: Answer"
+      },
+      "source": "agent",
+      "blocking": false
+    }
+  ],
+  "finishedAt": "2026-11-04T17:25:52.626Z"
+}
