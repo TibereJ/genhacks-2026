@@ -63,18 +63,27 @@ So for a public deployment (for example the hackathon demo):
    - refuses URLs whose hostname resolves to a private, loopback, link-local or otherwise non-public address
      (IPv4 `0/8`, `10/8`, `100.64/10`, `127/8`, `169.254/16`, `172.16/12`, `192.168/16`, multicast...;
      IPv6 `::1`, `fc00::/7`, `fe80::/10`, multicast, and IPv4-mapped forms like `::ffff:127.0.0.1`), except its
-     own `/demo/` pages;
+     own `/demo/` pages. The same check runs on every request the test browser makes: page loads, assets,
+     links the agent follows, new tabs, and each hop of a redirect chain;
    - only allows the scripted agent (the demo clinic before/after), unless `BLINDSPOT_ALLOW_CLAUDE=1`.
 2. Keep the Claude agent disabled publicly. If you need it, put the instance behind authentication (your host's
    access control, a reverse proxy with basic auth, or a VPN) before setting `BLINDSPOT_ALLOW_CLAUDE=1`, and set a
    spending limit on the API key in the Anthropic console.
 3. Keep `BLINDSPOT_MAX_RUNS` low.
 
-Known limits of the URL guard (`src/core/url-guard.ts`): it checks the URL that starts the test. A public page can
-still redirect, or the agent can follow a link, to an internal address, and a hostname can resolve differently
-when the browser loads it (DNS rebinding). Closing those gaps needs request interception inside the browser
-session (Playwright `page.route`) or a network policy that blocks private ranges for the container. For a public
-instance, also run it on a host or network where the container cannot reach anything sensitive.
+### Known limits
+
+The URL guard (`src/core/url-guard.ts`) does not cover everything:
+
+- **DNS rebinding**: the guard resolves a hostname, then Chromium resolves it again by itself when it connects.
+  A hostile DNS server can answer with a public address the first time and a private one the second time.
+- **WebSockets**: Playwright's request interception does not see WebSocket connections, so a page can open one
+  to a private address.
+
+So a public deployment must also block private ranges at the network level: an egress firewall, or a container
+network policy, that stops the container from reaching `10/8`, `172.16/12`, `192.168/16`, `100.64/10`,
+`169.254/16` (cloud metadata) and the IPv6 private ranges (`fc00::/7`, `fe80::/10`). Run nothing else in the
+container, and run it on a host or network where it cannot reach anything sensitive.
 
 ## Deployxa
 
