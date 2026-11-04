@@ -353,7 +353,7 @@ export function renderHome(root) {
             h(
               "div",
               { class: "hero-text" },
-              h("p", { class: "lede" }, "Lighthouse checks rules. BlindSpot checks whether a blind person can actually use your site."),
+              h("p", { class: "lede" }, "Lighthouse checks rules. BlindSpot checks the journey: can someone who hears the page, instead of seeing it, actually get it done?"),
               h(
                 "p",
                 { class: "lede-2" },
