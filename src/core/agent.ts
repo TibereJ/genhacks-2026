@@ -121,10 +121,10 @@ export async function runTest(opts: RunOptions): Promise<Report> {
             outcomes.push({ id: call.id, isError: true, content: "Look at the result of your action before finishing." });
             continue;
           }
-          const f = input as { status: "success" | "blocked"; summary: string };
+          const f = input as { status: "success" | "blocked" | "inconclusive"; summary: string };
           report.steps.push({
             index: report.steps.length, url: snapshot.url, reason: f.summary, heard: snapshot.text,
-            action: { type: "finish", value: f.status }, result: f.status === "success" ? "Task completed." : "Task could not be completed.", ok: true,
+            action: { type: "finish", value: f.status }, result: f.status === "success" ? "Task completed." : f.status === "inconclusive" ? "The test could not be carried out (not an accessibility verdict)." : "Task could not be completed.", ok: true,
           });
           report.status = f.status;
           report.summary = f.summary;
@@ -178,7 +178,7 @@ export async function runTest(opts: RunOptions): Promise<Report> {
   }
 
   report.finishedAt = new Date().toISOString();
-  report.score = report.status === "error" ? undefined : computeScore(report);
+  report.score = report.status === "error" || report.status === "inconclusive" ? undefined : computeScore(report);
   await publish();
   return report;
 }

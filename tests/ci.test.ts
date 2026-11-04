@@ -208,3 +208,11 @@ describe("CI run on the demo sites (scripted agent, --serve)", () => {
     expect(await readFile(summary, "utf8")).toMatch(/\*\*FAIL\*\*[\s\S]*### Failures[\s\S]*status: blocked/);
   }, 120_000);
 });
+
+describe("inconclusive journeys", () => {
+  it("fail even when mustSucceed is false, because nothing was verified", () => {
+    const v = evaluateJourney({ name: "j", url: "/", task: "t", mustSucceed: false }, { status: "inconclusive", score: undefined });
+    expect(v.passed).toBe(false);
+    expect(v.reasons.join(" ")).toContain("inconclusive");
+  });
+});

@@ -119,6 +119,9 @@ export function evaluateJourney(journey: Journey, report: Pick<Report, "status" 
   if (report.status === "error") {
     // A run that crashed (site down, browser error) tells nothing about accessibility: always a failure.
     reasons.push(`the test could not run: ${report.error ?? "unknown error"}`);
+  } else if (report.status === "inconclusive") {
+    // A CAPTCHA or login wall stopped the agent: the journey was not verified, so the build must not pass silently.
+    reasons.push("the test was inconclusive (bot check, login wall or similar): the journey could not be verified");
   } else if (mustSucceed && report.status !== "success") {
     reasons.push(`the task was not completed (status: ${report.status})`);
   }

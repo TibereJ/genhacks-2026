@@ -3,7 +3,8 @@
 
 export type Severity = "critical" | "serious" | "moderate" | "minor";
 
-export type RunStatus = "running" | "success" | "blocked" | "step_limit" | "error";
+/** "inconclusive": the agent could not test the task for reasons unrelated to accessibility (CAPTCHA/bot check, login wall). */
+export type RunStatus = "running" | "success" | "blocked" | "inconclusive" | "step_limit" | "error";
 
 /** An element as a screen reader user would perceive it. */
 export interface ElementRef {

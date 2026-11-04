@@ -281,3 +281,15 @@ describe("focus on non-widgets", () => {
     expect(snap.text).toContain('heading level 1 "Checkout" ← focus');
   });
 });
+
+describe("inconclusive runs", () => {
+  it("ends without a score when the agent cannot test the task (e.g. CAPTCHA)", async () => {
+    const brain = new ScriptedBrain([
+      () => [{ name: "finish", input: { status: "inconclusive", summary: "A bot check stopped me; it offers an audio challenge." } }],
+    ]);
+    const report = await runTest({ url: `${base}/done`, task: "Anything", brain });
+    expect(report.status).toBe("inconclusive");
+    expect(report.score).toBeUndefined();
+    expect(report.steps.at(-1)?.result).toContain("not an accessibility verdict");
+  });
+});

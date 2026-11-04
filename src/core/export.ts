@@ -8,6 +8,7 @@ const STATUS_LABELS: Record<RunStatus, string> = {
   running: "Running",
   success: "Task completed",
   blocked: "Blind user blocked",
+  inconclusive: "Inconclusive",
   step_limit: "Step limit reached",
   error: "Error",
 };

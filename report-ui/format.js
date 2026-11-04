@@ -6,6 +6,7 @@ export const STATUS_LABELS = {
   running: "Running",
   success: "Task completed",
   blocked: "Blind user blocked",
+  inconclusive: "Inconclusive",
   step_limit: "Step limit reached",
   error: "Error",
 };
@@ -24,6 +25,7 @@ export function statusTone(status) {
     case "error":
       return "bad";
     case "step_limit":
+    case "inconclusive":
       return "warn";
     default:
       return "info";

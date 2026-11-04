@@ -19,7 +19,7 @@ export const TOOL_INPUTS = {
     element_id: z.number().int().nullable(),
     blocking: z.boolean(),
   }),
-  finish: z.object({ status: z.enum(["success", "blocked"]), summary: z.string() }),
+  finish: z.object({ status: z.enum(["success", "blocked", "inconclusive"]), summary: z.string() }),
 } as const;
 
 export type ToolName = keyof typeof TOOL_INPUTS;
@@ -80,11 +80,11 @@ export const TOOLS: Anthropic.Beta.BetaTool[] = [
   },
   {
     name: "finish",
-    description: "End the test. status \"success\" only if the site confirmed the task is done. \"blocked\" if, after reasonable attempts, a screen reader user could not complete it.",
+    description: "End the test. status \"success\" only if the site confirmed the task is done. \"blocked\" if, after reasonable attempts, a screen reader user could not complete it because of the site. \"inconclusive\" if the test cannot go on for reasons unrelated to accessibility, such as a CAPTCHA or bot check, a login you have no account for, or the site being down.",
     input_schema: {
       type: "object",
       properties: {
-        status: { type: "string", enum: ["success", "blocked"] },
+        status: { type: "string", enum: ["success", "blocked", "inconclusive"] },
         summary: { type: "string", description: "3-5 sentences for the site owner: what you managed, where you got stuck and the most important fix." },
       },
       required: ["status", "summary"],
@@ -104,4 +104,5 @@ How to work:
 - When something is unlabeled (e.g. button ""), you may guess from context like a real user would, but record the problem.
 - When you notice an accessibility problem, call report_issue in the same turn as your next action. Report problems that affect this task: missing or unclear names, controls you cannot operate, errors or confirmations that are not announced, confusing order or focus, missing feedback. Do not report the same problem twice.
 - Make at most 2-3 reasonable attempts around a barrier. If the task is impossible, call finish with status "blocked". If the site confirms the task is done, call finish with status "success".
+- Never try to solve or bypass a CAPTCHA or bot check, and never create accounts or enter real personal data. If one stops you, note whether it offers an accessible alternative (for example an audio challenge), then finish with status "inconclusive".
 - Keep reasons short. Write issues and the summary in plain English for web developers.`;
