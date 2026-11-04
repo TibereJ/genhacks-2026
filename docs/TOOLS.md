@@ -13,6 +13,8 @@ _Obligatoire : tout lister dans la description Devpost (« Built with »)._
 - `@anthropic-ai/sdk` — SDK officiel de l'API Claude
 - `playwright` + Chromium — pilotage du navigateur ; Chrome DevTools Protocol (`Accessibility.getFullAXTree`) pour l'arbre d'accessibilité
 - `zod` — validation des entrées des outils de l'agent
+- `@modelcontextprotocol/sdk` — serveur MCP (Claude Code ou tout client MCP peut piloter l'agent)
+- Web Speech API (navigateur) — bouton « Listen » qui lit le transcript à voix haute
 - `tsx`, `typescript`, `vitest` — exécution, typage, tests
 - `zod` sert aussi à valider `blindspot.config.json` (mode CI)
 

@@ -32,13 +32,19 @@ compares byte-equal screenshots). Only the accessibility tree differs.
 
 | Version | Agent result | Score | Issues |
 |---|---|---|---|
-| `demo-site/bad/` | **Blocked** after 12 steps: "Time slots cannot be selected" | 0/100 | 17 |
+| `demo-site/bad/` | **Blocked** after 12 steps: "Time slots cannot be selected" | 0/100 | 15 |
 | `demo-site/fixed/` | **Success**: appointment booked | 100/100 | 0 |
 
 These are from a run where Claude played the screen reader user through BlindSpot's external-agent API. The time
 slots are clickable `<div>`s: a screen reader announces them as plain text, and pressing Tab jumps from the date
 field straight to "Full name". Submitting anyway shows a red "Please choose a time slot" message that is never
 announced. A sighted mouse user books without noticing anything.
+
+![What you see vs what a screen reader user hears](docs/screenshots/side-by-side.png)
+
+Fix the markup, run again, compare: 0 → 100.
+
+![Before/after comparison](docs/screenshots/compare.png)
 
 ## How it works
 
@@ -84,7 +90,9 @@ announced. A sighted mouse user books without noticing anything.
 Screenshots (with the target element outlined in red) are saved for the humans reading the report. The agent
 never receives them.
 
-### What the agent hears on the bad booking form (abridged)
+### What the agent hears on the bad booking form
+
+Real output from the run above (cut after the form):
 
 ```
 Page: Book an appointment - Maple Grove Clinic
@@ -96,22 +104,26 @@ banner
     [4] link ""
 main
   heading level 1 "Book an appointment"
-  text "Doctor"
-  [5] combobox "" value "Choose a doctor" options: "Choose a doctor", "Dr. Lee — Family medicine", …
-  text "Date"
-  [6] date field "Date" value "…"
-  text "Available times"
-  text "9:00"
-  text "10:30"
-  text "11:45"
-  text "14:00"
-  text "16:15"
-  heading level 2 "Your details"
-  [7] textbox "Full name"
-  text "Email"
-  [8] textbox ""
-  text "Book appointment"
-  [9] button ""
+  text "Choose a doctor and a time that suits you. It takes less than a minute."
+  form
+    text "Doctor"
+    [5] combobox "" value "Choose a doctor" options: "Choose a doctor", "Dr. Lee — Family medicine", "Dr. Patel — Pediatrics", "Dr. Moreau — Dermatology" (collapsed)
+    text "Date"
+    [6] date field "Date" value "2026-11-05"
+    text "Available times"
+    text "9:00"
+    text "10:30"
+    text "11:45"
+    text "14:00"
+    text "16:15"
+    text "Crossed-out times are already taken."
+    heading level 2 "Your details"
+    [7] textbox "Full name"
+    text "Email"
+    [8] textbox ""
+    text "We will email you a confirmation. You can cancel free of charge up to 24 hours before."
+    text "Book appointment"
+    [9] button ""
 …
 ```
 
