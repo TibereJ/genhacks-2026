@@ -186,7 +186,7 @@ export function renderReport(root, id) {
         stepNodes.delete(pos);
       }
     }
-    stepsCount.textContent = steps.length ? `(${steps.length})` : "";
+    stepsCount.textContent = steps.length ? String(steps.length) : "";
 
     if (running) {
       replaceChildren(
@@ -208,7 +208,7 @@ export function renderReport(root, id) {
 
   function renderIssues(issues, steps, running) {
     const sorted = sortIssues(issues);
-    issuesCount.textContent = issues.length ? `(${issues.length})` : "";
+    issuesCount.textContent = issues.length ? String(issues.length) : "";
     const counts = countBySeverity(issues);
     replaceChildren(
       severitySummary,
@@ -223,7 +223,7 @@ export function renderReport(root, id) {
       );
       return;
     }
-    replaceChildren(issuesBody, h("ol", { class: "issues", role: "list" }, sorted.map((i) => renderIssue(i, steps))));
+    replaceChildren(issuesBody, h("ol", { class: "issues", role: "list" }, sorted.map((i, k) => renderIssue(i, steps, k + 1))));
   }
 
   tick();
@@ -275,7 +275,6 @@ function renderHead(head, r, steps, issues) {
     h(
       "div",
       { class: "head-main" },
-      h("div", { class: "head-badges" }, statusBadge(r.status), r.model ? h("span", { class: "badge badge-quiet" }, r.model) : null),
       h("p", { class: "head-kicker" }, "Task"),
       h("h1", { id: "page-title", tabindex: "-1" }, r.task || "Untitled task"),
       h(
@@ -285,36 +284,38 @@ function renderHead(head, r, steps, issues) {
           ? h("a", { href: siteHref, target: "_blank", rel: "noopener noreferrer" }, prettyUrl(r.url), h("span", { class: "sr-only" }, " (opens in a new tab)"))
           : prettyUrl(r.url),
       ),
-      h(
-        "ul",
-        { class: "head-stats", role: "list" },
-        stat(String(steps.length), steps.length === 1 ? "step" : "steps"),
-        stat(String(issues.length), issues.length === 1 ? "issue" : "issues"),
-        stat(String(blocking), "blocking", blocking ? "bad" : ""),
-        took ? stat(took, "duration") : null,
-        started ? h("li", { class: "stat stat-time" }, h("time", { datetime: r.startedAt }, started)) : null,
-      ),
-      r.status === "error" && r.error ? errorBox("The run stopped with an error.", r.error) : null,
-      r.summary
-        ? h(
-            "figure",
-            { class: "summary" },
-            h("figcaption", {}, "Agent's verdict"),
-            h("blockquote", {}, h("p", {}, r.summary)),
-          )
-        : null,
     ),
-    h("div", { class: "head-score" }, scoreGauge(r.score, r.status), h("p", { class: "gauge-caption" }, "Screen reader score")),
+    h("div", { class: "head-score" }, h("p", { class: "gauge-caption" }, "Screen reader score"), scoreGauge(r.score, r.status)),
+    h(
+      "ul",
+      { class: "head-stats", role: "list" },
+      h("li", { class: "stat stat-status" }, h("span", { class: "stat-label" }, "Result"), h("span", { class: "stat-value" }, statusBadge(r.status))),
+      stat(String(steps.length), steps.length === 1 ? "Step" : "Steps"),
+      stat(String(issues.length), issues.length === 1 ? "Issue" : "Issues"),
+      stat(String(blocking), "Blocking", blocking ? "bad" : ""),
+      took ? stat(took, "Duration") : null,
+      started ? h("li", { class: "stat stat-time" }, h("span", { class: "stat-label" }, "Started"), h("span", { class: "stat-value" }, h("time", { datetime: r.startedAt }, started))) : null,
+      r.model ? h("li", { class: "stat stat-model" }, h("span", { class: "stat-label" }, "Agent"), h("span", { class: "stat-value" }, r.model)) : null,
+    ),
+    r.status === "error" && r.error ? errorBox("The run stopped with an error.", r.error) : null,
+    r.summary
+      ? h(
+          "figure",
+          { class: "summary" },
+          h("figcaption", {}, "The agent's verdict"),
+          h("blockquote", {}, h("p", {}, r.summary)),
+        )
+      : null,
   );
 }
 
 function stat(value, label, tone = "") {
-  return h("li", { class: `stat${tone ? ` stat-${tone}` : ""}` }, h("strong", {}, value), " ", h("span", {}, label));
+  return h("li", { class: `stat${tone ? ` stat-${tone}` : ""}` }, h("span", { class: "stat-label" }, label), " ", h("strong", { class: "stat-value" }, value));
 }
 
 // ---------------------------------------------------------------- issues
 
-function renderIssue(issue, steps) {
+function renderIssue(issue, steps, n) {
   const pos = stepPosition(steps, issue.stepIndex);
   const titleId = `issue-${cssId(issue.id)}-title`;
   return h(
@@ -330,6 +331,7 @@ function renderIssue(issue, steps) {
       h(
         "div",
         { class: "issue-top" },
+        h("span", { class: "issue-num", "aria-hidden": "true" }, String(n).padStart(2, "0")),
         h("span", { class: `badge sev sev-${issue.severity}` }, SEVERITY_LABELS[issue.severity] ?? issue.severity),
         issue.blocking ? h("span", { class: "badge blocking-flag" }, icon("alert"), "Blocks the task") : null,
         h("span", { class: `badge source source-${issue.source}` }, issue.source === "scan" ? "Automated scan" : "Found by agent"),
@@ -348,7 +350,7 @@ function renderIssue(issue, steps) {
         "dl",
         { class: "issue-meta" },
         issue.wcag?.length
-          ? h("div", {}, h("dt", {}, "WCAG"), h("dd", {}, h("ul", { class: "chips", role: "list" }, issue.wcag.map((c) => h("li", {}, wcagChip(c))))))
+          ? h("div", {}, h("dt", {}, "WCAG 2.2"), h("dd", {}, h("ul", { class: "chips", role: "list" }, issue.wcag.map((c) => h("li", {}, wcagChip(c))))))
           : null,
         issue.element
           ? h(
@@ -527,7 +529,7 @@ function hearPane(step, n) {
         "span",
         { class: `t-line${isTarget ? " is-target" : ""}` },
         line.tokens.map((t) => (t.kind === "text" ? t.text : h("span", { class: `t-${t.kind}` }, t.text))),
-        isTarget ? h("span", { class: "t-acted" }, " ◀ agent acted here") : null,
+        isTarget ? h("span", { class: "t-acted" }, " agent acted here") : null,
       );
     }),
   );

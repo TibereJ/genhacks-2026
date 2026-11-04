@@ -4,9 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="description" content="BlindSpot: an AI agent that tries to use your website with only what a screen reader announces, and reports where blind users get stuck." />
+    <meta name="description" content="BlindSpot: an agent tries to complete a task on your website using only what a screen reader announces, and reports where blind users get stuck." />
     <title>BlindSpot</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='white' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='white'/%3E%3C/svg%3E" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2317150f'/%3E%3Ctext x='4.5' y='25' font-family='Georgia,serif' font-size='25' fill='%23f3efe6'%3EB%3C/text%3E%3Crect x='22' y='20' width='5' height='5' fill='%23e04a1f'/%3E%3C/svg%3E" />
+    <link rel="preload" href="fonts/instrument-serif-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="style.css" />
     <script type="module" src="app.js"></script>
   </head>
@@ -16,15 +18,9 @@
     <header class="site-header">
       <div class="wrap header-inner">
         <a class="brand" href="#/" aria-label="BlindSpot home">
-          <svg class="brand-mark" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false">
-            <rect width="32" height="32" rx="9" class="brand-bg" />
-            <path d="M5 16s4-7 11-7 11 7 11 7-4 7-11 7S5 16 5 16z" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" />
-            <circle cx="16" cy="16" r="3.4" fill="#fff" />
-            <path d="M7 25 25 7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
-          </svg>
-          <span class="brand-name">Blind<span>Spot</span></span>
+          <span class="brand-name" aria-hidden="true">BlindSpot</span><span class="brand-dot" aria-hidden="true"></span>
         </a>
-        <p class="header-tag">Usability testing through a screen reader's ears</p>
+        <p class="header-tag">Usability testing by ear</p>
         <span id="fixture-flag" class="badge status-info" hidden>Fixture mode</span>
       </div>
     </header>
@@ -34,10 +30,14 @@
     </main>
 
     <footer class="site-footer">
-      <div class="wrap">
-        <p>
-          BlindSpot never looks at the screen: the agent only gets the browser's accessibility tree, exactly what a screen
-          reader announces. Screenshots are shown for sighted humans.
+      <div class="wrap footer-inner">
+        <p class="footer-lead">
+          The agent never looks at the screen. It gets the browser's accessibility tree, which is exactly what a screen
+          reader announces. Screenshots are kept for the sighted people reading the report.
+        </p>
+        <p class="colophon">
+          Set in Instrument Serif, IBM Plex Sans and IBM Plex Mono. Made for GenHacks 2026.
+          <a href="https://github.com/TibereJ/genhacks-2026">Source on GitHub</a>
         </p>
       </div>
     </footer>

@@ -1,8 +1,8 @@
-// Home view: pitch, "run a test" form with demo presets, and the list of past runs.
+// Home view: the pitch with a transcript specimen, the "run a test" form with demo presets, and the list of past runs.
 
 import { h, icon, replaceChildren } from "./dom.js";
 import { listReports, startRun, FIXTURE_MODE, STATIC_MODE } from "./api.js";
-import { orderRuns, prettyUrl, relativeTime } from "./format.js";
+import { orderRuns, prettyUrl, relativeTime, tokenizeTranscript } from "./format.js";
 import { statusBadge, scorePill, emptyState, errorBox } from "./components.js";
 
 const DEMO_TASK =
@@ -12,11 +12,42 @@ const SHOP_TASK =
   "Buy 2 kg of apples and a loaf of bread, then check out with home delivery. Use the name Alex Doe, address 12 Elm Street, and accept the terms.";
 
 const PRESETS = [
-  { label: "Demo: inaccessible clinic", url: "/demo/bad/index.html", task: DEMO_TASK, tone: "bad" },
-  { label: "Demo: fixed clinic", url: "/demo/fixed/index.html", task: DEMO_TASK, tone: "good" },
-  { label: "Demo: inaccessible shop", url: "/demo/shop/bad/index.html", task: SHOP_TASK, tone: "bad" },
-  { label: "Demo: fixed shop", url: "/demo/shop/fixed/index.html", task: SHOP_TASK, tone: "good" },
+  { label: "Inaccessible clinic", url: "/demo/bad/index.html", task: DEMO_TASK, tone: "bad" },
+  { label: "Fixed clinic", url: "/demo/fixed/index.html", task: DEMO_TASK, tone: "good" },
+  { label: "Inaccessible shop", url: "/demo/shop/bad/index.html", task: SHOP_TASK, tone: "bad" },
+  { label: "Fixed shop", url: "/demo/shop/fixed/index.html", task: SHOP_TASK, tone: "good" },
 ];
+
+/**
+ * An excerpt of what the agent heard on the inaccessible demo clinic's booking form (step 4 of the example run),
+ * shown on the home page as a specimen. `note` points at the numbered remarks under it; "…" marks lines left out.
+ */
+const SPECIMEN = [
+  { line: '[6] date field "Date" value "2026-11-05" ← focus' },
+  { line: 'text "Available times"' },
+  { line: 'text "9:00"', note: 1 },
+  { line: 'text "10:30"', note: 1 },
+  { line: 'text "11:45"', note: 1 },
+  { line: 'text "14:00"', note: 1 },
+  { line: 'text "16:15"', note: 1 },
+  { line: "…" },
+  { line: '[7] textbox "Full name"' },
+  { line: 'text "Email"' },
+  { line: '[8] textbox ""', note: 2 },
+  { line: "…" },
+  { line: 'text "Book appointment"' },
+  { line: '[9] button ""', note: 3 },
+];
+
+const SPECIMEN_NOTES = [
+  "The time slots are plain text with no number, so nothing can focus or choose them. Tab goes from the date straight to Full name.",
+  "The email field has no label. “Email” is only nearby text.",
+  "The button that books is announced as a button, with no name.",
+];
+
+/** The example runs of the demo clinic (examples/reports/), linked from the hero when they are in the list. */
+const EXAMPLE_BAD_CLINIC = "20261104164439-947unj";
+const EXAMPLE_FIXED_CLINIC = "20261104164505-l2g8gy";
 
 const LIST_REFRESH_MS = 3000;
 
@@ -35,7 +66,7 @@ export function renderHome(root) {
     autocomplete: "url",
     spellcheck: "false",
     required: true,
-    placeholder: "https://example.com or /demo/bad/index.html",
+    placeholder: "https://example.com/signup",
     "aria-describedby": "run-url-hint",
   });
   const taskInput = h("textarea", {
@@ -43,14 +74,14 @@ export function renderHome(root) {
     name: "task",
     rows: 3,
     required: true,
-    placeholder: "What should a screen reader user be able to do?",
+    placeholder: "Create an account with the email alex@example.com",
     "aria-describedby": "run-task-hint",
   });
   const brainSelect = h(
     "select",
     { id: "run-brain", name: "brain" },
-    h("option", { value: "claude" }, "Claude (AI agent)"),
-    h("option", { value: "scripted" }, "Scripted demo (no API key)"),
+    h("option", { value: "claude" }, "Claude"),
+    h("option", { value: "scripted" }, "Scripted demo, no API key"),
   );
   const submit = h("button", { type: "submit", class: "btn btn-primary btn-lg" }, "Run test", icon("arrow"));
   const formError = h("div", { class: "form-error", "aria-live": "assertive" });
@@ -109,7 +140,7 @@ export function renderHome(root) {
     h(
       "div",
       { class: "presets" },
-      h("p", { class: "presets-label", id: "presets-label" }, "Try the demo site"),
+      h("p", { class: "presets-label", id: "presets-label" }, "Fill in a demo"),
       h("div", { class: "preset-row", role: "group", "aria-labelledby": "presets-label" }, presetButtons),
     ),
     h(
@@ -117,14 +148,14 @@ export function renderHome(root) {
       { class: "field" },
       h("label", { for: "run-url" }, "Website URL"),
       urlInput,
-      h("p", { class: "hint", id: "run-url-hint" }, "A full URL, or a path on this server for the demo site."),
+      h("p", { class: "hint", id: "run-url-hint" }, "A full URL, or a path on this server such as /demo/bad/index.html."),
     ),
     h(
       "div",
       { class: "field" },
       h("label", { for: "run-task" }, "Task"),
       taskInput,
-      h("p", { class: "hint", id: "run-task-hint" }, "Written like you would ask a person. The agent decides how to do it."),
+      h("p", { class: "hint", id: "run-task-hint" }, "One or two sentences, the way you would brief a person. The agent decides how to do it."),
     ),
     h(
       "div",
@@ -135,8 +166,51 @@ export function renderHome(root) {
     formError,
   );
 
+  // ---- way in: the example clinic runs, when this server has them ----
+  const heroLinks = h("ul", { class: "hero-links", role: "list", "aria-label": "Start with an example" });
+
+  function renderHeroLinks() {
+    const bad = runs.find((r) => r.id === EXAMPLE_BAD_CLINIC);
+    const fixed = runs.find((r) => r.id === EXAMPLE_FIXED_CLINIC);
+    if (!bad) return replaceChildren(heroLinks);
+    const score = (r) => (typeof r.score === "number" ? String(Math.round(r.score)) : "–");
+    replaceChildren(
+      heroLinks,
+      h(
+        "li",
+        {},
+        h(
+          "a",
+          { href: `#/report/${encodeURIComponent(bad.id)}` },
+          h("span", { class: "hero-link-label" }, "Read a report"),
+          h("span", { class: "hero-link-sub" }, "The inaccessible clinic, where the agent gets stuck at the time slots"),
+          h("span", { class: "hero-link-score is-bad", "aria-hidden": "true" }, score(bad)),
+        ),
+      ),
+      fixed
+        ? h(
+            "li",
+            {},
+            h(
+              "a",
+              { href: `#/compare/${encodeURIComponent(bad.id)}/${encodeURIComponent(fixed.id)}` },
+              h("span", { class: "hero-link-label" }, "See it fixed"),
+              h("span", { class: "hero-link-sub" }, "Same page, same pixels, a corrected accessibility tree"),
+              h(
+                "span",
+                { class: "hero-link-score", "aria-hidden": "true" },
+                h("span", { class: "is-bad" }, score(bad)),
+                h("span", { class: "to" }, "to"),
+                score(fixed),
+              ),
+            ),
+          )
+        : null,
+    );
+  }
+
   // ---- runs list ----
-  const runsBody = h("div", { class: "runs-body", "aria-busy": "true" }, h("p", { class: "muted" }, "Loading runs…"));
+  const runsBody = h("div", { class: "runs-body", "aria-busy": "true" }, h("p", { class: "muted runs-loading" }, "Loading runs…"));
   let runsKey = "";
   let runs = [];
   /** Ids of the runs ticked for a before / after comparison. Survives list refreshes. */
@@ -192,6 +266,7 @@ export function renderHome(root) {
       const known = new Set(runs.map((r) => r.id));
       for (const id of selected) if (!known.has(id)) selected.delete(id);
       compareBar.hidden = runs.length < 2;
+      renderHeroLinks();
       updateCompareBar();
       // Only rebuild the list when it changed, so focus and ticks are not disturbed while polling.
       const k = JSON.stringify(runs);
@@ -204,10 +279,22 @@ export function renderHome(root) {
             runsBody,
             STATIC_MODE
               ? emptyState("No example runs", "This demo build contains no reports.")
-              : emptyState("No runs yet", "Launch a test above, or try one of the demo presets."),
+              : emptyState("No runs yet", "Start a test above, or fill in one of the demos."),
           );
         } else {
-          replaceChildren(runsBody, h("ul", { class: "runs", role: "list" }, runs.map((r) => runItem(r, selected.has(r.id), onPick))));
+          replaceChildren(
+            runsBody,
+            h(
+              "div",
+              { class: "runs-cols", "aria-hidden": "true" },
+              h("span", { class: "col-pick" }),
+              h("span", { class: "col-task" }, "Task and site"),
+              h("span", { class: "col-status" }, "Result"),
+              h("span", { class: "col-when" }, "Started"),
+              h("span", { class: "col-score" }, "Score"),
+            ),
+            h("ul", { class: "runs", role: "list" }, runs.map((r) => runItem(r, selected.has(r.id), onPick))),
+          );
         }
         if (focusedId) {
           const sel = focusedKind === "INPUT" ? "input" : "a";
@@ -235,7 +322,6 @@ export function renderHome(root) {
       h(
         "section",
         { class: "hero", "aria-labelledby": "page-title" },
-        h("p", { class: "eyebrow" }, "AI screen reader usability testing"),
         h(
           "h1",
           { id: "page-title", tabindex: "-1" },
@@ -244,24 +330,41 @@ export function renderHome(root) {
           h("span", { class: "hero-loud" }, "BlindSpot checks whether a blind person can ", h("em", {}, "actually"), " use your site."),
         ),
         h(
-          "p",
-          { class: "lede" },
-          "Give it a task. An AI agent tries to complete it using only what a screen reader announces, never the pixels, and shows you exactly where a blind user gets stuck, with WCAG criteria and code fixes.",
-        ),
-        h(
-          "ol",
-          { class: "how", role: "list" },
-          howItem("ear", "Hears, never sees", "The agent only gets the accessibility tree, like a screen reader user."),
-          howItem("arrow", "Does the real task", "Clicks, types and selects its way through your flow."),
-          howItem("alert", "Reports blockers", "Every dead end, with the WCAG criterion and the fix."),
+          "div",
+          { class: "hero-body" },
+          h(
+            "div",
+            { class: "hero-text" },
+            h(
+              "p",
+              { class: "lede" },
+              "Give it a web address and a task, the way you would brief a person: book an appointment, check out, find a price. An agent then tries to do it with nothing but what a screen reader announces. It never sees the page.",
+            ),
+            h(
+              "p",
+              { class: "lede-2" },
+              "When it gets stuck, the report shows the exact step, what it heard there, the WCAG criterion involved and the code that fixes it.",
+            ),
+            heroLinks,
+          ),
+          specimen(),
         ),
       ),
       STATIC_MODE
         ? staticNotice()
         : h(
             "section",
-            { class: "card run-card", "aria-labelledby": "run-title" },
-            h("h2", { id: "run-title" }, "Run a test"),
+            { class: "run-card", "aria-labelledby": "run-title" },
+            h(
+              "div",
+              { class: "run-intro" },
+              h("h2", { id: "run-title" }, "Run a test"),
+              h(
+                "p",
+                { class: "section-note" },
+                "The report opens straight away and fills in step by step while the agent works.",
+              ),
+            ),
             form,
           ),
       h(
@@ -272,7 +375,9 @@ export function renderHome(root) {
           { class: "section-head" },
           h("h2", { id: "runs-title" }, STATIC_MODE ? "Example runs" : "Recent runs"),
           FIXTURE_MODE ? h("span", { class: "badge status-info" }, "Sample data") : null,
-          STATIC_MODE ? h("span", { class: "badge status-info" }, "Real agent runs") : null,
+          STATIC_MODE
+            ? h("p", { class: "section-note" }, "Real runs by the agent: both demo sites, broken and fixed, and three public websites.")
+            : null,
         ),
         compareBar,
         runsBody,
@@ -291,6 +396,47 @@ export function renderHome(root) {
   };
 }
 
+/** The transcript excerpt shown in the hero: real output, typeset like a specimen with numbered remarks. */
+function specimen() {
+  const rows = SPECIMEN.map(({ line, note }, i) => {
+    const first = note && SPECIMEN[i - 1]?.note !== note;
+    const last = note && SPECIMEN[i + 1]?.note !== note;
+    if (line === "…") return h("span", { class: "sp-row sp-gap" }, h("span", { class: "sp-code" }, "…"));
+    const [tokens] = tokenizeTranscript(line);
+    return h(
+      "span",
+      { class: `sp-row${note ? " is-noted" : ""}${first ? " is-first" : ""}${last ? " is-last" : ""}` },
+      h(
+        "span",
+        { class: "sp-code" },
+        tokens.tokens.map((t) => (t.kind === "text" ? t.text : h("span", { class: `t-${t.kind}` }, t.text))),
+      ),
+      first ? h("span", { class: "sp-mark", "aria-hidden": "true" }, String(note)) : null,
+    );
+  });
+  return h(
+    "figure",
+    { class: "specimen", "aria-labelledby": "specimen-title" },
+    h(
+      "div",
+      { class: "specimen-head" },
+      h("p", { class: "specimen-title", id: "specimen-title" }, "What the agent heard on a booking form"),
+      h("p", { class: "specimen-source" }, "Maple Grove Clinic, inaccessible version, step 4"),
+    ),
+    h("pre", { class: "specimen-code", tabindex: "0", "aria-label": "Screen reader transcript excerpt" }, rows),
+    h(
+      "figcaption",
+      { class: "specimen-notes" },
+      h(
+        "ol",
+        {},
+        SPECIMEN_NOTES.map((text) => h("li", {}, text)),
+      ),
+      h("p", { class: "specimen-foot" }, "A mouse user books without noticing any of it."),
+    ),
+  );
+}
+
 /**
  * Static (read-only) demo: there is no server to run tests, so the form is replaced by a notice. The presets
  * become links to the copies of the demo sites shipped with the build, so visitors can see what the agent tested.
@@ -298,14 +444,18 @@ export function renderHome(root) {
 function staticNotice() {
   return h(
     "section",
-    { class: "card run-card static-notice", "aria-labelledby": "run-title" },
-    h("h2", { id: "run-title" }, "Run a test"),
+    { class: "run-card static-notice", "aria-labelledby": "run-title" },
     h(
-      "p",
-      { class: "static-text" },
-      "This is a read-only demo with real example runs. Run BlindSpot locally to test your own site: ",
-      h("a", { href: QUICK_START_URL }, "quick start on GitHub"),
-      ".",
+      "div",
+      { class: "run-intro" },
+      h("h2", { id: "run-title" }, "Run a test"),
+      h(
+        "p",
+        { class: "static-text" },
+        "This is a read-only demo with real example runs. Run BlindSpot locally to test your own site: ",
+        h("a", { href: QUICK_START_URL }, "quick start on GitHub"),
+        ".",
+      ),
     ),
     h(
       "div",
@@ -332,15 +482,6 @@ function staticNotice() {
   );
 }
 
-function howItem(iconName, title, text) {
-  return h(
-    "li",
-    {},
-    h("span", { class: "how-icon" }, icon(iconName)),
-    h("span", { class: "how-text" }, h("strong", {}, title), h("span", {}, text)),
-  );
-}
-
 function runItem(run, picked, onPick) {
   const when = relativeTime(run.startedAt);
   return h(
@@ -355,20 +496,15 @@ function runItem(run, picked, onPick) {
     h(
       "a",
       { class: "run", href: `#/report/${encodeURIComponent(run.id)}`, dataset: { id: run.id } },
-      scorePill(run.score),
       h(
         "span",
         { class: "run-main" },
         h("span", { class: "run-task" }, run.task || "(no task)"),
-        h(
-          "span",
-          { class: "run-meta" },
-          h("span", { class: "run-url" }, prettyUrl(run.url)),
-          when ? h("span", { "aria-hidden": "true" }, " · ") : null,
-          when ? h("time", { datetime: run.startedAt }, when) : null,
-        ),
+        h("span", { class: "run-meta" }, h("span", { class: "run-url" }, prettyUrl(run.url))),
       ),
-      statusBadge(run.status),
+      h("span", { class: "run-status" }, statusBadge(run.status)),
+      h("span", { class: "run-when" }, when ? h("time", { datetime: run.startedAt }, when) : null),
+      h("span", { class: "run-score" }, scorePill(run.score)),
     ),
   );
 }

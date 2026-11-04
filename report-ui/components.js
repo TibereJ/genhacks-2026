@@ -1,6 +1,6 @@
 // Reusable UI pieces shared by the home and report views.
 
-import { h, s, icon } from "./dom.js";
+import { h, icon } from "./dom.js";
 import { statusLabel, statusTone, scoreTone, scoreVerdict } from "./format.js";
 
 export function statusBadge(status) {
@@ -23,12 +23,10 @@ export function scorePill(score) {
   );
 }
 
-/** Big circular gauge for the report header. */
+/** Big score numeral with a thin bar, for the report header and the compare view. */
 export function scoreGauge(score, status) {
   const has = typeof score === "number";
   const value = has ? Math.max(0, Math.min(100, score)) : 0;
-  const r = 52;
-  const c = 2 * Math.PI * r;
   const tone = scoreTone(score);
   return h(
     "div",
@@ -37,20 +35,8 @@ export function scoreGauge(score, status) {
       role: "img",
       "aria-label": has ? `Accessibility score: ${Math.round(value)} out of 100. ${scoreVerdict(score)}.` : scoreVerdict(score, status),
     },
-    s(
-      "svg",
-      { viewBox: "0 0 120 120", class: "gauge-ring", "aria-hidden": "true", focusable: "false" },
-      s("circle", { cx: 60, cy: 60, r, class: "gauge-track" }),
-      s("circle", {
-        cx: 60,
-        cy: 60,
-        r,
-        class: "gauge-value",
-        "stroke-dasharray": `${c} ${c}`,
-        "stroke-dashoffset": String(c * (1 - value / 100)),
-        transform: "rotate(-90 60 60)",
-      }),
-    ),
+    // Presentation: a thin horizontal bar under the numeral (was a circular ring).
+    h("span", { class: "gauge-bar", "aria-hidden": "true" }, h("span", { class: "gauge-fill", style: `width: ${value}%` })),
     h(
       "div",
       { class: "gauge-label", "aria-hidden": "true" },
