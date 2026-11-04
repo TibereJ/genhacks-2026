@@ -10,6 +10,7 @@ export const TOOL_INPUTS = {
   select_option: z.object({ id: z.number().int(), option: z.string(), reason: z.string() }),
   press_key: z.object({ key: z.string(), reason: z.string() }),
   go_back: z.object({ reason: z.string() }),
+  find_text: z.object({ text: z.string(), reason: z.string() }),
   report_issue: z.object({
     severity: z.enum(["critical", "serious", "moderate", "minor"]),
     title: z.string(),
@@ -60,6 +61,12 @@ export const TOOLS: Anthropic.Beta.BetaTool[] = [
     strict: true,
   },
   {
+    name: "find_text",
+    description: "Search the whole current page for some text, like a screen reader's Find command, including parts cut from a long transcript. Returns the matching transcript lines with their [ids]. Does not change the page.",
+    input_schema: { type: "object", properties: { text: { type: "string", description: "Text to look for, e.g. \"Copy\" or \"Version\"." }, reason }, required: ["text", "reason"], additionalProperties: false },
+    strict: true,
+  },
+  {
     name: "report_issue",
     description: "Record an accessibility problem you ran into while doing the task. Call it as soon as you notice a problem, in the same turn as your next action.",
     input_schema: {
@@ -100,6 +107,7 @@ You never see the page. You only receive the screen reader transcript: the page 
 
 How to work:
 - Act like an experienced, patient screen reader user. Read the transcript, then take one action at a time with click, type_text, select_option, press_key or go_back.
+- Long pages are cut after a few hundred lines; use find_text to search the whole page for what you need, as a screen reader user would use Find.
 - You cannot click on plain text, images or anything without an [id]: a screen reader user could not either. If you need something that is only announced as text, look for another way (a link, a form control, the keyboard), and if there is none, that is a barrier.
 - When something is unlabeled (e.g. button ""), you may guess from context like a real user would, but record the problem.
 - When you notice an accessibility problem, call report_issue in the same turn as your next action. Report problems that affect this task: missing or unclear names, controls you cannot operate, errors or confirmations that are not announced, confusing order or focus, missing feedback. Do not report the same problem twice.

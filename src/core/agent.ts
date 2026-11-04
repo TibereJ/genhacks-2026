@@ -1,7 +1,7 @@
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
 import { BrowserSession, type BrowserAction, type RequestGuard } from "./browser.js";
-import type { Snapshot } from "./ax-tree.js";
+import { findInSnapshot, type Snapshot } from "./ax-tree.js";
 import { scanPage } from "./scan.js";
 import { computeScore, newReportId, reportDir, saveReport } from "./report.js";
 import { ACTION_TOOLS, TOOL_INPUTS, type ToolName } from "./tools.js";
@@ -101,6 +101,12 @@ export async function runTest(opts: RunOptions): Promise<Report> {
           continue;
         }
         const input = parsed.data as Record<string, unknown>;
+
+        if (name === "find_text") {
+          const f = input as { text: string };
+          outcomes.push({ id: call.id, content: findInSnapshot(snapshot, f.text) });
+          continue;
+        }
 
         if (name === "report_issue") {
           const i = input as unknown as { severity: Issue["severity"]; title: string; description: string; wcag: string[]; fix: string; element_id: number | null; blocking: boolean };

@@ -308,3 +308,23 @@ describe("focusable wrappers", () => {
     expect(snap.text).toMatch(/\[\d+\] link "@std\/path"/);
   });
 });
+
+describe("find_text", () => {
+  it("searches lines cut from a long transcript and returns usable ids", async () => {
+    const { buildSnapshot, findInSnapshot } = await import("../src/core/ax-tree.js");
+    const nodes: Record<string, unknown>[] = [{ nodeId: "0", ignored: false, role: { value: "RootWebArea" }, childIds: [] as string[] }];
+    for (let i = 1; i <= 700; i++) {
+      (nodes[0].childIds as string[]).push(String(i));
+      nodes.push(i === 650
+        ? { nodeId: String(i), ignored: false, role: { value: "button" }, name: { value: "Copy example" }, backendDOMNodeId: i }
+        : { nodeId: String(i), ignored: false, role: { value: "StaticText" }, name: { value: `line ${i}` } });
+    }
+    const snap = buildSnapshot(nodes as never, "http://x", "Long");
+    expect(snap.text).not.toContain("Copy example");
+    expect(snap.text).toContain("use find_text");
+    const found = findInSnapshot(snap, "copy");
+    expect(found).toMatch(/1 match for "copy":\nline \d+: \[1\] button "Copy example"/);
+    expect(snap.elements.get(1)?.name).toBe("Copy example");
+    expect(findInSnapshot(snap, "nope")).toContain("was not found");
+  });
+});

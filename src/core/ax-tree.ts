@@ -29,8 +29,10 @@ export interface SnapshotElement {
 export interface Snapshot {
   url: string;
   title: string;
-  /** The transcript shown to the agent. */
+  /** The transcript shown to the agent (cut after MAX_LINES lines). */
   text: string;
+  /** Every transcript line, including those cut from `text`, for find_text. */
+  fullLines: string[];
   /** Operable elements by transcript id. */
   elements: Map<number, SnapshotElement>;
   /** Description of the focused element, e.g. `button "Book"`, if any. */
@@ -132,7 +134,9 @@ export function buildSnapshot(nodes: AXNode[], url: string, title: string): Snap
   let nextId = 1;
   let truncated = 0;
 
+  const allLines: string[] = [];
   const emit = (depth: number, line: string) => {
+    allLines.push("  ".repeat(depth) + line);
     if (lines.length >= MAX_LINES) { truncated++; return; }
     lines.push("  ".repeat(depth) + line);
   };
@@ -242,8 +246,24 @@ export function buildSnapshot(nodes: AXNode[], url: string, title: string): Snap
   };
 
   if (root) visit(root, 0);
-  if (truncated) lines.push(`… (${truncated} more lines not shown)`);
+  if (truncated) lines.push(`… (${truncated} more lines not shown: use find_text to search the whole page)`);
 
   const header = `Page: ${title || "(untitled page)"}`;
-  return { url, title, text: [header, ...lines].join("\n"), elements, focused, liveTexts, flat };
+  return { url, title, text: [header, ...lines].join("\n"), fullLines: allLines, elements, focused, liveTexts, flat };
+}
+
+/**
+ * Like a screen reader's "find" command: the transcript lines containing `query` (case-insensitive),
+ * each with its line number, searched over the whole page including lines cut from the transcript.
+ */
+export function findInSnapshot(snapshot: Pick<Snapshot, "fullLines">, query: string, max = 25): string {
+  const q = query.trim().toLowerCase();
+  if (!q) return "Give some text to search for.";
+  const hits = snapshot.fullLines
+    .map((line, i) => ({ line, i }))
+    .filter(({ line }) => line.toLowerCase().includes(q));
+  if (hits.length === 0) return `"${query}" was not found on this page.`;
+  const shown = hits.slice(0, max).map(({ line, i }) => `line ${i + 1}: ${line.trim()}`);
+  const more = hits.length > max ? `\n… and ${hits.length - max} more matches.` : "";
+  return `${hits.length} match${hits.length > 1 ? "es" : ""} for "${query}":\n${shown.join("\n")}${more}`;
 }

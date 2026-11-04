@@ -35,7 +35,7 @@ describe("MCP server", () => {
   it("lists one tool per agent action", async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
-      "blindspot_click", "blindspot_finish", "blindspot_go_back", "blindspot_press_key",
+      "blindspot_click", "blindspot_find_text", "blindspot_finish", "blindspot_go_back", "blindspot_press_key",
       "blindspot_report_issue", "blindspot_select_option", "blindspot_start", "blindspot_type_text",
     ]);
   });
