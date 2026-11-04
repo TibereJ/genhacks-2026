@@ -1,0 +1,443 @@
+{
+  "id": "20261104164439-947unj",
+  "url": "http://localhost:3200/demo/bad/index.html",
+  "task": "Book an appointment with Dr. Lee for any available time. Use the name Alex Doe and the email alex@example.com.",
+  "model": "Claude Code (session brain)",
+  "status": "blocked",
+  "summary": "I reached the booking form and filled in the doctor, date, name and email, but I could not book: the available times are announced as plain text and cannot be reached with Tab or activated, so no time can be chosen. When I submitted anyway, the error \"Please choose a time slot\" appeared silently, without being announced. Several controls (doctor list, email field, submit button, two navigation links) have no accessible name, so I had to guess. The most important fix is to turn the time slots into a native radio group inside a fieldset with a legend.",
+  "startedAt": "2026-11-04T16:44:39.476Z",
+  "steps": [
+    {
+      "index": 0,
+      "url": "http://localhost:3200/demo/bad/index.html",
+      "reason": "I hear link \"Book an appointment\" in the main content; it should open the booking form.",
+      "heard": "Page: Maple Grove Clinic - Family care in your neighborhood\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  text \"Accepting new patients\"\n  heading level 1 \"Care that fits your day.\"\n  text \"Family medicine, pediatrics and dermatology under one roof. Book a same-week visit online in under a minute, with no phone queue.\"\n  [5] link \"Book an appointment\"\n  [6] link \"Meet our doctors\"\n  text \"3\"\n  text \"experienced doctors\"\n  text \"6 days\"\n  text \"open every week\"\n  text \"4.9 / 5\"\n  text \"patient rating\"\n  region \"Our doctors\"\n    heading level 4 \"Our doctors\"\n    text \"Three doctors who know your family by name.\"\n    heading level 5 \"Dr. Lee\"\n    text \"Family medicine\"\n    text \"Check-ups, chronic care and everything in between, for adults of every age.\"\n    text \"Available this week\"\n    heading level 5 \"Dr. Patel\"\n    text \"Pediatrics\"\n    text \"Gentle care for babies, kids and teens, from first vaccines to sports physicals.\"\n    text \"Available this week\"\n    heading level 5 \"Dr. Moreau\"\n    text \"Dermatology\"\n    text \"Skin checks, acne, eczema and mole screening, with same-week visits.\"\n    text \"Available this week\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [7] link \"Book online\"\n  [8] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 5,
+          "role": "link",
+          "name": "Book an appointment"
+        }
+      },
+      "result": "New page loaded: \"Book an appointment - Maple Grove Clinic\".",
+      "ok": true,
+      "screenshot": "step-0.png"
+    },
+    {
+      "index": 1,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "The options list doctors, so this is the doctor choice; I pick Dr. Lee.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Choose a doctor\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\"\n    text \"Email\"\n    [8] textbox \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "select",
+        "target": {
+          "id": 5,
+          "role": "combobox",
+          "name": ""
+        },
+        "value": "Dr. Lee"
+      },
+      "result": "combobox \"\" now has value \"Dr. Lee — Family medicine\". Focus moved to combobox \"\".",
+      "ok": true,
+      "screenshot": "step-1.png"
+    },
+    {
+      "index": 2,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "The times are only read as text. I tab forward to see if a time slot can get focus.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed) ← focus\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\"\n    text \"Email\"\n    [8] textbox \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "press",
+        "value": "Tab"
+      },
+      "result": "Focus moved to date field \"Date\".",
+      "ok": true,
+      "screenshot": "step-2.png"
+    },
+    {
+      "index": 3,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "The times are only read as text. I tab forward to see if a time slot can get focus.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\" ← focus\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\"\n    text \"Email\"\n    [8] textbox \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "press",
+        "value": "Tab"
+      },
+      "result": "Nothing was announced and the page content did not change.",
+      "ok": true,
+      "screenshot": "step-3.png"
+    },
+    {
+      "index": 4,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "The times are only read as text. I tab forward to see if a time slot can get focus.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\" ← focus\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\"\n    text \"Email\"\n    [8] textbox \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "press",
+        "value": "Tab"
+      },
+      "result": "Nothing was announced and the page content did not change.",
+      "ok": true,
+      "screenshot": "step-4.png"
+    },
+    {
+      "index": 5,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "The times are only read as text. I tab forward to see if a time slot can get focus.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\" ← focus\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\"\n    text \"Email\"\n    [8] textbox \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "press",
+        "value": "Tab"
+      },
+      "result": "Nothing was announced and the page content did not change.",
+      "ok": true,
+      "screenshot": "step-5.png"
+    },
+    {
+      "index": 6,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "The times are only read as text. I tab forward to see if a time slot can get focus.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\" ← focus\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\"\n    text \"Email\"\n    [8] textbox \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "press",
+        "value": "Tab"
+      },
+      "result": "Focus moved to textbox \"Full name\".",
+      "ok": true,
+      "screenshot": "step-6.png"
+    },
+    {
+      "index": 7,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "I fill in textbox \"Full name\".",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\" ← focus\n    text \"Email\"\n    [8] textbox \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 7,
+          "role": "textbox",
+          "name": "Full name"
+        },
+        "value": "Alex Doe"
+      },
+      "result": "textbox \"Full name\" now has value \"Alex Doe\".",
+      "ok": true,
+      "screenshot": "step-7.png"
+    },
+    {
+      "index": 8,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "The text \"Email\" precedes this unnamed field, so I type my email here.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\" value \"Alex Doe\" ← focus\n    text \"Email\"\n    [8] textbox \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 8,
+          "role": "textbox",
+          "name": ""
+        },
+        "value": "alex@example.com"
+      },
+      "result": "textbox \"\" now has value \"alex@example.com\". Focus moved to textbox \"\".",
+      "ok": true,
+      "screenshot": "step-8.png"
+    },
+    {
+      "index": 9,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "The only button in the form has no name; the text \"Book appointment\" is read just before it, so it is probably the submit button. I try it even though no time is selected, to see what the site tells me.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\" value \"Alex Doe\"\n    text \"Email\"\n    [8] textbox \"\" value \"alex@example.com\" ← focus\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 9,
+          "role": "button",
+          "name": ""
+        }
+      },
+      "result": "Focus moved to button \"\".",
+      "ok": true,
+      "screenshot": "step-9.png"
+    },
+    {
+      "index": 10,
+      "url": "http://localhost:3200/demo/bad/book.html",
+      "reason": "I reached the booking form and filled in the doctor, date, name and email, but I could not book: the available times are announced as plain text and cannot be reached with Tab or activated, so no time can be chosen. When I submitted anyway, the error \"Please choose a time slot\" appeared silently, without being announced. Several controls (doctor list, email field, submit button, two navigation links) have no accessible name, so I had to guess. The most important fix is to turn the time slots into a native radio group inside a fieldset with a legend.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    text \"Available times\"\n    text \"9:00\"\n    text \"10:30\"\n    text \"11:45\"\n    text \"14:00\"\n    text \"16:15\"\n    text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    [7] textbox \"Full name\" value \"Alex Doe\"\n    text \"Email\"\n    [8] textbox \"\" value \"alex@example.com\"\n    text \"Please choose a time slot.\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    text \"Book appointment\"\n    [9] button \"\" ← focus\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [10] link \"Book online\"\n  [11] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "finish",
+        "value": "blocked"
+      },
+      "result": "Task could not be completed.",
+      "ok": true
+    }
+  ],
+  "issues": [
+    {
+      "severity": "serious",
+      "title": "Link has no accessible name",
+      "description": "2 links on \"Maple Grove Clinic - Family care in your neighborhood\" are announced only as \"link\", with no name. A screen reader user cannot tell what they do. The same problem is also on \"Book an appointment - Maple Grove Clinic\".",
+      "wcag": [
+        "2.4.4 Link Purpose (In Context)",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "Add text to the link, or an aria-label for icon-only links:\n<a href=\"/book\" aria-label=\"Book an appointment\"><svg aria-hidden=\"true\">…</svg></a>",
+      "element": {
+        "role": "link",
+        "name": ""
+      },
+      "id": "scan-1",
+      "stepIndex": 0,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "severity": "minor",
+      "title": "Heading levels skip",
+      "description": "The heading \"Our doctors\" is level 4 but follows a level 1 heading. Screen reader users navigate by headings and may think content is missing.",
+      "wcag": [
+        "1.3.1 Info and Relationships"
+      ],
+      "fix": "Use heading levels in order. Change it to <h2> and style it with CSS if it should look smaller.",
+      "element": {
+        "role": "heading",
+        "name": "Our doctors"
+      },
+      "id": "scan-2",
+      "stepIndex": 0,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "severity": "serious",
+      "title": "Images have no text alternative",
+      "description": "1 image on \"Maple Grove Clinic - Family care in your neighborhood\" has no alt attribute. Screen readers announce them as \"image\" or read the file name. The same problem is also on \"Book an appointment - Maple Grove Clinic\".",
+      "wcag": [
+        "1.1.1 Non-text Content"
+      ],
+      "fix": "Describe meaningful images, and mark decorative ones as empty:\n<img src=\"logo.svg\" alt=\"Maple Grove Clinic\">\n<img src=\"divider.png\" alt=\"\">",
+      "element": {
+        "role": "image",
+        "name": "",
+        "html": "<img class=\"logo\" src=\"../shared/logo.svg\" width=\"186\" height=\"44\">"
+      },
+      "id": "scan-3",
+      "stepIndex": 0,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "id": "agent-4",
+      "severity": "serious",
+      "title": "Navigation link has no name",
+      "description": "In the main navigation, after \"Home\" and \"Doctors\", the screen reader only says \"link\". I cannot know where it goes; it might be the booking page, but I have to guess. The site logo link at the top is also announced as just \"link\".",
+      "wcag": [
+        "2.4.4 Link Purpose (In Context)",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "<a href=\"book.html\" aria-label=\"Book an appointment\"><svg aria-hidden=\"true\" focusable=\"false\">…</svg></a>",
+      "stepIndex": 0,
+      "element": {
+        "role": "link",
+        "name": ""
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "severity": "serious",
+      "title": "Drop-down list has no label",
+      "description": "1 combobox on \"Book an appointment - Maple Grove Clinic\" is announced only as \"combobox\", with no name. A screen reader user cannot tell what it does.",
+      "wcag": [
+        "1.3.1 Info and Relationships",
+        "3.3.2 Labels or Instructions",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "Associate a label with the select element:\n<label for=\"doctor\">Doctor</label>\n<select id=\"doctor\">…</select>",
+      "element": {
+        "role": "combobox",
+        "name": ""
+      },
+      "id": "scan-5",
+      "stepIndex": 1,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "severity": "serious",
+      "title": "Text field has no label",
+      "description": "1 textbox on \"Book an appointment - Maple Grove Clinic\" is announced only as \"textbox\", with no name. A screen reader user cannot tell what it does.",
+      "wcag": [
+        "1.3.1 Info and Relationships",
+        "3.3.2 Labels or Instructions",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "Associate a visible label with the field:\n<label for=\"email\">Email</label>\n<input id=\"email\" type=\"email\" autocomplete=\"email\">",
+      "element": {
+        "role": "textbox",
+        "name": ""
+      },
+      "id": "scan-6",
+      "stepIndex": 1,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "severity": "serious",
+      "title": "Button has no accessible name",
+      "description": "1 button on \"Book an appointment - Maple Grove Clinic\" is announced only as \"button\", with no name. A screen reader user cannot tell what it does.",
+      "wcag": [
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "Give the button visible text, or an aria-label when it only contains an icon:\n<button aria-label=\"Close\"><svg aria-hidden=\"true\">…</svg></button>",
+      "element": {
+        "role": "button",
+        "name": ""
+      },
+      "id": "scan-7",
+      "stepIndex": 1,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "severity": "critical",
+      "title": "Clickable elements cannot be reached or activated with a screen reader or keyboard",
+      "description": "5 elements on \"Book an appointment - Maple Grove Clinic\" react to mouse clicks but are not buttons, links or form controls (for example \"9:00\", \"10:30\", \"14:00\", \"16:15\"). Screen readers announce them as plain text and keyboard users cannot focus them.",
+      "wcag": [
+        "2.1.1 Keyboard",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "Use a native control instead of a clickable <div>. For a choice between options, a radio group:\n<fieldset>\n  <legend>Available times</legend>\n  <input type=\"radio\" id=\"t1\" name=\"time\" value=\"09:00\"><label for=\"t1\">9:00</label>\n</fieldset>\nFor an action: <button type=\"button\">…</button>",
+      "element": {
+        "role": "generic",
+        "name": "9:00",
+        "html": "<div class=\"slot\" data-time=\"9:00\" onclick=\"selectSlot(this)\"><span>9:00</span></div>"
+      },
+      "id": "scan-8",
+      "stepIndex": 1,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "severity": "moderate",
+      "title": "Fields use a placeholder instead of a label",
+      "description": "1 field on \"Book an appointment - Maple Grove Clinic\" only have placeholder text (\"Full name\"). It disappears while typing and is not reliably announced by every screen reader.",
+      "wcag": [
+        "3.3.2 Labels or Instructions",
+        "1.3.1 Info and Relationships"
+      ],
+      "fix": "Keep the placeholder as a hint if you like, but add a real label:\n<label for=\"name\">Full name</label>\n<input id=\"name\" autocomplete=\"name\">",
+      "element": {
+        "role": "textbox",
+        "name": "Full name",
+        "html": "<input class=\"input\" type=\"text\" id=\"name\" name=\"name\" placeholder=\"Full name\" autocomplete=\"name\">"
+      },
+      "id": "scan-9",
+      "stepIndex": 1,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "id": "agent-10",
+      "severity": "serious",
+      "title": "Doctor drop-down has no label",
+      "description": "The first form control is announced only as \"combobox\". The word \"Doctor\" is read just before it as plain text, but it is not connected to the list, so when I tab to the field I only hear \"combobox, Choose a doctor\". I guessed its purpose from the options.",
+      "wcag": [
+        "1.3.1 Info and Relationships",
+        "3.3.2 Labels or Instructions",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "<label for=\"doctor\">Doctor</label>\n<select id=\"doctor\" name=\"doctor\">…</select>",
+      "stepIndex": 1,
+      "element": {
+        "role": "combobox",
+        "name": ""
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-11",
+      "severity": "critical",
+      "title": "Time slots cannot be selected",
+      "description": "After \"Available times\" the screen reader only reads plain text: 9:00, 10:30, 11:45, 14:00, 16:15. None of them is a button, radio button or link, and pressing Tab jumps from the date field straight to \"Full name\". A screen reader or keyboard user has no way to choose a time, so the appointment cannot be booked.",
+      "wcag": [
+        "2.1.1 Keyboard",
+        "4.1.2 Name, Role, Value",
+        "1.3.1 Info and Relationships"
+      ],
+      "fix": "<fieldset>\n  <legend>Available times</legend>\n  <input type=\"radio\" id=\"t0900\" name=\"time\" value=\"09:00\"><label for=\"t0900\">9:00</label>\n  <input type=\"radio\" id=\"t1145\" name=\"time\" value=\"11:45\" disabled><label for=\"t1145\">11:45 (taken)</label>\n</fieldset>",
+      "stepIndex": 7,
+      "source": "agent",
+      "blocking": true
+    },
+    {
+      "id": "agent-12",
+      "severity": "moderate",
+      "title": "Taken time slots are only shown visually",
+      "description": "The page says \"Crossed-out times are already taken\", but nothing in what the screen reader announces tells me which times are crossed out. Even if I could select a time, I would not know which ones are available.",
+      "wcag": [
+        "1.3.1 Info and Relationships",
+        "1.4.1 Use of Color",
+        "1.3.3 Sensory Characteristics"
+      ],
+      "fix": "Mark unavailable slots in the markup, not only with styling: <input type=\"radio\" … disabled> with label \"11:45 (taken)\", or aria-disabled=\"true\" plus visually hidden text.",
+      "stepIndex": 7,
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-13",
+      "severity": "serious",
+      "title": "Email field has no label",
+      "description": "The field after \"Full name\" is announced only as \"edit text\" with no name. The word \"Email\" is read just before it as plain text, so I guessed, but when tabbing into the field nothing tells me what to type.",
+      "wcag": [
+        "1.3.1 Info and Relationships",
+        "3.3.2 Labels or Instructions",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "<label for=\"email\">Email</label>\n<input id=\"email\" type=\"email\" autocomplete=\"email\">",
+      "stepIndex": 8,
+      "element": {
+        "role": "textbox",
+        "name": ""
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-14",
+      "severity": "serious",
+      "title": "Validation error is not announced",
+      "description": "When I pressed the submit button, the screen reader said nothing except that focus was on the button. The message \"Please choose a time slot.\" was added to the page silently; I only found it by reading the whole page again. A screen reader user would think the button did nothing.",
+      "wcag": [
+        "4.1.3 Status Messages",
+        "3.3.1 Error Identification"
+      ],
+      "fix": "<p id=\"time-error\" role=\"alert\"></p>\n<!-- set its text when validation fails, and link it to the time group with aria-describedby -->",
+      "stepIndex": 10,
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-15",
+      "severity": "serious",
+      "title": "Submit button has no name",
+      "description": "The form's only button is announced as just \"button\". The text \"Book appointment\" is read before it as separate text, so I had to guess that this button submits the booking.",
+      "wcag": [
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "<button type=\"submit\">Book appointment <svg aria-hidden=\"true\" focusable=\"false\">…</svg></button>",
+      "stepIndex": 10,
+      "element": {
+        "role": "button",
+        "name": ""
+      },
+      "source": "agent",
+      "blocking": false
+    }
+  ],
+  "finishedAt": "2026-11-04T16:44:59.625Z",
+  "score": 0
+}

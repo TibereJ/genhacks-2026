@@ -1,0 +1,131 @@
+{
+  "id": "20261104164505-l2g8gy",
+  "url": "http://localhost:3200/demo/fixed/index.html",
+  "task": "Book an appointment with Dr. Lee for any available time. Use the name Alex Doe and the email alex@example.com.",
+  "model": "Claude Code (session brain)",
+  "status": "success",
+  "summary": "I booked an appointment with Dr. Lee at 9:00 as Alex Doe without any guessing. Every control had a clear name, the time slots were a proper radio group under \"Available times\" with the taken slot announced as unavailable, and the confirmation page announced \"Appointment confirmed\" with the details.",
+  "startedAt": "2026-11-04T16:45:05.901Z",
+  "steps": [
+    {
+      "index": 0,
+      "url": "http://localhost:3200/demo/fixed/index.html",
+      "reason": "I hear link \"Book an appointment\"; it should open the booking form.",
+      "heard": "Page: Maple Grove Clinic - Family care in your neighborhood\nbanner\n  [1] link \"Maple Grove Clinic home\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"Book\"\nmain\n  text \"Accepting new patients\"\n  heading level 1 \"Care that fits your day.\"\n  text \"Family medicine, pediatrics and dermatology under one roof. Book a same-week visit online in under a minute, with no phone queue.\"\n  [5] link \"Book an appointment\"\n  [6] link \"Meet our doctors\"\n  text \"3\"\n  text \"experienced doctors\"\n  text \"6 days\"\n  text \"open every week\"\n  text \"4.9 / 5\"\n  text \"patient rating\"\n  region \"Our doctors\"\n    heading level 2 \"Our doctors\"\n    text \"Three doctors who know your family by name.\"\n    heading level 3 \"Dr. Lee\"\n    text \"Family medicine\"\n    text \"Check-ups, chronic care and everything in between, for adults of every age.\"\n    text \"Available this week\"\n    heading level 3 \"Dr. Patel\"\n    text \"Pediatrics\"\n    text \"Gentle care for babies, kids and teens, from first vaccines to sports physicals.\"\n    text \"Available this week\"\n    heading level 3 \"Dr. Moreau\"\n    text \"Dermatology\"\n    text \"Skin checks, acne, eczema and mole screening, with same-week visits.\"\n    text \"Available this week\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [7] link \"Book online\"\n  [8] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 5,
+          "role": "link",
+          "name": "Book an appointment"
+        }
+      },
+      "result": "New page loaded: \"Book an appointment - Maple Grove Clinic\".",
+      "ok": true,
+      "screenshot": "step-0.png"
+    },
+    {
+      "index": 1,
+      "url": "http://localhost:3200/demo/fixed/book.html",
+      "reason": "combobox \"Doctor\" lists the doctors; I choose Dr. Lee.",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"Maple Grove Clinic home\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"Book\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"Doctor\" value \"Choose a doctor\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    group \"Available times\"\n      text \"Available times\"\n      [7] radio \"9:00\" (not checked)\n      text \"9:00\"\n      [8] radio \"10:30\" (not checked)\n      text \"10:30\"\n      [9] radio \"11:45\" (not checked, unavailable)\n      text \"11:45\"\n      [10] radio \"14:00\" (not checked)\n      text \"14:00\"\n      [11] radio \"16:15\" (not checked)\n      text \"16:15\"\n      text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [12] textbox \"Full name\"\n    text \"Email\"\n    [13] textbox \"Email\"\n    alert \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    [14] button \"Book appointment\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [15] link \"Book online\"\n  [16] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "select",
+        "target": {
+          "id": 5,
+          "role": "combobox",
+          "name": "Doctor"
+        },
+        "value": "Dr. Lee"
+      },
+      "result": "combobox \"Doctor\" now has value \"Dr. Lee — Family medicine\". Focus moved to combobox \"Doctor\".",
+      "ok": true,
+      "screenshot": "step-1.png"
+    },
+    {
+      "index": 2,
+      "url": "http://localhost:3200/demo/fixed/book.html",
+      "reason": "In the group \"Available times\" I choose the first available time, radio \"9:00\".",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"Maple Grove Clinic home\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"Book\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"Doctor\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed) ← focus\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    group \"Available times\"\n      text \"Available times\"\n      [7] radio \"9:00\" (not checked)\n      text \"9:00\"\n      [8] radio \"10:30\" (not checked)\n      text \"10:30\"\n      [9] radio \"11:45\" (not checked, unavailable)\n      text \"11:45\"\n      [10] radio \"14:00\" (not checked)\n      text \"14:00\"\n      [11] radio \"16:15\" (not checked)\n      text \"16:15\"\n      text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [12] textbox \"Full name\"\n    text \"Email\"\n    [13] textbox \"Email\"\n    alert \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    [14] button \"Book appointment\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [15] link \"Book online\"\n  [16] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 7,
+          "role": "radio",
+          "name": "9:00"
+        }
+      },
+      "result": "radio \"9:00\" is now checked. Focus moved to radio \"9:00\".",
+      "ok": true,
+      "screenshot": "step-2.png"
+    },
+    {
+      "index": 3,
+      "url": "http://localhost:3200/demo/fixed/book.html",
+      "reason": "I fill in textbox \"Full name\".",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"Maple Grove Clinic home\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"Book\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"Doctor\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    group \"Available times\"\n      text \"Available times\"\n      [7] radio \"9:00\" (checked) ← focus\n      text \"9:00\"\n      [8] radio \"10:30\" (not checked)\n      text \"10:30\"\n      [9] radio \"11:45\" (not checked, unavailable)\n      text \"11:45\"\n      [10] radio \"14:00\" (not checked)\n      text \"14:00\"\n      [11] radio \"16:15\" (not checked)\n      text \"16:15\"\n      text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [12] textbox \"Full name\"\n    text \"Email\"\n    [13] textbox \"Email\"\n    alert \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    [14] button \"Book appointment\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [15] link \"Book online\"\n  [16] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 12,
+          "role": "textbox",
+          "name": "Full name"
+        },
+        "value": "Alex Doe"
+      },
+      "result": "textbox \"Full name\" now has value \"Alex Doe\". Focus moved to textbox \"Full name\".",
+      "ok": true,
+      "screenshot": "step-3.png"
+    },
+    {
+      "index": 4,
+      "url": "http://localhost:3200/demo/fixed/book.html",
+      "reason": "I fill in textbox \"Email\".",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"Maple Grove Clinic home\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"Book\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"Doctor\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    group \"Available times\"\n      text \"Available times\"\n      [7] radio \"9:00\" (checked)\n      text \"9:00\"\n      [8] radio \"10:30\" (not checked)\n      text \"10:30\"\n      [9] radio \"11:45\" (not checked, unavailable)\n      text \"11:45\"\n      [10] radio \"14:00\" (not checked)\n      text \"14:00\"\n      [11] radio \"16:15\" (not checked)\n      text \"16:15\"\n      text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [12] textbox \"Full name\" value \"Alex Doe\" ← focus\n    text \"Email\"\n    [13] textbox \"Email\"\n    alert \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    [14] button \"Book appointment\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [15] link \"Book online\"\n  [16] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 13,
+          "role": "textbox",
+          "name": "Email"
+        },
+        "value": "alex@example.com"
+      },
+      "result": "textbox \"Email\" now has value \"alex@example.com\". Focus moved to textbox \"Email\".",
+      "ok": true,
+      "screenshot": "step-4.png"
+    },
+    {
+      "index": 5,
+      "url": "http://localhost:3200/demo/fixed/book.html",
+      "reason": "Everything is filled in; I press button \"Book appointment\".",
+      "heard": "Page: Book an appointment - Maple Grove Clinic\nbanner\n  [1] link \"Maple Grove Clinic home\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"Book\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Choose a doctor and a time that suits you. It takes less than a minute.\"\n  form\n    text \"Doctor\"\n    [5] combobox \"Doctor\" value \"Dr. Lee — Family medicine\" options: \"Choose a doctor\", \"Dr. Lee — Family medicine\", \"Dr. Patel — Pediatrics\", \"Dr. Moreau — Dermatology\" (collapsed)\n    text \"Date\"\n    [6] date field \"Date\" value \"2026-11-05\"\n    group \"Available times\"\n      text \"Available times\"\n      [7] radio \"9:00\" (checked)\n      text \"9:00\"\n      [8] radio \"10:30\" (not checked)\n      text \"10:30\"\n      [9] radio \"11:45\" (not checked, unavailable)\n      text \"11:45\"\n      [10] radio \"14:00\" (not checked)\n      text \"14:00\"\n      [11] radio \"16:15\" (not checked)\n      text \"16:15\"\n      text \"Crossed-out times are already taken.\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [12] textbox \"Full name\" value \"Alex Doe\"\n    text \"Email\"\n    [13] textbox \"Email\" value \"alex@example.com\" ← focus\n    alert \"\"\n    text \"We will email you a confirmation. You can cancel free of charge up to 24 hours before.\"\n    [14] button \"Book appointment\"\n  complementary \"Clinic information\"\n    heading level 2 \"Clinic information\"\n    text \"Address\"\n    text \"120 Orchard Lane, Maple Grove\"\n    text \"Opening hours\"\n    text \"Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00\"\n    text \"Visit length\"\n    text \"20 minutes. Please arrive 10 minutes early.\"\n    text \"Need help booking?\"\n    text \"Call us on 555-0142 and we will book for you.\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [15] link \"Book online\"\n  [16] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 14,
+          "role": "button",
+          "name": "Book appointment"
+        }
+      },
+      "result": "New page loaded: \"Appointment confirmed - Maple Grove Clinic\".",
+      "ok": true,
+      "screenshot": "step-5.png"
+    },
+    {
+      "index": 6,
+      "url": "http://localhost:3200/demo/fixed/confirm.html?doctor=Dr.+Lee&date=2026-11-05&time=9%3A00&name=Alex+Doe",
+      "reason": "I booked an appointment with Dr. Lee at 9:00 as Alex Doe without any guessing. Every control had a clear name, the time slots were a proper radio group under \"Available times\" with the taken slot announced as unavailable, and the confirmation page announced \"Appointment confirmed\" with the details.",
+      "heard": "Page: Appointment confirmed - Maple Grove Clinic\nbanner\n  [1] link \"Maple Grove Clinic home\"\n  navigation \"Main\"\n    [2] link \"Home\"\n    [3] link \"Doctors\"\n    [4] link \"Book\"\nmain\n  heading level 1 \"Appointment confirmed\"\n  text \"Thank you. We have saved your visit and sent the details to your email.\"\n  text \"Doctor\"\n  text \"Dr. Lee\"\n  text \"Date\"\n  text \"Thursday, November 5, 2026\"\n  text \"Time\"\n  text \"9:00\"\n  text \"Patient\"\n  text \"Alex Doe\"\n  [5] link \"Back to home\"\ncontentinfo\n  text \"Maple Grove Clinic\"\n  text \"120 Orchard Lane, Maple Grove\"\n  text \"Phone: 555-0142\"\n  text \"Opening hours\"\n  text \"Mon to Fri: 8:00 to 18:00\"\n  text \"Saturday: 9:00 to 13:00\"\n  text \"Visit\"\n  [6] link \"Book online\"\n  [7] link \"Our doctors\"\n  text \"Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.\"",
+      "action": {
+        "type": "finish",
+        "value": "success"
+      },
+      "result": "Task completed.",
+      "ok": true
+    }
+  ],
+  "issues": [],
+  "finishedAt": "2026-11-04T16:45:10.055Z",
+  "score": 100
+}

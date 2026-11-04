@@ -1,0 +1,215 @@
+{
+  "id": "20261104165344-bsrrv6",
+  "url": "http://localhost:3200/demo/shop/fixed/index.html",
+  "task": "Buy 2 kg of apples and a loaf of bread, then check out with home delivery. Use the name Alex Doe, address 12 Elm Street, and accept the terms.",
+  "model": "Claude Code (session brain)",
+  "status": "success",
+  "summary": "I bought 2 kg of apples and a loaf of bread with home delivery as Alex Doe, 12 Elm Street, and accepted the terms. The cookie dialog took focus and had a clear \"Accept all\" button, every quantity and add button named its product, each change was announced (\"Apples, 2 kg, added. Cart: 1 item.\"), delivery was a radio group, the terms a real checkbox, and the confirmation page announced \"Order placed\".",
+  "startedAt": "2026-11-04T16:53:44.887Z",
+  "steps": [
+    {
+      "index": 0,
+      "url": "http://localhost:3200/demo/shop/fixed/index.html",
+      "reason": "A dialog \"We value your privacy\" has focus on button \"Accept all\"; I accept to continue shopping.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ndialog \"We value your privacy\"\n  [1] button \"Accept all and close\"\n  heading level 2 \"We value your privacy\"\n  text \"We use cookies to keep your cart, remember your delivery address and improve your shopping. You can change your choice at any time in your account settings.\"\n  [2] button \"Accept all\" ← focus",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 2,
+          "role": "button",
+          "name": "Accept all"
+        }
+      },
+      "result": "Focus moved to heading level 1 \"Fresh groceries, delivered tomorrow morning\".",
+      "ok": true,
+      "screenshot": "step-0.png"
+    },
+    {
+      "index": 1,
+      "url": "http://localhost:3200/demo/shop/fixed/index.html",
+      "reason": "Button \"Increase apples quantity\" to go from 1 to 2 kg.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (0 items)\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\" ← focus\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"Decrease apples quantity\"\n  text \"Apples quantity in kg\"\n  [7] spinbutton \"Apples quantity in kg\" value \"1\"\n  [8] button \"Increase apples quantity\"\n  [9] button \"Add apples to cart\"\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [10] button \"Decrease bread quantity\"\n  text \"Bread quantity in loaves\"\n  [11] spinbutton \"Bread quantity in loaves\" value \"1\"\n  [12] button \"Increase bread quantity\"\n  [13] button \"Add bread to cart\"\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [14] button \"Decrease milk quantity\"\n  text \"Milk quantity in bottles\"\n  [15] spinbutton \"Milk quantity in bottles\" value \"1\"\n  [16] button \"Increase milk quantity\"\n  [17] button \"Add milk to cart\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [18] button \"Decrease eggs quantity\"\n  text \"Eggs quantity in boxes\"\n  [19] spinbutton \"Eggs quantity in boxes\" value \"1\"\n  [20] button \"Increase eggs quantity\"\n  [21] button \"Add eggs to cart\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [22] button \"Decrease bananas quantity\"\n  text \"Bananas quantity in kg\"\n  [23] spinbutton \"Bananas quantity in kg\" value \"1\"\n  [24] button \"Increase bananas quantity\"\n  [25] button \"Add bananas to cart\"\n  status \"\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 8,
+          "role": "button",
+          "name": "Increase apples quantity"
+        }
+      },
+      "result": "Announced: \"Apples quantity: 2 kg.\". Focus moved to button \"Increase apples quantity\".",
+      "ok": true,
+      "screenshot": "step-1.png"
+    },
+    {
+      "index": 2,
+      "url": "http://localhost:3200/demo/shop/fixed/index.html",
+      "reason": "Button \"Add apples to cart\".",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (0 items)\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"Decrease apples quantity\"\n  text \"Apples quantity in kg\"\n  [7] spinbutton \"Apples quantity in kg\" value \"2\"\n  [8] button \"Increase apples quantity\" ← focus\n  [9] button \"Add apples to cart\"\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [10] button \"Decrease bread quantity\"\n  text \"Bread quantity in loaves\"\n  [11] spinbutton \"Bread quantity in loaves\" value \"1\"\n  [12] button \"Increase bread quantity\"\n  [13] button \"Add bread to cart\"\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [14] button \"Decrease milk quantity\"\n  text \"Milk quantity in bottles\"\n  [15] spinbutton \"Milk quantity in bottles\" value \"1\"\n  [16] button \"Increase milk quantity\"\n  [17] button \"Add milk to cart\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [18] button \"Decrease eggs quantity\"\n  text \"Eggs quantity in boxes\"\n  [19] spinbutton \"Eggs quantity in boxes\" value \"1\"\n  [20] button \"Increase eggs quantity\"\n  [21] button \"Add eggs to cart\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [22] button \"Decrease bananas quantity\"\n  text \"Bananas quantity in kg\"\n  [23] spinbutton \"Bananas quantity in kg\" value \"1\"\n  [24] button \"Increase bananas quantity\"\n  [25] button \"Add bananas to cart\"\n  status \"Apples quantity: 2 kg.\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 9,
+          "role": "button",
+          "name": "Add apples to cart"
+        }
+      },
+      "result": "Announced: \"Apples, 2 kg, added. Cart: 1 item.\". Focus moved to button \"Add apples to cart\".",
+      "ok": true,
+      "screenshot": "step-2.png"
+    },
+    {
+      "index": 3,
+      "url": "http://localhost:3200/demo/shop/fixed/index.html",
+      "reason": "Button \"Add bread to cart\" (1 loaf).",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (1 item)\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"Decrease apples quantity\"\n  text \"Apples quantity in kg\"\n  [7] spinbutton \"Apples quantity in kg\" value \"2\"\n  [8] button \"Increase apples quantity\"\n  [9] button \"Add apples to cart\" ← focus\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [10] button \"Decrease bread quantity\"\n  text \"Bread quantity in loaves\"\n  [11] spinbutton \"Bread quantity in loaves\" value \"1\"\n  [12] button \"Increase bread quantity\"\n  [13] button \"Add bread to cart\"\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [14] button \"Decrease milk quantity\"\n  text \"Milk quantity in bottles\"\n  [15] spinbutton \"Milk quantity in bottles\" value \"1\"\n  [16] button \"Increase milk quantity\"\n  [17] button \"Add milk to cart\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [18] button \"Decrease eggs quantity\"\n  text \"Eggs quantity in boxes\"\n  [19] spinbutton \"Eggs quantity in boxes\" value \"1\"\n  [20] button \"Increase eggs quantity\"\n  [21] button \"Add eggs to cart\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [22] button \"Decrease bananas quantity\"\n  text \"Bananas quantity in kg\"\n  [23] spinbutton \"Bananas quantity in kg\" value \"1\"\n  [24] button \"Increase bananas quantity\"\n  [25] button \"Add bananas to cart\"\n  status \"Apples, 2 kg, added. Cart: 1 item.\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 13,
+          "role": "button",
+          "name": "Add bread to cart"
+        }
+      },
+      "result": "Announced: \"Bread loaf, 1 loaf, added. Cart: 2 items.\". Focus moved to button \"Add bread to cart\".",
+      "ok": true,
+      "screenshot": "step-3.png"
+    },
+    {
+      "index": 4,
+      "url": "http://localhost:3200/demo/shop/fixed/index.html",
+      "reason": "Link \"Cart (2 items)\" to review the cart.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (2 items)\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"Decrease apples quantity\"\n  text \"Apples quantity in kg\"\n  [7] spinbutton \"Apples quantity in kg\" value \"2\"\n  [8] button \"Increase apples quantity\"\n  [9] button \"Add apples to cart\"\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [10] button \"Decrease bread quantity\"\n  text \"Bread quantity in loaves\"\n  [11] spinbutton \"Bread quantity in loaves\" value \"1\"\n  [12] button \"Increase bread quantity\"\n  [13] button \"Add bread to cart\" ← focus\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [14] button \"Decrease milk quantity\"\n  text \"Milk quantity in bottles\"\n  [15] spinbutton \"Milk quantity in bottles\" value \"1\"\n  [16] button \"Increase milk quantity\"\n  [17] button \"Add milk to cart\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [18] button \"Decrease eggs quantity\"\n  text \"Eggs quantity in boxes\"\n  [19] spinbutton \"Eggs quantity in boxes\" value \"1\"\n  [20] button \"Increase eggs quantity\"\n  [21] button \"Add eggs to cart\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [22] button \"Decrease bananas quantity\"\n  text \"Bananas quantity in kg\"\n  [23] spinbutton \"Bananas quantity in kg\" value \"1\"\n  [24] button \"Increase bananas quantity\"\n  [25] button \"Add bananas to cart\"\n  status \"Bread loaf, 1 loaf, added. Cart: 2 items.\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 5,
+          "role": "link",
+          "name": "Cart (2 items)"
+        }
+      },
+      "result": "New page loaded: \"Your cart - GreenCart\".",
+      "ok": true,
+      "screenshot": "step-4.png"
+    },
+    {
+      "index": 5,
+      "url": "http://localhost:3200/demo/shop/fixed/cart.html",
+      "reason": "The cart has apples 2 kg and bread; I follow link \"Go to checkout\".",
+      "heard": "Page: Your cart - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (2 items)\"\nmain\n  heading level 1 \"Your cart\"\n  text \"Check your items, then head to checkout.\"\n  text \"Apples\"\n  text \"2 kg\"\n  text \"$6.40\"\n  text \"Bread loaf\"\n  text \"1 loaf\"\n  text \"$2.80\"\n  complementary \"Cart summary\"\n    heading level 2 \"Summary\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"Chosen at checkout\"\n    [6] link \"Go to checkout\"\n    [7] link \"Continue shopping\"\n    text \"Store pickup is free. Home delivery is $4.99.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 6,
+          "role": "link",
+          "name": "Go to checkout"
+        }
+      },
+      "result": "New page loaded: \"Checkout - GreenCart\".",
+      "ok": true,
+      "screenshot": "step-5.png"
+    },
+    {
+      "index": 6,
+      "url": "http://localhost:3200/demo/shop/fixed/checkout.html",
+      "reason": "In group \"Delivery method\", Store pickup is checked; I choose radio \"Home delivery\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (2 items)\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    group \"Delivery method\"\n      text \"Delivery method\"\n      [6] radio \"Home delivery $4.99\" (not checked)\n      text \"Home delivery\"\n      text \"Tomorrow, 8:00 to 12:00\"\n      text \"$4.99\"\n      [7] radio \"Store pickup Free\" (checked)\n      text \"Store pickup\"\n      text \"Ready in 2 hours, 4 Market Square\"\n      text \"Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\"\n    text \"Address\"\n    [9] textbox \"Address\"\n    [10] checkbox \"I accept the terms of sale and the privacy policy\" (not checked)\n    text \"Required to place your order.\"\n    alert \"\"\n    [11] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"Free\"\n    text \"Total\"\n    text \"$9.20\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 6,
+          "role": "radio",
+          "name": "Home delivery $4.99"
+        }
+      },
+      "result": "radio \"Home delivery $4.99\" is now checked. Focus moved to radio \"Home delivery $4.99\".",
+      "ok": true,
+      "screenshot": "step-6.png"
+    },
+    {
+      "index": 7,
+      "url": "http://localhost:3200/demo/shop/fixed/checkout.html",
+      "reason": "I fill in textbox \"Full name\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (2 items)\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    group \"Delivery method\"\n      text \"Delivery method\"\n      [6] radio \"Home delivery $4.99\" (checked) ← focus\n      text \"Home delivery\"\n      text \"Tomorrow, 8:00 to 12:00\"\n      text \"$4.99\"\n      [7] radio \"Store pickup Free\" (not checked)\n      text \"Store pickup\"\n      text \"Ready in 2 hours, 4 Market Square\"\n      text \"Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\"\n    text \"Address\"\n    [9] textbox \"Address\"\n    [10] checkbox \"I accept the terms of sale and the privacy policy\" (not checked)\n    text \"Required to place your order.\"\n    alert \"\"\n    [11] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 8,
+          "role": "textbox",
+          "name": "Full name"
+        },
+        "value": "Alex Doe"
+      },
+      "result": "textbox \"Full name\" now has value \"Alex Doe\". Focus moved to textbox \"Full name\".",
+      "ok": true,
+      "screenshot": "step-7.png"
+    },
+    {
+      "index": 8,
+      "url": "http://localhost:3200/demo/shop/fixed/checkout.html",
+      "reason": "I fill in textbox \"Address\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (2 items)\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    group \"Delivery method\"\n      text \"Delivery method\"\n      [6] radio \"Home delivery $4.99\" (checked)\n      text \"Home delivery\"\n      text \"Tomorrow, 8:00 to 12:00\"\n      text \"$4.99\"\n      [7] radio \"Store pickup Free\" (not checked)\n      text \"Store pickup\"\n      text \"Ready in 2 hours, 4 Market Square\"\n      text \"Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\" value \"Alex Doe\" ← focus\n    text \"Address\"\n    [9] textbox \"Address\"\n    [10] checkbox \"I accept the terms of sale and the privacy policy\" (not checked)\n    text \"Required to place your order.\"\n    alert \"\"\n    [11] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 9,
+          "role": "textbox",
+          "name": "Address"
+        },
+        "value": "12 Elm Street"
+      },
+      "result": "textbox \"Address\" now has value \"12 Elm Street\". Focus moved to textbox \"Address\".",
+      "ok": true,
+      "screenshot": "step-8.png"
+    },
+    {
+      "index": 9,
+      "url": "http://localhost:3200/demo/shop/fixed/checkout.html",
+      "reason": "I tick checkbox \"I accept the terms of sale and the privacy policy\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (2 items)\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    group \"Delivery method\"\n      text \"Delivery method\"\n      [6] radio \"Home delivery $4.99\" (checked)\n      text \"Home delivery\"\n      text \"Tomorrow, 8:00 to 12:00\"\n      text \"$4.99\"\n      [7] radio \"Store pickup Free\" (not checked)\n      text \"Store pickup\"\n      text \"Ready in 2 hours, 4 Market Square\"\n      text \"Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\" value \"Alex Doe\"\n    text \"Address\"\n    [9] textbox \"Address\" value \"12 Elm Street\" ← focus\n    [10] checkbox \"I accept the terms of sale and the privacy policy\" (not checked)\n    text \"Required to place your order.\"\n    alert \"\"\n    [11] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 10,
+          "role": "checkbox",
+          "name": "I accept the terms of sale and the privacy policy"
+        }
+      },
+      "result": "checkbox \"I accept the terms of sale and the privacy policy\" is now checked. Focus moved to checkbox \"I accept the terms of sale and the privacy policy\".",
+      "ok": true,
+      "screenshot": "step-9.png"
+    },
+    {
+      "index": 10,
+      "url": "http://localhost:3200/demo/shop/fixed/checkout.html",
+      "reason": "All set; I press button \"Place order\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (2 items)\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    group \"Delivery method\"\n      text \"Delivery method\"\n      [6] radio \"Home delivery $4.99\" (checked)\n      text \"Home delivery\"\n      text \"Tomorrow, 8:00 to 12:00\"\n      text \"$4.99\"\n      [7] radio \"Store pickup Free\" (not checked)\n      text \"Store pickup\"\n      text \"Ready in 2 hours, 4 Market Square\"\n      text \"Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\" value \"Alex Doe\"\n    text \"Address\"\n    [9] textbox \"Address\" value \"12 Elm Street\"\n    [10] checkbox \"I accept the terms of sale and the privacy policy\" (checked) ← focus\n    text \"Required to place your order.\"\n    alert \"\"\n    [11] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 11,
+          "role": "button",
+          "name": "Place order"
+        }
+      },
+      "result": "New page loaded: \"Order placed - GreenCart\".",
+      "ok": true,
+      "screenshot": "step-10.png"
+    },
+    {
+      "index": 11,
+      "url": "http://localhost:3200/demo/shop/fixed/done.html",
+      "reason": "I bought 2 kg of apples and a loaf of bread with home delivery as Alex Doe, 12 Elm Street, and accepted the terms. The cookie dialog took focus and had a clear \"Accept all\" button, every quantity and add button named its product, each change was announced (\"Apples, 2 kg, added. Cart: 1 item.\"), delivery was a radio group, the terms a real checkbox, and the confirmation page announced \"Order placed\".",
+      "heard": "Page: Order placed - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart (0 items)\"\nmain\n  heading level 1 \"Order placed\"\n  text \"Thanks, Alex Doe. Your groceries will be delivered tomorrow between 8:00 and 12:00.\"\n  text \"Apples\"\n  text \"2 kg\"\n  text \"$6.40\"\n  text \"Bread loaf\"\n  text \"1 loaf\"\n  text \"$2.80\"\n  text \"Order number\"\n  text \"GC-237600\"\n  text \"Name\"\n  text \"Alex Doe\"\n  text \"Delivery\"\n  text \"Home delivery\"\n  text \"Address\"\n  text \"12 Elm Street\"\n  text \"Total\"\n  text \"$14.19\"\n  [6] link \"Back to the shop\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "finish",
+        "value": "success"
+      },
+      "result": "Task completed.",
+      "ok": true
+    }
+  ],
+  "issues": [],
+  "finishedAt": "2026-11-04T16:53:58.238Z",
+  "score": 100
+}
