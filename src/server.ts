@@ -5,6 +5,7 @@ import { runTest } from "./core/agent.js";
 import { ClaudeBrain } from "./core/brains/claude.js";
 import { ScriptedBrain, clinicDemoPlan } from "./core/brains/scripted.js";
 import { listReports, loadReport, newReportId, reportDir } from "./core/report.js";
+import { reportToMarkdown } from "./core/export.js";
 
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = process.cwd();
@@ -61,6 +62,18 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && reportMatch) {
       const report = await loadReport(reportMatch[1]);
       return report ? send(res, 200, report) : send(res, 404, { error: "Report not found" });
+    }
+
+    const markdownMatch = /^\/api\/reports\/([a-z0-9-]+)\/markdown$/i.exec(p);
+    if (req.method === "GET" && markdownMatch) {
+      const report = await loadReport(markdownMatch[1]);
+      if (!report) return send(res, 404, { error: "Report not found" });
+      res.writeHead(200, {
+        "content-type": "text/markdown; charset=utf-8",
+        "content-disposition": `attachment; filename="blindspot-${markdownMatch[1]}.md"`,
+        "cache-control": "no-store",
+      });
+      return void res.end(reportToMarkdown(report));
     }
 
     if (req.method === "POST" && p === "/api/runs") {
