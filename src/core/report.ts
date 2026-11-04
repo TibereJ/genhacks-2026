@@ -1,4 +1,5 @@
-import { mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import type { Report, Severity } from "./types.js";
 
@@ -24,16 +25,47 @@ export function reportDir(id: string): string {
   return path.join(REPORTS_DIR, id);
 }
 
-/** Next to a running report: the id of the process running the test, so other processes leave it alone. */
-const OWNER_FILE = "running.pid";
+/**
+ * Next to a running report: which process runs the test, as JSON {pid, host, startedAt}, so other processes leave
+ * it alone. Older versions wrote the pid alone.
+ */
+export const OWNER_FILE = "running.pid";
 const owned = new Set<string>();
+
+export interface ReportOwner {
+  pid: number;
+  /** os.hostname() of the machine running the test: a pid only means something on that machine. */
+  host?: string;
+  startedAt?: string;
+}
+
+/** Reads running.pid in either format: JSON {pid, host, startedAt}, or a plain pid. */
+export function parseOwner(text: string): ReportOwner | undefined {
+  const raw = text.trim();
+  let pid: unknown = Number(raw);
+  let host: string | undefined;
+  let startedAt: string | undefined;
+  if (raw.startsWith("{")) {
+    try {
+      const o = JSON.parse(raw) as Record<string, unknown>;
+      pid = o.pid;
+      host = typeof o.host === "string" ? o.host : undefined;
+      startedAt = typeof o.startedAt === "string" ? o.startedAt : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  if (typeof pid !== "number" || !Number.isInteger(pid) || pid <= 0) return undefined;
+  return { pid, ...(host !== undefined ? { host } : {}), ...(startedAt !== undefined ? { startedAt } : {}) };
+}
 
 export async function saveReport(report: Report): Promise<void> {
   const dir = reportDir(report.id);
   await mkdir(dir, { recursive: true });
   const file = path.join(dir, "report.json");
   if (report.status === "running" && !owned.has(report.id)) {
-    await writeFile(path.join(dir, OWNER_FILE), String(process.pid));
+    const owner: ReportOwner = { pid: process.pid, host: os.hostname(), startedAt: new Date().toISOString() };
+    await writeFile(path.join(dir, OWNER_FILE), JSON.stringify(owner));
     owned.add(report.id);
   }
   // Write then rename, so readers polling the file never see half a report.
@@ -53,12 +85,27 @@ const processAlive = (pid: number): boolean => {
   }
 };
 
+/** A running report not saved for this long is abandoned, whatever its owner file says (a test saves after every step). */
+export const STALE_AFTER_MS = 30 * 60_000;
+
+/**
+ * True when the process in `owner` may still be running the test. An owner on another machine (a reports folder
+ * shared over the network) cannot be checked, so it counts as alive; our own pid counts as dead, since a container
+ * restart can hand the same pid to the new process.
+ */
+export function ownerAlive(owner: ReportOwner | undefined, isAlive: (pid: number) => boolean = processAlive, host = os.hostname()): boolean {
+  if (!owner) return false;
+  if (owner.host !== undefined && owner.host !== host) return true;
+  return owner.pid !== process.pid && isAlive(owner.pid);
+}
+
 /**
  * Marks as "error" every report still "running" whose test died with its process (server or MCP restart),
  * so the UI does not show it as live forever. Reports owned by another live process (for example the MCP
- * server and the HTTP server sharing one reports folder) are left alone. Returns the ids it changed.
+ * server and the HTTP server sharing one reports folder) are left alone, unless the report was not saved for
+ * STALE_AFTER_MS. Returns the ids it changed.
  */
-export async function markInterruptedReports(isAlive: (pid: number) => boolean = processAlive): Promise<string[]> {
+export async function markInterruptedReports(isAlive: (pid: number) => boolean = processAlive, now = Date.now()): Promise<string[]> {
   let ids: string[] = [];
   try { ids = await readdir(REPORTS_DIR); } catch { return []; }
   const changed: string[] = [];
@@ -66,9 +113,9 @@ export async function markInterruptedReports(isAlive: (pid: number) => boolean =
     if (!/^[a-z0-9-]+$/i.test(id) || owned.has(id)) continue;
     const report = await loadReport(id);
     if (report?.status !== "running") continue;
-    const owner = Number(await readFile(path.join(reportDir(id), OWNER_FILE), "utf8").catch(() => ""));
-    // A container restart can hand the same pid to the new process, so our own pid counts as dead.
-    if (Number.isInteger(owner) && owner > 0 && owner !== process.pid && isAlive(owner)) continue;
+    const owner = parseOwner(await readFile(path.join(reportDir(id), OWNER_FILE), "utf8").catch(() => ""));
+    const savedAt = (await stat(path.join(reportDir(id), "report.json")).catch(() => undefined))?.mtimeMs ?? 0;
+    if (now - savedAt <= STALE_AFTER_MS && ownerAlive(owner, isAlive)) continue;
     report.status = "error";
     report.error = INTERRUPTED_ERROR;
     report.summary ||= `The test stopped because of an error: ${INTERRUPTED_ERROR}`;
