@@ -63,11 +63,18 @@ screen reader announces**. It never sees the page, no pixels, no HTML.
 
 **The demo.** *Maple Grove Clinic* is a fictional clinic site in two versions that are **pixel-identical** (a test
 compares byte-equal screenshots of every page and state). When Claude played the screen reader user on the
-inaccessible version, it was **blocked after 12 steps, score 0/100, 15 issues**. The blocking issue: *"Time slots
+inaccessible version, it was **blocked after 11 steps, score 0/100, 15 issues**. The blocking issue: *"Time slots
 cannot be selected"*. The slots are clickable `<div>`s, so they are announced as plain text, and pressing Tab
 jumps from the date field straight to "Full name". When it submitted anyway, the red "Please choose a time slot"
 error was never announced. On the fixed version, which looks exactly the same, the same agent **booked the
 appointment: score 100/100, 0 issues**.
+
+**A second demo, to show it generalises.** *GreenCart* is a grocery checkout, also in two pixel-identical
+versions, with different barriers: a cookie banner that silently disables every button and whose only control has
+no name, quantity and add buttons named just "+" and "Add", cart updates that are never announced, a delivery
+choice that never says which option is selected, and a terms checkbox that is a plain `<div>`. Claude was
+**blocked at checkout (0/100, 8 issues)** on the inaccessible version and **placed the order (100/100)** on the
+fixed one. All four reports ship in the repo: `npm run examples`.
 
 ## How we built it
 
