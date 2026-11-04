@@ -25,6 +25,7 @@ const PAGES: Record<string, string> = {
       <div role="status" id="msg"></div>
       <div style="cursor:pointer"><input type="checkbox" id="terms"><label for="terms">I accept the terms</label></div>
       <a href="/redirect">Partner site</a>
+      <button onclick="document.getElementById('badge').textContent='Cart 1'">Add to cart</button><span id="badge">Cart 0</span>
       <a id="dl" tabindex="0" onclick="void 0" style="cursor:pointer">Download audio</a>
     </main></body></html>`,
   "/done": `<!doctype html><html lang="en"><head><title>Thanks</title></head><body><main><h1>Message sent</h1></main></body></html>`,
@@ -462,5 +463,23 @@ describe("lists", () => {
     ], "http://x", "T");
     expect(snap.text).toContain("list (3 items)");
     expect(snap.text).toMatch(/\n {2}\[1\] link "Apples"/);
+  });
+});
+
+describe("silent changes", () => {
+  it("says when other content changed without being announced, even if focus moved", async () => {
+    const s = await BrowserSession.open(`${base}/form`);
+    try {
+      const snap = await s.snapshot();
+      const add = [...snap.elements.values()].find((e) => e.role === "button" && e.name === "Add to cart")!;
+      const out = await s.act({ type: "click", id: add.id }, snap);
+      expect(out.result).toContain('Focus moved to button "Add to cart"');
+      expect(out.result).toContain("Other content on the page changed without being announced.");
+      const name = [...out.snapshot.elements.values()].find((e) => e.role === "textbox" && e.name === "Name")!;
+      const typed = await s.act({ type: "type", id: name.id, text: "Al" }, out.snapshot);
+      expect(typed.result).not.toContain("Other content");
+    } finally {
+      await s.close();
+    }
   });
 });
