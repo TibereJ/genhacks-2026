@@ -1,0 +1,20 @@
+{
+  "note": "BlindSpot CI journeys, see docs/CI.md. Run: npx tsx src/ci.ts blindspot.config.json --brain scripted --serve",
+  "brain": "scripted",
+  "journeys": [
+    {
+      "name": "Book appointment (fixed clinic)",
+      "url": "/fixed/index.html",
+      "task": "Book an appointment with Dr. Lee as Alex Doe (alex@example.com).",
+      "mustSucceed": true,
+      "minScore": 90
+    },
+    {
+      "name": "Book appointment (inaccessible clinic)",
+      "url": "/bad/index.html",
+      "task": "Book an appointment with Dr. Lee as Alex Doe (alex@example.com).",
+      "mustSucceed": false,
+      "note": "Known-bad example: the time slots cannot be selected with a screen reader, so this journey is expected to be blocked. It is reported but does not fail the build."
+    }
+  ]
+}
