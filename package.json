@@ -1,0 +1,28 @@
+{
+  "name": "blindspot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An AI agent that tests whether screen-reader users can actually complete tasks on a website.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "blindspot": "tsx src/cli.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
+    "playwright": "^1.63.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
