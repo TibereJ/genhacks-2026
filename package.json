@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "playwright": "^1.63.0",
     "zod": "^4.6.7"
   },

@@ -4,6 +4,7 @@ import path from "node:path";
 import { runTest } from "./core/agent.js";
 import { ClaudeBrain } from "./core/brains/claude.js";
 import { ScriptedBrain, clinicDemoPlan } from "./core/brains/scripted.js";
+import { callAgentSession, startAgentSession } from "./core/brains/external.js";
 import { listReports, loadReport, newReportId, reportDir } from "./core/report.js";
 
 const PORT = Number(process.env.PORT || 3000);
@@ -89,6 +90,32 @@ const server = http.createServer(async (req, res) => {
         .catch((err) => console.error("run failed", err))
         .finally(() => { activeRuns--; });
       return send(res, 202, { id });
+    }
+
+    // External agent API: another AI agent (e.g. Claude Code) drives the test one tool call at a time.
+    // Disabled on public instances: it lets the caller steer the server's browser.
+    if (req.method === "POST" && p.startsWith("/api/agent/") && process.env.BLINDSPOT_PUBLIC !== "1") {
+      const body = (await readJson(req).catch(() => null)) as Record<string, unknown> | null;
+      if (!body) return send(res, 400, { error: "Expected a JSON body" });
+      if (p === "/api/agent/start") {
+        if (typeof body.url !== "string" || typeof body.task !== "string") return send(res, 400, { error: "Expected {url, task}" });
+        let target: URL;
+        try { target = new URL(body.url, `http://localhost:${PORT}`); } catch { return send(res, 400, { error: "Invalid URL" }); }
+        if (target.protocol !== "http:" && target.protocol !== "https:") return send(res, 400, { error: "Only http and https URLs can be tested" });
+        try {
+          return send(res, 200, await startAgentSession(target.href, body.task.slice(0, 500), typeof body.model === "string" ? body.model : undefined));
+        } catch (err) {
+          return send(res, 502, { error: (err as Error).message });
+        }
+      }
+      const call = /^\/api\/agent\/([a-z0-9-]+)\/([a-z_]+)$/i.exec(p);
+      if (call) {
+        try {
+          return send(res, 200, { result: await callAgentSession(call[1], call[2], body) });
+        } catch (err) {
+          return send(res, 404, { error: (err as Error).message });
+        }
+      }
     }
 
     if (req.method !== "GET" && req.method !== "HEAD") return send(res, 405, { error: "Method not allowed" });
