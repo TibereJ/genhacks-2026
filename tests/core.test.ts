@@ -9,6 +9,7 @@ process.env.BLINDSPOT_REPORTS_DIR = await mkdtemp(path.join(os.tmpdir(), "blinds
 const { BrowserSession } = await import("../src/core/browser.js");
 const { runTest } = await import("../src/core/agent.js");
 const { ScriptedBrain, parseTranscript } = await import("../src/core/brains/scripted.js");
+const { scanPage } = await import("../src/core/scan.js");
 
 const PAGES: Record<string, string> = {
   "/form": `<!doctype html><html lang="en"><head><title>Form</title></head><body>
@@ -27,6 +28,16 @@ const PAGES: Record<string, string> = {
       <a id="dl" tabindex="0" onclick="void 0" style="cursor:pointer">Download audio</a>
     </main></body></html>`,
   "/done": `<!doctype html><html lang="en"><head><title>Thanks</title></head><body><main><h1>Message sent</h1></main></body></html>`,
+  "/scan": `<!doctype html><html lang="en"><head><title>Scan</title></head><body><main>
+    <h1>Products</h1>
+    <div class="card" onclick="location.href='/done'"><h2>Green tea</h2><a href="/done">Details</a></div>
+    <div class="opt" onclick="void 0"><input type="radio" id="r1" name="r"><label for="r1">Small</label></div>
+    <div class="pair" onclick="void 0"><input id="q1" aria-label="Qty 1"><input id="q2" aria-label="Qty 2"></div>
+    <ul><li style="cursor:pointer"><a href="/done">Menu link</a></li></ul>
+    <a id="nohref" tabindex="0" onclick="void 0">Download audio</a>
+    <a id="keyed" tabindex="0" role="button" onclick="void 0" onkeydown="void 0">Play</a>
+    <a id="unreachable" onclick="void 0">Share</a>
+  </main></body></html>`,
   "/tabs": `<!doctype html><html lang="en"><head><title>Tabs</title></head><body><main>
     <h1>Links</h1><a href="/done" target="_blank">Open thanks in a new tab</a></main></body></html>`,
 };
@@ -95,6 +106,37 @@ describe("screen reader transcript", () => {
       expect(nav.snapshot.text).toContain("Message sent");
 
       expect((await s.act({ type: "click", id: 999 }, nav.snapshot)).ok).toBe(false);
+    } finally {
+      await s.close();
+    }
+  });
+});
+
+describe("automated scan", () => {
+  it("flags clickable wrappers around links, but not around a single form control and its label", async () => {
+    const s = await BrowserSession.open(`${base}/scan`);
+    try {
+      const findings = await scanPage(s.page, await s.snapshot());
+      const clickable = findings.find((f) => f.title.startsWith("Clickable elements"))!;
+      expect(clickable.severity).toBe("critical");
+      // The product card, the wrapper around two fields, and the <a onclick> without tabindex (Tab never reaches it).
+      expect(clickable.description).toContain("3 elements");
+      expect(clickable.description).toContain('"Green teaDetails"');
+      expect(clickable.description).toContain('"Share"');
+      expect(clickable.element?.html).toContain('class="card"');
+      expect(clickable.description).not.toContain("Small");
+      expect(clickable.description).not.toContain("Menu link");
+      expect(clickable.description).not.toContain("Download audio");
+
+      const hrefless = findings.find((f) => f.title === "Links without href may not respond to Enter")!;
+      expect(hrefless).toBeDefined();
+      expect(hrefless.severity).toBe("moderate");
+      expect(hrefless.wcag).toEqual(["2.1.1 Keyboard", "4.1.2 Name, Role, Value"]);
+      expect(hrefless.fix).toMatch(/<a href>.*<button>/);
+      expect(hrefless.description).toContain("1 link");
+      expect(hrefless.description).toContain('"Download audio"');
+      expect(hrefless.description).not.toContain("Play");
+      expect(hrefless.element).toMatchObject({ role: "link", name: "Download audio" });
     } finally {
       await s.close();
     }
