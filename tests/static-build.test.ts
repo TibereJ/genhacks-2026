@@ -324,7 +324,7 @@ describe("static demo in a browser, under a sub-path", () => {
     await page.goto(`${base}#/compare/${NODEJS}/${PYPI}`);
     await page.locator(".cmp-delta-num").waitFor();
     await expect(page.locator(".cmp-not-comparable").innerText()).resolves.toContain("Issues cannot be compared: the after run was inconclusive");
-    expect(await page.locator(".cmp-delta-label").innerText()).toBe("not scored");
+    expect(await page.locator(".cmp-delta-label").textContent()).toBe("not scored");
     expect(await page.locator(".cmp-delta .sr-only").innerText()).toBe("No score change: the after run was not scored.");
     await expect(page.locator("#cmp-fixed-title").innerText()).resolves.toContain("(not compared)");
     expect(await page.locator(".cmp-good li.cmp-issue").count()).toBe(0);

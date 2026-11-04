@@ -18,6 +18,12 @@ _Obligatoire : tout lister dans la description Devpost (« Built with »)._
 - `tsx`, `typescript`, `vitest` — exécution, typage, tests
 - `zod` sert aussi à valider `blindspot.config.json` (mode CI)
 
+## Polices (auto-hébergées dans `report-ui/fonts/`, licence SIL Open Font License 1.1)
+- **Instrument Serif** (The Instrument Serif Project Authors) — titres et grands chiffres du score
+- **IBM Plex Sans** (IBM) — texte de l'interface
+- **IBM Plex Mono** (IBM) — transcripts, URLs, code des correctifs
+- Fichiers `.woff2` (sous-ensemble latin) copiés depuis les paquets npm Fontsource (`@fontsource/instrument-serif`, `@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-mono`, v5.3.0) récupérés avec `npm pack` ; textes de licence à côté (`OFL-*.txt`)
+
 ## CI et déploiement
 - **GitHub Actions** — `.github/workflows/blindspot.yml` : tests + parcours d'accessibilité à chaque push/PR ; actions officielles `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4`
 - **GitHub Pages** — démo en ligne en lecture seule (https://tiberej.github.io/genhacks-2026/), construite par `src/build-static.ts` et déployée par `.github/workflows/pages.yml` ; actions officielles `actions/configure-pages@v5`, `actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4`

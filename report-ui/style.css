@@ -113,6 +113,7 @@
   --term-id: #c9a66b;
   --term-empty: #ff7a55;
   --term-target: #2a1a13;
+  --term-border: transparent;
 
   --radius: 2px;
   --gutter: 20px;
@@ -145,6 +146,7 @@
     --term-bg: #0b0a08;
     --term-rule: #2b2822;
     --term-target: #2a1810;
+    --term-border: #34312a;
   }
 }
 
@@ -776,6 +778,7 @@ main:focus {
   font-size: 0.875rem;
   line-height: 1.75;
   border-radius: var(--radius);
+  border: 1px solid var(--term-border);
   overflow-x: auto;
 }
 
@@ -1371,6 +1374,8 @@ main:focus {
 
 .gauge.tone-none .gauge-number {
   color: var(--muted);
+  font-size: 4.5rem;
+  line-height: 1;
 }
 
 .gauge-of {
@@ -2215,6 +2220,7 @@ q.value {
   font-size: 0.8125rem;
   line-height: 1.7;
   border-radius: var(--radius);
+  border: 1px solid var(--term-border);
   scrollbar-color: var(--term-dim) var(--term-bg);
 }
 
@@ -2655,6 +2661,7 @@ q.value {
   flex-direction: column;
   gap: 12px;
   max-height: 94vh;
+  padding: 8px; /* room for the focus ring of Close */
 }
 
 .lightbox-bar {
