@@ -171,7 +171,8 @@ const DOM_CHECKS = `(() => {
   const ROLES = new Set(["button", "link", "checkbox", "radio", "tab", "menuitem", "option", "switch", "combobox", "slider", "textbox"]);
   const seen = new Set();
   document.querySelectorAll("body *").forEach((el) => {
-    if (hidden(el) || el.matches(NATIVE) || el.closest(NATIVE)) return;
+    // Wrappers around a real control (e.g. a styled <div> holding a checkbox and its label) are fine.
+    if (hidden(el) || el.matches(NATIVE) || el.closest(NATIVE) || el.querySelector(NATIVE)) return;
     const role = el.getAttribute("role");
     if (role && ROLES.has(role) && el.hasAttribute("tabindex")) return;
     const clickable = el.hasAttribute("onclick") || (getComputedStyle(el).cursor === "pointer" && getComputedStyle(el.parentElement).cursor !== "pointer");

@@ -205,7 +205,10 @@ export function buildSnapshot(nodes: AXNode[], url: string, title: string): Snap
     }
 
     if (role === "heading") {
-      emit(depth, `heading level ${level ?? "?"} ${quote(name || collectText(node))}`);
+      const text = `heading level ${level ?? "?"} ${quote(name || collectText(node))}`;
+      // Sites often move focus to a heading (tabindex="-1") after a dialog or page change.
+      if (isFocused) focused = text;
+      emit(depth, isFocused ? `${text} ← focus` : text);
       return;
     }
     if (role === "img" || role === "image") {

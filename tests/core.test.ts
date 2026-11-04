@@ -22,7 +22,7 @@ const PAGES: Record<string, string> = {
       <button onclick="document.getElementById('msg').textContent='Sent!'"><svg width="10" height="10"></svg></button>
       <button onclick="location.href='/done'">Send</button>
       <div role="status" id="msg"></div>
-      <input type="checkbox" id="terms"><label for="terms">I accept the terms</label>
+      <div style="cursor:pointer"><input type="checkbox" id="terms"><label for="terms">I accept the terms</label></div>
       <a href="/redirect">Partner site</a>
     </main></body></html>`,
   "/done": `<!doctype html><html lang="en"><head><title>Thanks</title></head><body><main><h1>Message sent</h1></main></body></html>`,
@@ -117,6 +117,9 @@ describe("agent loop", () => {
     expect(titles).toContain("Images have no text alternative");
     expect(titles).toContain("Button has no accessible name");
     expect(titles).toContain("Clickable elements cannot be reached or activated with a screen reader or keyboard");
+    const clickable = report.issues.find((i) => i.title.startsWith("Clickable elements"))!;
+    expect(clickable.description).toContain("1 element");
+    expect(clickable.description).not.toContain("accept the terms");
     expect(titles).toContain("Fields use a placeholder instead of a label");
     expect(report.score).toBeGreaterThanOrEqual(50);
     expect(report.score).toBeLessThan(100);
@@ -164,5 +167,17 @@ describe("browser safety and states", () => {
       await s.close();
     }
     await expect(BrowserSession.open(`${base}/redirect`, guard)).rejects.toThrow(/BLOCKED_BY_CLIENT/);
+  });
+});
+
+describe("focus on non-widgets", () => {
+  it("reports focus moved to a heading", async () => {
+    const { buildSnapshot } = await import("../src/core/ax-tree.js");
+    const snap = buildSnapshot([
+      { nodeId: "1", ignored: false, role: { value: "RootWebArea" }, childIds: ["2"] },
+      { nodeId: "2", ignored: false, role: { value: "heading" }, name: { value: "Checkout" }, backendDOMNodeId: 2, properties: [{ name: "level", value: { value: 1 } }, { name: "focusable", value: { value: true } }, { name: "focused", value: { value: true } }] },
+    ], "http://x", "T");
+    expect(snap.focused).toBe('heading level 1 "Checkout"');
+    expect(snap.text).toContain('heading level 1 "Checkout" ← focus');
   });
 });
