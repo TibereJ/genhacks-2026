@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { existsSync, readdirSync } from "node:fs";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import http from "node:http";
 import net from "node:net";
 import os from "node:os";
@@ -30,9 +31,9 @@ const report = (id: string) => ({
 });
 
 /** Starts src/server.ts with these environment variables; resolves once it listens, with its output so far. */
-async function startServer(env: Record<string, string>): Promise<{ child: ChildProcess; output: () => string }> {
+async function startServer(env: Record<string, string>, script = "src/server.ts"): Promise<{ child: ChildProcess; output: () => string }> {
   let out = "";
-  const proc = spawn(process.execPath, ["--import", "tsx", "src/server.ts"], {
+  const proc = spawn(process.execPath, ["--import", "tsx", script], {
     env: { ...process.env, BLINDSPOT_PUBLIC: "", BLINDSPOT_ALLOWED_HOSTS: "", ...env },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -151,4 +152,25 @@ describe("HTTP server", () => {
     const live = JSON.parse(await readFile(path.join(reports, "live-run", "report.json"), "utf8"));
     expect(live.status).toBe("running");
   });
+});
+
+describe("npm run examples", () => {
+  it("serves a temporary copy of examples/reports, so new runs never land in the repository", async () => {
+    const shipped = readdirSync("examples/reports").filter((d) => /^[a-z0-9-]+$/i.test(d)).sort();
+    const port = await freePort();
+    const examples = await startServer({ PORT: String(port), HOST: "127.0.0.1", BLINDSPOT_REPORTS_DIR: "" }, "src/examples.ts");
+    let dir = "";
+    try {
+      const match = /Serving a copy of the example reports from (\S+)\. New runs are saved there/.exec(examples.output());
+      expect(match, examples.output()).not.toBeNull();
+      dir = match![1];
+      expect(path.resolve(dir).startsWith(path.resolve(os.tmpdir()))).toBe(true);
+      expect(readdirSync(dir).sort()).toEqual(shipped);
+      const list = (await (await fetch(`http://127.0.0.1:${port}/api/reports`)).json()) as { id: string }[];
+      expect(list.map((r) => r.id).sort()).toEqual(shipped);
+    } finally {
+      examples.child.kill();
+      if (dir && existsSync(dir)) await rm(dir, { recursive: true, force: true });
+    }
+  }, 30_000);
 });
