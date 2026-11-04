@@ -1,0 +1,371 @@
+{
+  "id": "20261104164652-tbhon8",
+  "url": "http://localhost:3200/demo/shop/bad/index.html",
+  "task": "Buy 2 kg of apples and a loaf of bread, then check out with home delivery. Use the name Alex Doe, address 12 Elm Street, and accept the terms.",
+  "model": "Claude Code (session brain)",
+  "status": "blocked",
+  "summary": "I added 2 kg of apples and a loaf of bread to the cart and reached checkout, but I could not place the order: accepting the terms is required, and the terms are only announced as text with no checkbox to tick. Along the way, a cookie banner silently disabled every button until I found its unnamed close control at the very end of the page; the quantity and add buttons are ambiguous (\"+\", \"Add\") with no confirmation; the delivery choice never says which option is selected; and the checkout error is not announced. The most important fix is a real, labelled checkbox for the terms, with the error announced via role=\"alert\".",
+  "startedAt": "2026-11-04T16:46:52.049Z",
+  "steps": [
+    {
+      "index": 0,
+      "url": "http://localhost:3200/demo/shop/bad/index.html",
+      "reason": "Under heading \"Apples\" the quantity is 1; I press button \"+\" to make it 2 kg.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"−\"\n  text \"1\"\n  [7] button \"+\"\n  [8] button \"Add\"\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [9] button \"−\"\n  text \"1\"\n  [10] button \"+\"\n  [11] button \"Add\"\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [12] button \"−\"\n  text \"1\"\n  [13] button \"+\"\n  [14] button \"Add\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [15] button \"−\"\n  text \"1\"\n  [16] button \"+\"\n  [17] button \"Add\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [18] button \"−\"\n  text \"1\"\n  [19] button \"+\"\n  [20] button \"Add\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"\n[21] generic (focusable) \"\"\ntext \"We value your privacy\"\ntext \"We use cookies to keep your cart, remember your delivery address and improve your shopping. You can change your choice at any time in your account settings.\"\ntext \"Accept all\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 7,
+          "role": "button",
+          "name": "+"
+        }
+      },
+      "result": "Focus moved to button \"+\".",
+      "ok": true,
+      "screenshot": "step-0.png"
+    },
+    {
+      "index": 1,
+      "url": "http://localhost:3200/demo/shop/bad/index.html",
+      "reason": "The only operable element of the cookie message has no name; it is probably the close or accept control. I try it.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"−\"\n  text \"1\"\n  [7] button \"+\" ← focus\n  [8] button \"Add\"\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [9] button \"−\"\n  text \"1\"\n  [10] button \"+\"\n  [11] button \"Add\"\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [12] button \"−\"\n  text \"1\"\n  [13] button \"+\"\n  [14] button \"Add\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [15] button \"−\"\n  text \"1\"\n  [16] button \"+\"\n  [17] button \"Add\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [18] button \"−\"\n  text \"1\"\n  [19] button \"+\"\n  [20] button \"Add\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"\n[21] generic (focusable) \"\"\ntext \"We value your privacy\"\ntext \"We use cookies to keep your cart, remember your delivery address and improve your shopping. You can change your choice at any time in your account settings.\"\ntext \"Accept all\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 21,
+          "role": "generic",
+          "name": ""
+        }
+      },
+      "result": "Nothing was announced, but the page content changed.",
+      "ok": true,
+      "screenshot": "step-1.png"
+    },
+    {
+      "index": 2,
+      "url": "http://localhost:3200/demo/shop/bad/index.html",
+      "reason": "Now that the banner is gone, I press \"+\" under \"Apples\" again to get 2 kg.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"−\"\n  text \"1\"\n  [7] button \"+\"\n  [8] button \"Add\"\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [9] button \"−\"\n  text \"1\"\n  [10] button \"+\"\n  [11] button \"Add\"\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [12] button \"−\"\n  text \"1\"\n  [13] button \"+\"\n  [14] button \"Add\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [15] button \"−\"\n  text \"1\"\n  [16] button \"+\"\n  [17] button \"Add\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [18] button \"−\"\n  text \"1\"\n  [19] button \"+\"\n  [20] button \"Add\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 7,
+          "role": "button",
+          "name": "+"
+        }
+      },
+      "result": "Focus moved to button \"+\".",
+      "ok": true,
+      "screenshot": "step-2.png"
+    },
+    {
+      "index": 3,
+      "url": "http://localhost:3200/demo/shop/bad/index.html",
+      "reason": "Button \"Add\" right after the apples quantity should add 2 kg of apples to the cart.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"−\"\n  text \"2\"\n  [7] button \"+\" ← focus\n  [8] button \"Add\"\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [9] button \"−\"\n  text \"1\"\n  [10] button \"+\"\n  [11] button \"Add\"\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [12] button \"−\"\n  text \"1\"\n  [13] button \"+\"\n  [14] button \"Add\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [15] button \"−\"\n  text \"1\"\n  [16] button \"+\"\n  [17] button \"Add\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [18] button \"−\"\n  text \"1\"\n  [19] button \"+\"\n  [20] button \"Add\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 8,
+          "role": "button",
+          "name": "Add"
+        }
+      },
+      "result": "Focus moved to button \"Add\".",
+      "ok": true,
+      "screenshot": "step-3.png"
+    },
+    {
+      "index": 4,
+      "url": "http://localhost:3200/demo/shop/bad/index.html",
+      "reason": "Button \"Add\" after the bread quantity (1 loaf) adds the bread to the cart.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 1\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"−\"\n  text \"2\"\n  [7] button \"+\"\n  [8] button \"Add\" ← focus\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [9] button \"−\"\n  text \"1\"\n  [10] button \"+\"\n  [11] button \"Add\"\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [12] button \"−\"\n  text \"1\"\n  [13] button \"+\"\n  [14] button \"Add\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [15] button \"−\"\n  text \"1\"\n  [16] button \"+\"\n  [17] button \"Add\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [18] button \"−\"\n  text \"1\"\n  [19] button \"+\"\n  [20] button \"Add\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 11,
+          "role": "button",
+          "name": "Add"
+        }
+      },
+      "result": "Nothing was announced, but the page content changed.",
+      "ok": true,
+      "screenshot": "step-4.png"
+    },
+    {
+      "index": 5,
+      "url": "http://localhost:3200/demo/shop/bad/index.html",
+      "reason": "The link now reads \"Cart 2\", so both items seem to be in the cart. I open the cart.",
+      "heard": "Page: GreenCart - Fresh groceries delivered\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 2\"\nmain\n  text \"This week at GreenCart\"\n  heading level 1 \"Fresh groceries, delivered tomorrow morning\"\n  text \"Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.\"\n  text \"Picked this morning\"\n  text \"No plastic bags\"\n  heading level 2 \"This week's essentials\"\n  text \"Choose a quantity, then add to your cart.\"\n  text \"Prices include tax\"\n  text \"Local\"\n  heading level 3 \"Apples\"\n  text \"Gala, Hillside Orchard\"\n  text \"$3.20\"\n  text \"/ kg\"\n  [6] button \"−\"\n  text \"2\"\n  [7] button \"+\"\n  [8] button \"Add\"\n  text \"Baked today\"\n  heading level 3 \"Bread loaf\"\n  text \"Sourdough, 800 g\"\n  text \"$2.80\"\n  text \"/ loaf\"\n  [9] button \"−\"\n  text \"1\"\n  [10] button \"+\"\n  [11] button \"Add\" ← focus\n  heading level 3 \"Milk\"\n  text \"Whole milk, 1 L bottle\"\n  text \"$1.45\"\n  text \"/ bottle\"\n  [12] button \"−\"\n  text \"1\"\n  [13] button \"+\"\n  [14] button \"Add\"\n  text \"Free range\"\n  heading level 3 \"Eggs\"\n  text \"Box of 6, large\"\n  text \"$3.10\"\n  text \"/ box\"\n  [15] button \"−\"\n  text \"1\"\n  [16] button \"+\"\n  [17] button \"Add\"\n  heading level 3 \"Bananas\"\n  text \"Fairtrade, Ecuador\"\n  text \"$1.90\"\n  text \"/ kg\"\n  [18] button \"−\"\n  text \"1\"\n  [19] button \"+\"\n  [20] button \"Add\"\n  region \"Why GreenCart\"\n    text \"Next-morning delivery\"\n    text \"Order by 22:00, at your door between 8:00 and 12:00.\"\n    text \"Local farms first\"\n    text \"Most of our produce travels less than 50 km.\"\n    text \"Free store pickup\"\n    text \"Ready in 2 hours at 4 Market Square.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 5,
+          "role": "link",
+          "name": "Cart 2"
+        }
+      },
+      "result": "New page loaded: \"Your cart - GreenCart\".",
+      "ok": true,
+      "screenshot": "step-5.png"
+    },
+    {
+      "index": 6,
+      "url": "http://localhost:3200/demo/shop/bad/cart.html",
+      "reason": "Apples 2 kg and the bread loaf are in the cart; I follow link \"Go to checkout\".",
+      "heard": "Page: Your cart - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 2\"\nmain\n  heading level 1 \"Your cart\"\n  text \"Check your items, then head to checkout.\"\n  text \"Apples\"\n  text \"2 kg\"\n  text \"$6.40\"\n  text \"Bread loaf\"\n  text \"1 loaf\"\n  text \"$2.80\"\n  complementary \"Cart summary\"\n    heading level 2 \"Summary\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"Chosen at checkout\"\n    [6] link \"Go to checkout\"\n    [7] link \"Continue shopping\"\n    text \"Store pickup is free. Home delivery is $4.99.\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 6,
+          "role": "link",
+          "name": "Go to checkout"
+        }
+      },
+      "result": "New page loaded: \"Checkout - GreenCart\".",
+      "ok": true,
+      "screenshot": "step-6.png"
+    },
+    {
+      "index": 7,
+      "url": "http://localhost:3200/demo/shop/bad/checkout.html",
+      "reason": "Under \"Delivery method\" I choose button \"Home delivery\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 2\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    text \"Delivery method\"\n    [6] button \"Home delivery Tomorrow, 8:00 to 12:00 $4.99\"\n    [7] button \"Store pickup Ready in 2 hours, 4 Market Square Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\"\n    text \"Address\"\n    [9] textbox \"Address\"\n    text \"I accept the terms of sale and the privacy policy\"\n    text \"Required to place your order.\"\n    [10] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"Free\"\n    text \"Total\"\n    text \"$9.20\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 6,
+          "role": "button",
+          "name": "Home delivery Tomorrow, 8:00 to 12:00 $4.99"
+        }
+      },
+      "result": "Nothing was announced, but the page content changed.",
+      "ok": true,
+      "screenshot": "step-7.png"
+    },
+    {
+      "index": 8,
+      "url": "http://localhost:3200/demo/shop/bad/checkout.html",
+      "reason": "I fill in textbox \"Full name\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 2\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    text \"Delivery method\"\n    [6] button \"Home delivery Tomorrow, 8:00 to 12:00 $4.99\"\n    [7] button \"Store pickup Ready in 2 hours, 4 Market Square Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\"\n    text \"Address\"\n    [9] textbox \"Address\"\n    text \"I accept the terms of sale and the privacy policy\"\n    text \"Required to place your order.\"\n    [10] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 8,
+          "role": "textbox",
+          "name": "Full name"
+        },
+        "value": "Alex Doe"
+      },
+      "result": "textbox \"Full name\" now has value \"Alex Doe\". Focus moved to textbox \"Full name\".",
+      "ok": true,
+      "screenshot": "step-8.png"
+    },
+    {
+      "index": 9,
+      "url": "http://localhost:3200/demo/shop/bad/checkout.html",
+      "reason": "I fill in textbox \"Address\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 2\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    text \"Delivery method\"\n    [6] button \"Home delivery Tomorrow, 8:00 to 12:00 $4.99\"\n    [7] button \"Store pickup Ready in 2 hours, 4 Market Square Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\" value \"Alex Doe\" ← focus\n    text \"Address\"\n    [9] textbox \"Address\"\n    text \"I accept the terms of sale and the privacy policy\"\n    text \"Required to place your order.\"\n    [10] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 9,
+          "role": "textbox",
+          "name": "Address"
+        },
+        "value": "12 Elm Street"
+      },
+      "result": "textbox \"Address\" now has value \"12 Elm Street\". Focus moved to textbox \"Address\".",
+      "ok": true,
+      "screenshot": "step-9.png"
+    },
+    {
+      "index": 10,
+      "url": "http://localhost:3200/demo/shop/bad/checkout.html",
+      "reason": "The terms are only read as text. I tab forward from the address to see if a checkbox for the terms gets focus.",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 2\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    text \"Delivery method\"\n    [6] button \"Home delivery Tomorrow, 8:00 to 12:00 $4.99\"\n    [7] button \"Store pickup Ready in 2 hours, 4 Market Square Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\" value \"Alex Doe\"\n    text \"Address\"\n    [9] textbox \"Address\" value \"12 Elm Street\" ← focus\n    text \"I accept the terms of sale and the privacy policy\"\n    text \"Required to place your order.\"\n    [10] button \"Place order\"\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "press",
+        "value": "Tab"
+      },
+      "result": "Focus moved to button \"Place order\".",
+      "ok": true,
+      "screenshot": "step-10.png"
+    },
+    {
+      "index": 11,
+      "url": "http://localhost:3200/demo/shop/bad/checkout.html",
+      "reason": "I cannot find a way to accept the terms; I try button \"Place order\" to see what the site tells me.",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 2\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    text \"Delivery method\"\n    [6] button \"Home delivery Tomorrow, 8:00 to 12:00 $4.99\"\n    [7] button \"Store pickup Ready in 2 hours, 4 Market Square Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\" value \"Alex Doe\"\n    text \"Address\"\n    [9] textbox \"Address\" value \"12 Elm Street\"\n    text \"I accept the terms of sale and the privacy policy\"\n    text \"Required to place your order.\"\n    [10] button \"Place order\" ← focus\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 10,
+          "role": "button",
+          "name": "Place order"
+        }
+      },
+      "result": "Nothing was announced, but the page content changed.",
+      "ok": true,
+      "screenshot": "step-11.png"
+    },
+    {
+      "index": 12,
+      "url": "http://localhost:3200/demo/shop/bad/checkout.html",
+      "reason": "I added 2 kg of apples and a loaf of bread to the cart and reached checkout, but I could not place the order: accepting the terms is required, and the terms are only announced as text with no checkbox to tick. Along the way, a cookie banner silently disabled every button until I found its unnamed close control at the very end of the page; the quantity and add buttons are ambiguous (\"+\", \"Add\") with no confirmation; the delivery choice never says which option is selected; and the checkout error is not announced. The most important fix is a real, labelled checkbox for the terms, with the error announced via role=\"alert\".",
+      "heard": "Page: Checkout - GreenCart\ntext \"Free delivery on orders over $35 · Same-day pickup at\"\ntext \"4 Market Square\"\nbanner\n  [1] link \"GreenCart\"\n  navigation \"Main\"\n    [2] link \"Shop\"\n    [3] link \"Fresh produce\"\n    [4] link \"Why GreenCart\"\n  text \"Delivering to Maple Grove\"\n  text \"Next slot: tomorrow, 8:00\"\n  [5] link \"Cart 2\"\nmain\n  heading level 1 \"Checkout\"\n  text \"Almost there. Tell us how you want to get your groceries.\"\n  form\n    text \"Delivery method\"\n    [6] button \"Home delivery Tomorrow, 8:00 to 12:00 $4.99\"\n    [7] button \"Store pickup Ready in 2 hours, 4 Market Square Free\"\n    heading level 2 \"Your details\"\n    text \"Full name\"\n    [8] textbox \"Full name\" value \"Alex Doe\"\n    text \"Address\"\n    [9] textbox \"Address\" value \"12 Elm Street\"\n    text \"I accept the terms of sale and the privacy policy\"\n    text \"Required to place your order.\"\n    text \"Please accept the terms of sale to place your order.\"\n    [10] button \"Place order\" ← focus\n    text \"Pay on delivery or at pickup. No card needed.\"\n  complementary \"Order summary\"\n    heading level 2 \"Order summary\"\n    text \"Apples\"\n    text \"2 kg\"\n    text \"$6.40\"\n    text \"Bread loaf\"\n    text \"1 loaf\"\n    text \"$2.80\"\n    text \"Subtotal\"\n    text \"$9.20\"\n    text \"Delivery\"\n    text \"$4.99\"\n    text \"Total\"\n    text \"$14.19\"\ncontentinfo\n  text \"GreenCart\"\n  text \"Fresh groceries from local farms, delivered to your door in Maple Grove.\"\n  text \"Store\"\n  text \"4 Market Square, Maple Grove\"\n  text \"Open daily, 7:00 to 21:00\"\n  text \"Help\"\n  text \"Phone: 555-0199\"\n  text \"help@greencart.example\"\n  text \"GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.\"",
+      "action": {
+        "type": "finish",
+        "value": "blocked"
+      },
+      "result": "Task could not be completed.",
+      "ok": true
+    }
+  ],
+  "issues": [
+    {
+      "severity": "critical",
+      "title": "Clickable elements cannot be reached or activated with a screen reader or keyboard",
+      "description": "2 elements on \"GreenCart - Fresh groceries delivered\" react to mouse clicks but are not buttons, links or form controls (for example \"\", \"Accept all\"). Screen readers announce them as plain text and keyboard users cannot focus them. The same problem is also on \"Checkout - GreenCart\".",
+      "wcag": [
+        "2.1.1 Keyboard",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "Use a native control instead of a clickable <div>. For a choice between options, a radio group:\n<fieldset>\n  <legend>Available times</legend>\n  <input type=\"radio\" id=\"t1\" name=\"time\" value=\"09:00\"><label for=\"t1\">9:00</label>\n</fieldset>\nFor an action: <button type=\"button\">…</button>",
+      "element": {
+        "role": "generic",
+        "name": "",
+        "html": "<div class=\"consent-close\" tabindex=\"0\" data-consent-accept=\"\"> <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"ro"
+      },
+      "id": "scan-1",
+      "stepIndex": 0,
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "id": "agent-2",
+      "severity": "serious",
+      "title": "Cookie banner silently blocks the page",
+      "description": "Pressing \"+\" for apples did nothing and nothing was announced. Only by reading the whole page did I find, after the footer, a cookie message (\"We value your privacy\"). It is not announced as a dialog, focus is not moved to it, and the shop ignores every button until it is accepted. A screen reader user hears a normal page whose buttons do not work.",
+      "wcag": [
+        "4.1.2 Name, Role, Value",
+        "2.4.3 Focus Order",
+        "1.3.2 Meaningful Sequence"
+      ],
+      "fix": "<div role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"cookie-title\"> … <button type=\"button\">Accept all</button></div>\nMove focus into the dialog when it opens, make the rest of the page inert, and return focus afterwards.",
+      "stepIndex": 1,
+      "element": {
+        "role": "generic",
+        "name": ""
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-3",
+      "severity": "serious",
+      "title": "Cookie banner close control has no name and \"Accept all\" is not operable",
+      "description": "The only operable part of the cookie banner is announced as an unnamed focusable element. The text \"Accept all\" is read separately as plain text and cannot be activated, so I have to guess that the unnamed element closes the banner.",
+      "wcag": [
+        "4.1.2 Name, Role, Value",
+        "2.1.1 Keyboard"
+      ],
+      "fix": "<button type=\"button\">Accept all</button>\n<button type=\"button\" aria-label=\"Close and accept\"><svg aria-hidden=\"true\" focusable=\"false\">…</svg></button>",
+      "stepIndex": 1,
+      "element": {
+        "role": "generic",
+        "name": ""
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-4",
+      "severity": "moderate",
+      "title": "Quantity buttons are ambiguous and the quantity is not announced",
+      "description": "Every product has buttons named only \"−\" and \"+\", so out of context I cannot tell which product they change. After pressing \"+\" the screen reader only said that focus was on \"+\"; the new quantity is plain text that is not announced, so I had to read the page again to check it.",
+      "wcag": [
+        "2.4.6 Headings and Labels",
+        "4.1.2 Name, Role, Value",
+        "4.1.3 Status Messages"
+      ],
+      "fix": "<button type=\"button\" aria-label=\"Increase apples quantity\">+</button>\n<label for=\"qty-apples\">Apples quantity (kg)</label>\n<input id=\"qty-apples\" type=\"number\" min=\"1\" value=\"2\">",
+      "stepIndex": 3,
+      "element": {
+        "role": "button",
+        "name": "+"
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-5",
+      "severity": "moderate",
+      "title": "Adding to the cart gives no feedback, and all add buttons are named \"Add\"",
+      "description": "After pressing \"Add\" nothing was announced. The only sign is that the cart link now reads \"Cart 2\", which I only notice if I go back to the top of the page. All five product buttons are called just \"Add\", so in a list of buttons I cannot tell which product each one adds.",
+      "wcag": [
+        "4.1.3 Status Messages",
+        "2.4.6 Headings and Labels",
+        "2.4.4 Link Purpose (In Context)"
+      ],
+      "fix": "<button type=\"button\" aria-label=\"Add apples to cart\">Add</button>\n<p role=\"status\" class=\"visually-hidden\" id=\"cart-status\"></p>\n<!-- after adding: cart-status.textContent = \"Apples, 2 kg, added. Cart: 1 item.\" -->",
+      "stepIndex": 5,
+      "element": {
+        "role": "button",
+        "name": "Add"
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-6",
+      "severity": "serious",
+      "title": "Delivery choice does not say which option is selected",
+      "description": "\"Home delivery\" and \"Store pickup\" are announced as two plain buttons. After pressing \"Home delivery\" nothing was announced and neither button says selected, pressed or checked, so I cannot know which delivery method the order will use.",
+      "wcag": [
+        "4.1.2 Name, Role, Value",
+        "1.3.1 Info and Relationships",
+        "1.4.1 Use of Color"
+      ],
+      "fix": "<fieldset>\n  <legend>Delivery method</legend>\n  <input type=\"radio\" id=\"home\" name=\"delivery\" value=\"home\"><label for=\"home\">Home delivery, tomorrow 8:00 to 12:00, $4.99</label>\n  <input type=\"radio\" id=\"pickup\" name=\"delivery\" value=\"pickup\"><label for=\"pickup\">Store pickup, free</label>\n</fieldset>",
+      "stepIndex": 8,
+      "element": {
+        "role": "button",
+        "name": "Home delivery Tomorrow, 8:00 to 12:00 $4.99"
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-7",
+      "severity": "critical",
+      "title": "Terms of sale cannot be accepted",
+      "description": "The sentence \"I accept the terms of sale and the privacy policy\" is announced as plain text. There is no checkbox, and pressing Tab goes from \"Address\" straight to \"Place order\". The order requires the terms to be accepted, so a screen reader or keyboard user cannot place an order.",
+      "wcag": [
+        "2.1.1 Keyboard",
+        "4.1.2 Name, Role, Value",
+        "1.3.1 Info and Relationships"
+      ],
+      "fix": "<input type=\"checkbox\" id=\"terms\" required aria-describedby=\"terms-hint\">\n<label for=\"terms\">I accept the terms of sale and the privacy policy</label>\n<p id=\"terms-hint\">Required to place your order.</p>",
+      "stepIndex": 11,
+      "source": "agent",
+      "blocking": true
+    },
+    {
+      "id": "agent-8",
+      "severity": "serious",
+      "title": "Checkout error is not announced",
+      "description": "After pressing \"Place order\" nothing was announced. The message \"Please accept the terms of sale to place your order.\" was added to the page silently, so a screen reader user would think the button is broken.",
+      "wcag": [
+        "4.1.3 Status Messages",
+        "3.3.1 Error Identification"
+      ],
+      "fix": "<p id=\"terms-error\" role=\"alert\"></p>\n<!-- set its text on failed submit, add aria-invalid=\"true\" and aria-describedby=\"terms-error\" to the checkbox, and move focus to it -->",
+      "stepIndex": 12,
+      "source": "agent",
+      "blocking": false
+    }
+  ],
+  "finishedAt": "2026-11-04T16:48:03.413Z",
+  "score": 0
+}

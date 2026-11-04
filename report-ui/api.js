@@ -2,9 +2,23 @@
 // fixtures/sample-report.json so the UI can be built and demoed without the server.
 //   #/report/sample       finished fixture report
 //   #/report/sample-live  the same report replayed as a live run (one new step every 1.5 s)
+//
+// Static mode (the read-only GitHub Pages demo built by src/build-static.ts, which adds
+// <meta name="blindspot-static" content="1">): no server, every URL is relative to the page.
+//   data/reports.json                   the run list (same shape as GET /api/reports)
+//   data/reports/<id>/report.json       a report
+//   data/reports/<id>/report.md         its Markdown export
+//   data/reports/<id>/step-N.png        screenshots
 
 const params = new URLSearchParams(location.search);
 export const FIXTURE_MODE = params.get("fixture") === "1";
+export const STATIC_MODE =
+  !FIXTURE_MODE && document.querySelector('meta[name="blindspot-static"]')?.getAttribute("content") === "1";
+
+/** Base URL of step screenshots, for screenshotUrl() in format.js. */
+export const SCREENSHOT_BASE = STATIC_MODE ? "data/reports/" : "/reports/";
+
+const relative = (path) => new URL(path, document.baseURI).href;
 
 const FIXTURE_URL = new URL("fixtures/sample-report.json", document.baseURI).href;
 const LIVE_STEP_MS = 1500;
@@ -57,6 +71,7 @@ export async function listReports() {
     const r = await loadFixture();
     return [{ id: r.id, url: r.url, task: r.task, status: r.status, score: r.score, startedAt: r.startedAt }];
   }
+  if (STATIC_MODE) return getJson(relative("data/reports.json"));
   return getJson("/api/reports");
 }
 
@@ -65,11 +80,16 @@ export async function getReport(id) {
     const r = await loadFixture();
     return id === "sample-live" ? liveSlice(r) : r;
   }
+  if (STATIC_MODE) return getJson(relative(`data/reports/${encodeURIComponent(id)}/report.json`));
   return getJson(`/api/reports/${encodeURIComponent(id)}`);
 }
 
-/** URL of the Markdown export (served as a download). Not available in fixture mode. */
+/**
+ * URL of the Markdown export (served as a download). Not available in fixture mode. In static mode it is
+ * the report.md file written at build time by src/build-static.ts.
+ */
 export function markdownUrl(id) {
+  if (STATIC_MODE) return `data/reports/${encodeURIComponent(id)}/report.md`;
   return `/api/reports/${encodeURIComponent(id)}/markdown`;
 }
 
@@ -89,6 +109,7 @@ export async function startRun({ url, task, brain }) {
     liveStartedAt = null;
     return { id: "sample-live" };
   }
+  if (STATIC_MODE) throw new Error("This read-only demo cannot run tests. Run BlindSpot locally to test your own site.");
   return getJson("/api/runs", {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },

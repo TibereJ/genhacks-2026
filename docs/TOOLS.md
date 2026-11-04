@@ -20,6 +20,7 @@ _Obligatoire : tout lister dans la description Devpost (« Built with »)._
 
 ## CI et déploiement
 - **GitHub Actions** — `.github/workflows/blindspot.yml` : tests + parcours d'accessibilité à chaque push/PR ; actions officielles `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4`
+- **GitHub Pages** — démo en ligne en lecture seule (https://tiberej.github.io/genhacks-2026/), construite par `src/build-static.ts` et déployée par `.github/workflows/pages.yml` ; actions officielles `actions/configure-pages@v5`, `actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4`
 - **Docker** — `Dockerfile` pour déployer le serveur dans un conteneur
 - **Image Docker officielle Playwright** (`mcr.microsoft.com/playwright:v1.63.0-noble`, Microsoft) — Node + Chromium et ses dépendances système
 

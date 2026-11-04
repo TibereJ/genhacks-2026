@@ -6,5 +6,8 @@ dist/
 .DS_Store
 *.bundle
 reports/
+# ...except the example reports that ship with the repo (npm run examples, static demo build)
+!examples/reports/
 .claude/worktrees/
 blindspot-summary.md
+dist-static/

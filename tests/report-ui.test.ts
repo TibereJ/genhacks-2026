@@ -4,6 +4,7 @@ import type { Report } from "../src/core/types.js";
 import {
   actionText,
   countBySeverity,
+  demoSiteHref,
   duration,
   prettyUrl,
   screenshotUrl,
@@ -99,6 +100,19 @@ describe("misc formatting", () => {
     expect(screenshotUrl("abc", "step-3.png")).toBe("/reports/abc/step-3.png");
     expect(screenshotUrl("abc", "../../etc/passwd")).toBe("/reports/abc/etc/passwd");
     expect(screenshotUrl("abc", undefined)).toBeNull();
+    // Static demo build: relative base.
+    expect(screenshotUrl("abc", "step-3.png", "data/reports/")).toBe("data/reports/abc/step-3.png");
+  });
+
+  it("maps local demo-site URLs to the static build's copy", () => {
+    expect(demoSiteHref("http://localhost:3200/demo/bad/index.html")).toBe("demo/bad/index.html");
+    expect(demoSiteHref("http://127.0.0.1:3000/demo/shop/fixed/cart.html?x=1")).toBe("demo/shop/fixed/cart.html?x=1");
+    expect(demoSiteHref("/demo/fixed/index.html")).toBe("demo/fixed/index.html");
+    expect(demoSiteHref("https://example.com/demo/bad/index.html")).toBeNull();
+    expect(demoSiteHref("http://localhost:3000/api/reports")).toBeNull();
+    expect(demoSiteHref("http://localhost:3000/demo/../api/reports")).toBeNull();
+    expect(demoSiteHref("javascript:alert(1)")).toBeNull();
+    expect(demoSiteHref(undefined)).toBeNull();
   });
 
   it("formats durations and URLs", () => {

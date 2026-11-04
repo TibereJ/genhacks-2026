@@ -42,7 +42,8 @@ export function toSpeech(heard: string | undefined): string[];
 export function tokenizeTranscript(heard: string | undefined): TranscriptLine[];
 export function relativeTime(iso: string, now?: number): string;
 export function duration(startIso: string | undefined, endIso: string | undefined): string;
-export function screenshotUrl(reportId: string, file: string | undefined): string | null;
+export function screenshotUrl(reportId: string, file: string | undefined, base?: string): string | null;
+export function demoSiteHref(url: string | undefined): string | null;
 export function prettyUrl(url: string | undefined): string;
 
 export interface MatchableIssue extends IssueLike {

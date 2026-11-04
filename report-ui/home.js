@@ -1,7 +1,7 @@
 // Home view: pitch, "run a test" form with demo presets, and the list of past runs.
 
 import { h, icon, replaceChildren } from "./dom.js";
-import { listReports, startRun, FIXTURE_MODE } from "./api.js";
+import { listReports, startRun, FIXTURE_MODE, STATIC_MODE } from "./api.js";
 import { orderRuns, prettyUrl, relativeTime } from "./format.js";
 import { statusBadge, scorePill, emptyState, errorBox } from "./components.js";
 
@@ -19,6 +19,8 @@ const PRESETS = [
 ];
 
 const LIST_REFRESH_MS = 3000;
+
+const QUICK_START_URL = "https://github.com/TibereJ/genhacks-2026#quick-start";
 
 export function renderHome(root) {
   let alive = true;
@@ -198,7 +200,12 @@ export function renderHome(root) {
         const focusedId = runsBody.contains(document.activeElement) ? document.activeElement.dataset?.id : undefined;
         const focusedKind = document.activeElement?.tagName;
         if (runs.length === 0) {
-          replaceChildren(runsBody, emptyState("No runs yet", "Launch a test above, or try one of the demo presets."));
+          replaceChildren(
+            runsBody,
+            STATIC_MODE
+              ? emptyState("No example runs", "This demo build contains no reports.")
+              : emptyState("No runs yet", "Launch a test above, or try one of the demo presets."),
+          );
         } else {
           replaceChildren(runsBody, h("ul", { class: "runs", role: "list" }, runs.map((r) => runItem(r, selected.has(r.id), onPick))));
         }
@@ -213,7 +220,9 @@ export function renderHome(root) {
       runsBody.setAttribute("aria-busy", "false");
       replaceChildren(
         runsBody,
-        errorBox("Can't reach the BlindSpot server.", `${err.message}. Start it with "npm start", or open this page with ?fixture=1 for sample data.`),
+        STATIC_MODE
+          ? errorBox("Could not load the example runs.", err.message)
+          : errorBox("Can't reach the BlindSpot server.", `${err.message}. Start it with "npm start", or open this page with ?fixture=1 for sample data.`),
       );
     }
   }
@@ -247,16 +256,24 @@ export function renderHome(root) {
           howItem("alert", "Reports blockers", "Every dead end, with the WCAG criterion and the fix."),
         ),
       ),
-      h(
-        "section",
-        { class: "card run-card", "aria-labelledby": "run-title" },
-        h("h2", { id: "run-title" }, "Run a test"),
-        form,
-      ),
+      STATIC_MODE
+        ? staticNotice()
+        : h(
+            "section",
+            { class: "card run-card", "aria-labelledby": "run-title" },
+            h("h2", { id: "run-title" }, "Run a test"),
+            form,
+          ),
       h(
         "section",
         { class: "runs-section", "aria-labelledby": "runs-title" },
-        h("div", { class: "section-head" }, h("h2", { id: "runs-title" }, "Recent runs"), FIXTURE_MODE ? h("span", { class: "badge status-info" }, "Sample data") : null),
+        h(
+          "div",
+          { class: "section-head" },
+          h("h2", { id: "runs-title" }, STATIC_MODE ? "Example runs" : "Recent runs"),
+          FIXTURE_MODE ? h("span", { class: "badge status-info" }, "Sample data") : null,
+          STATIC_MODE ? h("span", { class: "badge status-info" }, "Real agent runs") : null,
+        ),
         compareBar,
         runsBody,
       ),
@@ -272,6 +289,47 @@ export function renderHome(root) {
       clearTimeout(listTimer);
     },
   };
+}
+
+/**
+ * Static (read-only) demo: there is no server to run tests, so the form is replaced by a notice. The presets
+ * become links to the copies of the demo sites shipped with the build, so visitors can see what the agent tested.
+ */
+function staticNotice() {
+  return h(
+    "section",
+    { class: "card run-card static-notice", "aria-labelledby": "run-title" },
+    h("h2", { id: "run-title" }, "Run a test"),
+    h(
+      "p",
+      { class: "static-text" },
+      "This is a read-only demo with real example runs. Run BlindSpot locally to test your own site: ",
+      h("a", { href: QUICK_START_URL }, "quick start on GitHub"),
+      ".",
+    ),
+    h(
+      "div",
+      { class: "presets" },
+      h("p", { class: "presets-label", id: "presets-label" }, "Open the demo sites the agent tested"),
+      h(
+        "ul",
+        { class: "preset-row", role: "list", "aria-labelledby": "presets-label" },
+        PRESETS.map((p) =>
+          h(
+            "li",
+            { class: "preset-item" },
+            h(
+              "a",
+              { class: `btn btn-preset preset-${p.tone}`, href: p.url.replace(/^\//, ""), target: "_blank", rel: "noopener" },
+              h("span", { class: "preset-dot", "aria-hidden": "true" }),
+              p.label,
+              h("span", { class: "sr-only" }, " (opens in a new tab)"),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 function howItem(iconName, title, text) {

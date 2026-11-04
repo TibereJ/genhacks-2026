@@ -219,15 +219,36 @@ export function duration(startIso, endIso) {
   return `${Math.floor(s / 60)} min ${s % 60} s`;
 }
 
-/** URL of a step screenshot served by the API. */
-export function screenshotUrl(reportId, file) {
+/**
+ * URL of a step screenshot: served by the API under /reports/ by default, or under another base
+ * (the static demo build passes the relative "data/reports/").
+ */
+export function screenshotUrl(reportId, file, base = "/reports/") {
   if (!file) return null;
   const path = String(file)
     .split("/")
     .filter((p) => p && p !== "." && p !== "..")
     .map(encodeURIComponent)
     .join("/");
-  return `/reports/${encodeURIComponent(reportId)}/${path}`;
+  return `${base}${encodeURIComponent(reportId)}/${path}`;
+}
+
+/**
+ * For the static demo build: a report URL that pointed at a local BlindSpot server's demo site
+ * (http://localhost:3000/demo/bad/index.html) becomes a relative link to the copy shipped with the
+ * build (demo/bad/index.html). Any other URL returns null.
+ */
+export function demoSiteHref(url) {
+  let u;
+  try {
+    u = new URL(String(url ?? ""), "http://localhost");
+  } catch {
+    return null;
+  }
+  if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+  if (!["localhost", "127.0.0.1", "[::1]"].includes(u.hostname)) return null;
+  if (!u.pathname.startsWith("/demo/")) return null;
+  return `demo/${u.pathname.slice("/demo/".length)}${u.search}${u.hash}`;
 }
 
 /** Display a URL without the protocol noise. */

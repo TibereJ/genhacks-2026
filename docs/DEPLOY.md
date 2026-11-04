@@ -8,6 +8,29 @@ The image is based on the official Playwright image `mcr.microsoft.com/playwrigh
 contains Chromium and its system libraries. Its version must match the `playwright` npm package: when you upgrade
 `playwright` in `package.json`, change the `FROM` line too.
 
+## Static read-only demo (GitHub Pages)
+
+The live demo at https://tiberej.github.io/genhacks-2026/ is a static build, not a server: the report UI, the
+demo sites and the example reports from `examples/reports/`. Visitors can browse the runs, every step and
+screenshot, Listen, compare before / after and download the Markdown export, but cannot start a test (the form is
+replaced by a notice pointing to the quick start).
+
+```bash
+npm run build:static            # or: npx tsx src/build-static.ts [outDir], default dist-static/
+```
+
+Serve the folder with any static file server, at the root or under a sub-path: every URL in it is relative.
+
+`src/build-static.ts` copies `report-ui/` (without `fixtures/` and `format.d.ts`) and adds
+`<meta name="blindspot-static" content="1">` to `index.html`, which makes the UI read `data/reports.json`,
+`data/reports/<id>/report.json` and `data/reports/<id>/step-N.png` instead of the API. It copies `demo-site/` to
+`demo/`, and writes `data/reports/<id>/report.md` (the Markdown export, made with `reportToMarkdown`) for
+"Download Markdown" and "Copy as GitHub issue". Report data is published as it is.
+
+`.github/workflows/pages.yml` builds and deploys it on every push to `main` (and on demand from the Actions tab).
+**The repository owner must enable Pages once:** Settings → Pages → Build and deployment → Source:
+**GitHub Actions**. Until then the deploy job fails.
+
 ## Run locally with Docker
 
 ```bash
