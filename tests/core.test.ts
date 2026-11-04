@@ -26,6 +26,8 @@ const PAGES: Record<string, string> = {
       <a href="/redirect">Partner site</a>
     </main></body></html>`,
   "/done": `<!doctype html><html lang="en"><head><title>Thanks</title></head><body><main><h1>Message sent</h1></main></body></html>`,
+  "/tabs": `<!doctype html><html lang="en"><head><title>Tabs</title></head><body><main>
+    <h1>Links</h1><a href="/done" target="_blank">Open thanks in a new tab</a></main></body></html>`,
 };
 
 let server: http.Server;
@@ -206,6 +208,45 @@ describe("browser safety and states", () => {
       expect(snap.text).toContain('checkbox "I accept the terms" (not checked)');
       const out = await s.act({ type: "click", id: box.id }, snap);
       expect(out.result).toContain('checkbox "I accept the terms" is now checked');
+    } finally {
+      await s.close();
+    }
+  });
+
+  it("follows a link into a new tab, and back closes that tab", async () => {
+    const s = await BrowserSession.open(`${base}/tabs`);
+    try {
+      const snap = await s.snapshot();
+      const link = [...snap.elements.values()].find((e) => e.role === "link")!;
+      const opened = await s.act({ type: "click", id: link.id }, snap);
+      expect(opened.ok).toBe(true);
+      expect(opened.result).toContain('A new tab opened: "Thanks".');
+      expect(opened.snapshot.text).toContain("Message sent");
+      expect(s.page.url()).toBe(`${base}/done`);
+
+      const back = await s.act({ type: "back" }, opened.snapshot);
+      expect(back.ok).toBe(true);
+      expect(back.result).toContain('This tab closed. Back on the previous tab: "Tabs".');
+      expect(s.page.url()).toBe(`${base}/tabs`);
+      expect(s.page.context().pages()).toHaveLength(1);
+    } finally {
+      await s.close();
+    }
+  });
+
+  it("retries a snapshot once when a navigation destroyed the page mid-read", async () => {
+    const s = await BrowserSession.open(`${base}/tabs`);
+    try {
+      const cdp = (s as unknown as { cdp: { send: (...a: unknown[]) => Promise<unknown> } }).cdp;
+      const real = cdp.send.bind(cdp);
+      let failures = 0;
+      cdp.send = async (...a: unknown[]) => {
+        if (failures === 0) { failures++; throw new Error("Protocol error: Execution context was destroyed."); }
+        return real(...a);
+      };
+      const snap = await s.snapshot();
+      expect(failures).toBe(1);
+      expect(snap.title).toBe("Tabs");
     } finally {
       await s.close();
     }

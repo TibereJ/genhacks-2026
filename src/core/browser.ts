@@ -1,4 +1,4 @@
-import { chromium, type Browser, type CDPSession, type Page } from "playwright";
+import { chromium, type Browser, type BrowserContext, type CDPSession, type Page } from "playwright";
 import { buildSnapshot, type AXNode, type Snapshot, type SnapshotElement } from "./ax-tree.js";
 
 export type BrowserAction =
@@ -20,13 +20,39 @@ export type RequestGuard = (url: URL) => Promise<string | null>;
 
 const ALLOWED_KEYS = new Set(["Enter", "Escape", "Tab", "Shift+Tab", "Space", "ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Home", "End"]);
 
-/** One Chromium tab driven only through what the accessibility tree exposes. */
+/**
+ * One Chromium tab driven only through what the accessibility tree exposes.
+ *
+ * Tabs: when an action opens a new tab (target="_blank", window.open), the session switches to it, as a screen
+ * reader would, and says so in the result. The previous tab stays open: "back" in a tab that has no history of its
+ * own closes it and returns to the previous tab.
+ */
 export class BrowserSession {
+  /** Tabs we left for a new one, most recent last. */
+  private readonly previousTabs: Page[] = [];
+  /** Pages opened since the current action started. */
+  private openedPages: Page[] = [];
+
   private constructor(
     private readonly browser: Browser,
-    readonly page: Page,
-    private readonly cdp: CDPSession,
-  ) {}
+    private readonly context: BrowserContext,
+    private currentPage: Page,
+    private cdp: CDPSession,
+  ) {
+    context.on("page", (p) => this.openedPages.push(p));
+  }
+
+  /** The tab the agent is currently on. */
+  get page(): Page {
+    return this.currentPage;
+  }
+
+  private static async attach(context: BrowserContext, page: Page): Promise<CDPSession> {
+    const cdp = await context.newCDPSession(page);
+    await cdp.send("DOM.enable");
+    await cdp.send("Accessibility.enable");
+    return cdp;
+  }
 
   /**
    * @param requestGuard Called for every request the page makes (navigations, redirects, assets).
@@ -34,7 +60,8 @@ export class BrowserSession {
    */
   static async open(url: string, requestGuard?: RequestGuard): Promise<BrowserSession> {
     const browser = await chromium.launch();
-    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    // Service workers would serve requests without going through context.route (and the request guard).
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, serviceWorkers: "block" });
     if (requestGuard) {
       const verdicts = new Map<string, Promise<string | null>>();
       await context.route("**/*", async (route) => {
@@ -68,12 +95,11 @@ export class BrowserSession {
       });
     }
     const page = await context.newPage();
-    const cdp = await context.newCDPSession(page);
-    await cdp.send("DOM.enable");
-    await cdp.send("Accessibility.enable");
-    const session = new BrowserSession(browser, page, cdp);
+    const cdp = await BrowserSession.attach(context, page);
+    const session = new BrowserSession(browser, context, page, cdp);
     try {
-      await page.goto(url, { waitUntil: "load", timeout: 30_000 });
+      // Real sites often never fire "load" in time (trackers, long polling): wait for the DOM, then settle.
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 });
       await session.settle();
     } catch (err) {
       await browser.close().catch(() => {});
@@ -87,10 +113,44 @@ export class BrowserSession {
   }
 
   async snapshot(): Promise<Snapshot> {
+    try {
+      return await this.readSnapshot();
+    } catch {
+      // A navigation in progress (redirect, script, late form submit) destroys the document mid-read
+      // ("Execution context was destroyed"): wait for the new page and try once more.
+      await this.currentPage.waitForLoadState("load", { timeout: 15_000 }).catch(() => {});
+      return this.readSnapshot();
+    }
+  }
+
+  private async readSnapshot(): Promise<Snapshot> {
     // getDocument resets backend node bookkeeping so DOM.resolveNode works after navigations.
     await this.cdp.send("DOM.getDocument", { depth: 0 });
     const { nodes } = (await this.cdp.send("Accessibility.getFullAXTree")) as unknown as { nodes: AXNode[] };
-    return buildSnapshot(nodes, this.page.url(), await this.page.title());
+    return buildSnapshot(nodes, this.currentPage.url(), await this.currentPage.title());
+  }
+
+  /** Makes `page` the current tab. */
+  private async switchTo(page: Page): Promise<void> {
+    const cdp = await BrowserSession.attach(this.context, page);
+    await this.cdp.detach().catch(() => {});
+    this.cdp = cdp;
+    this.currentPage = page;
+    await page.bringToFront().catch(() => {});
+  }
+
+  /** If the last action opened a tab, switch to it. Returns true when it did. */
+  private async adoptNewTab(): Promise<boolean> {
+    const opened = this.openedPages.filter((p) => !p.isClosed());
+    this.openedPages = [];
+    const next = opened.at(-1);
+    if (!next) return false;
+    await next.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => {});
+    if (next.isClosed()) return false;
+    this.previousTabs.push(this.currentPage);
+    await this.switchTo(next);
+    await this.settle();
+    return true;
   }
 
   /** Screenshot for human readers of the report, with the target element outlined. */
@@ -107,7 +167,7 @@ export class BrowserSession {
         }`).catch(() => {});
       }
     }
-    await this.page.screenshot({ path, fullPage: false });
+    await this.currentPage.screenshot({ path, fullPage: false });
     if (objectId) {
       await this.call(objectId, `function () {
         this.style.outline = this.dataset.bsOutline || "";
@@ -119,6 +179,8 @@ export class BrowserSession {
 
   async act(action: BrowserAction, before: Snapshot): Promise<ActionOutcome> {
     const fail = async (result: string): Promise<ActionOutcome> => ({ ok: false, result, snapshot: await this.snapshot() });
+    this.openedPages = [];
+    let tab: TabChange | undefined;
 
     let el: SnapshotElement | undefined;
     if ("id" in action) {
@@ -159,7 +221,7 @@ export class BrowserSession {
               this.dispatchEvent(new Event("change", { bubbles: true }));
             }`, [value]);
           } else {
-            await this.page.keyboard.type(action.text, { delay: 5 });
+            await this.currentPage.keyboard.type(action.text, { delay: 5 });
           }
           break;
         }
@@ -183,11 +245,22 @@ export class BrowserSession {
         }
         case "press": {
           if (!ALLOWED_KEYS.has(action.key)) return fail(`Key "${action.key}" is not supported. Use one of: ${[...ALLOWED_KEYS].join(", ")}.`);
-          await this.page.keyboard.press(action.key === "Space" ? " " : action.key);
+          await this.currentPage.keyboard.press(action.key === "Space" ? " " : action.key);
           break;
         }
         case "back": {
-          await this.page.goBack({ waitUntil: "load", timeout: 15_000 });
+          const { currentIndex } = await this.cdp.send("Page.getNavigationHistory");
+          const previous = this.previousTabs.at(-1);
+          if (currentIndex === 0 && previous && !previous.isClosed()) {
+            // Nothing to go back to in this tab: close it and return to the tab that opened it.
+            const closing = this.currentPage;
+            this.previousTabs.pop();
+            await this.switchTo(previous);
+            await closing.close().catch(() => {});
+            tab = "closed";
+          } else {
+            await this.currentPage.goBack({ waitUntil: "domcontentloaded", timeout: 15_000 });
+          }
           break;
         }
       }
@@ -196,15 +269,16 @@ export class BrowserSession {
     }
 
     await this.settle();
+    if (await this.adoptNewTab()) tab = "opened";
     const after = await this.snapshot();
-    return { ok: true, result: describeChange(before, after, action, el), snapshot: after };
+    return { ok: true, result: describeChange(before, after, action, el, tab), snapshot: after };
   }
 
   /** Wait for navigation and scripts triggered by an action to finish. */
   private async settle(): Promise<void> {
-    await this.page.waitForTimeout(350);
-    await this.page.waitForLoadState("load", { timeout: 15_000 }).catch(() => {});
-    await this.page.waitForLoadState("networkidle", { timeout: 3_000 }).catch(() => {});
+    await this.currentPage.waitForTimeout(350);
+    await this.currentPage.waitForLoadState("load", { timeout: 15_000 }).catch(() => {});
+    await this.currentPage.waitForLoadState("networkidle", { timeout: 3_000 }).catch(() => {});
   }
 
   private async resolve(el: SnapshotElement): Promise<string> {
@@ -250,12 +324,15 @@ export function normalizeDateValue(type: string, input: string): string | undefi
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+export type TabChange = "opened" | "closed";
+
 /** Summarise what a screen reader user would notice after an action. */
-export function describeChange(before: Snapshot, after: Snapshot, action: BrowserAction, el?: SnapshotElement): string {
+export function describeChange(before: Snapshot, after: Snapshot, action: BrowserAction, el?: SnapshotElement, tab?: TabChange): string {
   const parts: string[] = [];
-  if (after.url !== before.url || after.title !== before.title) {
-    parts.push(`New page loaded: "${after.title || "(untitled page)"}".`);
-  }
+  const title = `"${after.title || "(untitled page)"}"`;
+  if (tab === "opened") parts.push(`A new tab opened: ${title}.`);
+  else if (tab === "closed") parts.push(`This tab closed. Back on the previous tab: ${title}.`);
+  else if (after.url !== before.url || after.title !== before.title) parts.push(`New page loaded: ${title}.`);
   const newLive = after.liveTexts.filter((t) => !before.liveTexts.includes(t));
   for (const t of newLive) parts.push(`Announced: "${t}".`);
   if (action.type === "type" || action.type === "select") {
