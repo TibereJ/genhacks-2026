@@ -24,6 +24,7 @@ const PAGES: Record<string, string> = {
       <div role="status" id="msg"></div>
       <div style="cursor:pointer"><input type="checkbox" id="terms"><label for="terms">I accept the terms</label></div>
       <a href="/redirect">Partner site</a>
+      <a id="dl" tabindex="0" onclick="void 0" style="cursor:pointer">Download audio</a>
     </main></body></html>`,
   "/done": `<!doctype html><html lang="en"><head><title>Thanks</title></head><body><main><h1>Message sent</h1></main></body></html>`,
   "/tabs": `<!doctype html><html lang="en"><head><title>Tabs</title></head><body><main>

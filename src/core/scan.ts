@@ -175,6 +175,8 @@ const DOM_CHECKS = `(() => {
     if (hidden(el) || el.matches(NATIVE) || el.closest(NATIVE) || el.querySelector(NATIVE)) return;
     const role = el.getAttribute("role");
     if (role && ROLES.has(role) && el.hasAttribute("tabindex")) return;
+    // Focusable links without href (<a tabindex="0">) are reachable and announced as links.
+    if (el.tagName === "A" && el.tabIndex >= 0) return;
     const clickable = el.hasAttribute("onclick") || (getComputedStyle(el).cursor === "pointer" && getComputedStyle(el.parentElement).cursor !== "pointer");
     if (!clickable) return;
     for (const s of seen) if (s.contains(el)) return;
