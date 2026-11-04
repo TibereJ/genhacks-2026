@@ -429,10 +429,25 @@ export function describeChange(before: Snapshot, after: Snapshot, action: Browse
     if (same?.states && same.states.join() !== el.states.join()) parts.push(`${same.role} "${same.name}" is now ${same.states.join(", ")}.`);
   }
   if (after.focused && after.focused !== before.focused) parts.push(`Focus moved to ${after.focused}.`);
+  // Same page, nothing announced, but something else changed (a cart badge, an error text…): a screen reader
+  // user would not know unless they re-read the page, so say it, without saying what.
+  const samePage = !tab && after.url === before.url && after.title === before.title;
+  if (parts.length > 0 && samePage && newLive.length === 0 && stripVolatile(after.text) !== stripVolatile(before.text)) {
+    parts.push("Other content on the page changed without being announced.");
+  }
   if (parts.length === 0) {
     parts.push(after.text === before.text
       ? "Nothing was announced and the page content did not change."
       : "Nothing was announced, but the page content changed.");
   }
   return parts.join(" ");
+}
+
+/** Transcript without what an action is expected to change: focus markers, field values, widget states, ids. */
+function stripVolatile(text: string): string {
+  return text
+    .replace(/ ← focus/g, "")
+    .replace(/ value "(?:[^"\\]|\\.)*"/g, "")
+    .replace(/ \((?:checked|not checked|partially checked|pressed|expanded|collapsed|selected|required|invalid entry|unavailable|read only)(?:, (?:checked|not checked|partially checked|pressed|expanded|collapsed|selected|required|invalid entry|unavailable|read only))*\)/g, "")
+    .replace(/\[\d+\] /g, "");
 }
