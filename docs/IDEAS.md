@@ -51,3 +51,23 @@ ESP32 + capteur CO₂ (SCD40, ~30 $) dans une classe → LED « ouvrez la fenêt
 
 ## Écartée
 - Scanner de menu pour allergies : déjà fait par Allergy Translate, DishCheck, SafePlate, ScanYum.
+
+---
+
+## Tour 2 — idées sans matériel (AirCoach retirée)
+
+## 7. RecallRadar — Healthcare & Environmental
+Photo du ticket de caisse → liste des produits achetés → alerte automatique si un produit fait l'objet d'un rappel sanitaire (Santé Canada / ACIA, openFDA food enforcement, RappelConso en France). Les rappels sont publics mais personne ne les lit.
+Stack : web app, OCR/vision IA, API publiques de rappels, notifications e-mail. Risque : faire correspondre « POM GALA 1KG » du ticket avec le rappel → l'IA aide justement à ça.
+
+## 8. ClearCare — Healthcare & Environmental
+Coller ou photographier les consignes de sortie d'hôpital / ordonnance → checklist en langage simple, dans la langue de la famille, planning des médicaments, et « quand revenir aux urgences » mis en évidence. Cible : familles immigrées, personnes âgées.
+Risque : exactitude médicale → toujours citer le texte d'origine à côté de la simplification.
+
+## 9. PhysioCam — Healthcare & Environmental
+Webcam de l'ordi uniquement : l'appli guide les exercices de kiné à la maison, compte les répétitions et corrige la posture en temps réel (MediaPipe pose, dans le navigateur). Résumé de progression pour le kiné.
+Existant : Kemtai et similaires → se démarquer par un mode « ordonnance du kiné → séance » généré par IA.
+
+## 10. ScamDojo — Cybersecurity
+Jeu d'entraînement anti-arnaques pour les grands-parents : faux SMS/e-mails/appels réalistes mais inoffensifs, « arnaque ou pas ? », explication de chaque indice, niveaux qui s'adaptent. Mode famille : le petit-enfant crée une partie pour son grand-parent.
+Existant : quelques quiz de phishing pour entreprises, peu pour le grand public âgé.
