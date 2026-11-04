@@ -16,6 +16,21 @@ export interface ActionOutcome {
   snapshot: Snapshot;
 }
 
+/**
+ * Full Chromium in headless mode is closer to real Chrome than Playwright's lighter headless shell (and uses
+ * the system certificate store on Linux). Fall back to the default build if it isn't installed.
+ * Override with BLINDSPOT_BROWSER_CHANNEL (e.g. "chrome", "msedge", or "default" for the headless shell).
+ */
+async function launchBrowser(): Promise<Browser> {
+  const channel = process.env.BLINDSPOT_BROWSER_CHANNEL || "chromium";
+  if (channel === "default") return chromium.launch();
+  try {
+    return await chromium.launch({ channel });
+  } catch {
+    return chromium.launch();
+  }
+}
+
 export type RequestGuard = (url: URL) => Promise<string | null>;
 
 const ALLOWED_KEYS = new Set(["Enter", "Escape", "Tab", "Shift+Tab", "Space", "ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Home", "End"]);
@@ -59,7 +74,7 @@ export class BrowserSession {
    *   Return a reason to block it, or null to allow it. Used by public instances against SSRF.
    */
   static async open(url: string, requestGuard?: RequestGuard): Promise<BrowserSession> {
-    const browser = await chromium.launch();
+    const browser = await launchBrowser();
     // Service workers would serve requests without going through context.route (and the request guard).
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, serviceWorkers: "block" });
     if (requestGuard) {
