@@ -51,6 +51,34 @@ export function scoreVerdict(score, status) {
   return "Score pending";
 }
 
+/** Screen reader text for a missing score: pending while running, otherwise why the run was not scored. */
+export function noScoreText(status) {
+  if (status === "running") return "No score yet";
+  if (status === "inconclusive") return "Not scored: test inconclusive";
+  if (status === "error") return "Not scored: the test failed";
+  return "No score";
+}
+
+/** Runs that ended without testing the whole task: their issue lists cannot be compared with another run's. */
+const UNCOMPARABLE = { inconclusive: "was inconclusive", error: "failed" };
+
+/**
+ * Whether the issues of two runs can be compared. When one run is inconclusive or failed, an issue missing from it
+ * may only mean that the run never got that far, so nothing can be called fixed.
+ */
+export function issueComparability(beforeStatus, afterStatus) {
+  const broken = [
+    UNCOMPARABLE[beforeStatus] ? `the before run ${UNCOMPARABLE[beforeStatus]}` : null,
+    UNCOMPARABLE[afterStatus] ? `the after run ${UNCOMPARABLE[afterStatus]}` : null,
+  ].filter(Boolean);
+  if (!broken.length) return { comparable: true, reason: "" };
+  const who = broken.length === 2 ? `${broken[0]} and ${broken[1]}` : broken[0];
+  return {
+    comparable: false,
+    reason: `Issues cannot be compared: ${who}, so an issue missing from one run may only mean that run never reached it.`,
+  };
+}
+
 /** Issues sorted: blocking first, then by severity, then by step. Does not mutate the input. */
 export function sortIssues(issues) {
   const rank = (s) => {
@@ -304,14 +332,22 @@ export function orderRuns(a, b) {
   return !Number.isNaN(ta) && !Number.isNaN(tb) && tb < ta ? [b, a] : [a, b];
 }
 
-/** Score change from before to after: { value, text: "+57", tone, sentence }. value is null when a score is missing. */
-export function scoreDelta(before, after) {
+/**
+ * Score change from before to after: { value, text: "+57", tone, label, sentence }. value is null when a score is
+ * missing: label is then "pending" while a run is still going (or no status is known), else "not scored".
+ */
+export function scoreDelta(before, after, beforeStatus, afterStatus) {
   if (typeof before !== "number" || typeof after !== "number") {
-    return { value: null, text: "–", tone: "none", sentence: "Score change not available yet" };
+    const known = beforeStatus !== undefined || afterStatus !== undefined;
+    const running = beforeStatus === "running" || afterStatus === "running";
+    if (!known || running) return { value: null, text: "–", tone: "none", label: "pending", sentence: "Score change not available yet" };
+    const unscored = [typeof before !== "number" ? "before" : null, typeof after !== "number" ? "after" : null].filter(Boolean);
+    const which = unscored.length === 2 ? "neither run was" : `the ${unscored[0]} run was not`;
+    return { value: null, text: "–", tone: "none", label: "not scored", sentence: `No score change: ${which} scored` };
   }
   const value = Math.round(after) - Math.round(before);
   const pts = (n) => `${n} point${n === 1 ? "" : "s"}`;
-  if (value > 0) return { value, text: `+${value}`, tone: "good", sentence: `Score up ${pts(value)}` };
-  if (value < 0) return { value, text: `−${-value}`, tone: "bad", sentence: `Score down ${pts(-value)}` };
-  return { value, text: "±0", tone: "none", sentence: "Score unchanged" };
+  if (value > 0) return { value, text: `+${value}`, tone: "good", label: "points", sentence: `Score up ${pts(value)}` };
+  if (value < 0) return { value, text: `−${-value}`, tone: "bad", label: "points", sentence: `Score down ${pts(-value)}` };
+  return { value, text: "±0", tone: "none", label: "points", sentence: "Score unchanged" };
 }

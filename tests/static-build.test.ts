@@ -5,12 +5,12 @@ import { readdirSync } from "node:fs";
 // Set BLINDSPOT_STATIC_SHOTS=<dir> to also save screenshots of the home page and a report there.
 import { createServer, type Server } from "node:http";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { chromium, type Browser } from "playwright";
-import { buildStatic, injectStaticMarker, type RunSummary } from "../src/build-static.js";
+import { BUILD_MARKER_FILE, buildStatic, checkOutDir, injectStaticMarker, isMainModule, type RunSummary } from "../src/build-static.js";
 
 // One folder per example run in examples/reports/.
 const EXAMPLE_COUNT = readdirSync(new URL("../examples/reports/", import.meta.url)).filter((d) => /^[a-z0-9-]+$/i.test(d)).length;
@@ -18,6 +18,8 @@ const EXAMPLE_COUNT = readdirSync(new URL("../examples/reports/", import.meta.ur
 const SUB_PATH = "/genhacks-2026/";
 const BAD_CLINIC = "20261104164439-947unj";
 const FIXED_CLINIC = "20261104164505-l2g8gy";
+const NODEJS = "20261104172502-oh6mrq"; // success, 3 issues
+const PYPI = "20261104172549-si9xd8"; // inconclusive (bot check), no score
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -28,6 +30,8 @@ const TYPES: Record<string, string> = {
   ".svg": "image/svg+xml",
 };
 
+let tmp: string;
+let fakeRoot: string;
 let outDir: string;
 let reports: RunSummary[];
 let server: Server;
@@ -35,8 +39,13 @@ let browser: Browser;
 let origin: string;
 
 beforeAll(async () => {
-  outDir = await mkdtemp(path.join(os.tmpdir(), "blindspot-static-"));
-  ({ reports } = await buildStatic(outDir));
+  // The output folder must be inside the repository, and the build wipes it: build inside a throwaway copy of the
+  // parts of the repository it reads (report-ui/, demo-site/), with the real example reports.
+  tmp = await mkdtemp(path.join(os.tmpdir(), "blindspot-static-"));
+  fakeRoot = path.join(tmp, "repo");
+  for (const dir of ["report-ui", "demo-site"]) await cp(path.resolve(dir), path.join(fakeRoot, dir), { recursive: true });
+  outDir = path.join(fakeRoot, "dist-static");
+  ({ reports } = await buildStatic(outDir, { root: fakeRoot, reportsDir: path.resolve("examples/reports") }));
 
   // A tiny GitHub Pages: the build is only served under /genhacks-2026/, everything else is a 404.
   server = createServer(async (req, res) => {
@@ -72,7 +81,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await browser?.close();
   await new Promise((resolve) => server?.close(resolve));
-  if (outDir) await rm(outDir, { recursive: true, force: true });
+  if (tmp) await rm(tmp, { recursive: true, force: true });
 });
 
 describe("static build files", () => {
@@ -86,6 +95,7 @@ describe("static build files", () => {
     expect(existsSync(path.join(outDir, "demo", "shop", "fixed", "checkout.html"))).toBe(true);
     expect(existsSync(path.join(outDir, "data", "reports", BAD_CLINIC, "step-0.png"))).toBe(true);
     expect(existsSync(path.join(outDir, ".nojekyll"))).toBe(true);
+    expect(existsSync(path.join(outDir, BUILD_MARKER_FILE))).toBe(true);
 
     const md = await readFile(path.join(outDir, "data", "reports", BAD_CLINIC, "report.md"), "utf8");
     expect(md).toMatch(/^# BlindSpot: Blind user blocked, score 0\/100/);
@@ -148,12 +158,91 @@ describe("static build files", () => {
   it("refuses to wipe the repository", async () => {
     // A throwaway "repository", so a broken guard could only delete a temp dir.
     const parent = await mkdtemp(path.join(os.tmpdir(), "blindspot-guard-"));
-    const fakeRoot = path.join(parent, "repo");
-    await mkdir(fakeRoot);
+    const root = path.join(parent, "repo");
+    await mkdir(root);
     try {
-      await expect(buildStatic(fakeRoot, { root: fakeRoot })).rejects.toThrow(/Refusing/);
-      await expect(buildStatic(parent, { root: fakeRoot })).rejects.toThrow(/Refusing/);
-      expect(existsSync(fakeRoot)).toBe(true);
+      await expect(buildStatic(root, { root })).rejects.toThrow(/Refusing/);
+      await expect(buildStatic(parent, { root })).rejects.toThrow(/Refusing/);
+      expect(existsSync(root)).toBe(true);
+    } finally {
+      await rm(parent, { recursive: true, force: true });
+    }
+  });
+
+  it("only builds into a folder inside the repository that overlaps no source folder", async () => {
+    const parent = await mkdtemp(path.join(os.tmpdir(), "blindspot-guard-"));
+    const root = path.join(parent, "repo");
+    const reportsDir = path.join(parent, "reports");
+    try {
+      for (const dir of ["src", "tests", "docs", ".git", "data/reports"]) {
+        await mkdir(path.join(root, dir), { recursive: true });
+        await writeFile(path.join(root, dir, "keep.txt"), "keep");
+      }
+      await mkdir(reportsDir);
+      const build = (out: string, extra: { reportsDir?: string } = {}) => buildStatic(out, { root, reportsDir, ...extra });
+      // Outside the repository, or the repository itself.
+      await expect(build(path.join(parent, "elsewhere"))).rejects.toThrow(/inside the repository/);
+      await expect(build(os.tmpdir())).rejects.toThrow(/Refusing/);
+      // A source folder, a folder inside one, the folder the reports are read from or one of its parents.
+      for (const out of ["src", "tests", "docs", ".git", "src/sub", "node_modules", ".github/x", "examples"]) {
+        await expect(build(path.join(root, out)), out).rejects.toThrow(/overlaps/);
+      }
+      await expect(build(path.join(root, "data"), { reportsDir: path.join(root, "data/reports") })).rejects.toThrow(/overlaps/);
+      // A link to a source folder.
+      await symlink(path.join(root, "src"), path.join(root, "link"), "dir");
+      await expect(build(path.join(root, "link"))).rejects.toThrow(/overlaps/);
+      for (const dir of ["src", "tests", "docs", ".git", "data/reports"]) {
+        expect(await readFile(path.join(root, dir, "keep.txt"), "utf8")).toBe("keep");
+      }
+    } finally {
+      await rm(parent, { recursive: true, force: true });
+    }
+  });
+
+  it("compares paths case-insensitively on Windows", () => {
+    expect(() => checkOutDir("C:\\Repo\\SRC", "c:\\repo", [], "win32")).toThrow(/overlaps/);
+    expect(() => checkOutDir("c:\\repo\\Src\\x", "C:\\Repo", [], "win32")).toThrow(/overlaps/);
+    expect(() => checkOutDir("C:\\REPO", "c:\\repo", [], "win32")).toThrow(/inside the repository/);
+    expect(() => checkOutDir("D:\\repo\\dist", "c:\\repo", [], "win32")).toThrow(/inside the repository/);
+    expect(() => checkOutDir("C:\\Repo\\dist-static", "c:\\repo", [], "win32")).not.toThrow();
+    // On Linux, case matters.
+    expect(() => checkOutDir("/repo/SRC", "/repo", [], "linux")).not.toThrow();
+    expect(() => checkOutDir("/repo/src", "/repo", [], "linux")).toThrow(/overlaps/);
+  });
+
+  it("recognises the main module whatever the drive letter case", () => {
+    expect(isMainModule("file:///C:/Repo/src/build-static.ts", "c:\\repo\\SRC\\build-static.ts", "win32")).toBe(true);
+    expect(isMainModule("file:///C:/Repo/src/build-static.ts", "C:\\Repo\\src\\server.ts", "win32")).toBe(false);
+    expect(isMainModule("file:///repo/src/build-static.ts", "/repo/src/build-static.ts", "linux")).toBe(true);
+    expect(isMainModule("file:///repo/src/build-static.ts", "/repo/src/Build-static.ts", "linux")).toBe(false);
+    expect(isMainModule("file:///repo/src/build-static.ts", undefined, "linux")).toBe(false);
+  });
+
+  it("only wipes a non-empty folder written by a previous build, and refuses running reports", async () => {
+    const parent = await mkdtemp(path.join(os.tmpdir(), "blindspot-guard-"));
+    const root = path.join(parent, "repo");
+    const reportsDir = path.join(parent, "reports");
+    try {
+      for (const dir of ["report-ui", "demo-site"]) await cp(path.resolve(dir), path.join(root, dir), { recursive: true });
+      await cp(path.resolve("examples/reports", BAD_CLINIC), path.join(reportsDir, BAD_CLINIC), { recursive: true });
+      const out = path.join(root, "out");
+      await mkdir(out);
+      await writeFile(path.join(out, "notes.txt"), "mine");
+      await expect(buildStatic(out, { root, reportsDir })).rejects.toThrow(new RegExp(`not empty.*${BUILD_MARKER_FILE.replace(".", "\\.")}`));
+      expect(await readFile(path.join(out, "notes.txt"), "utf8")).toBe("mine");
+
+      // An empty folder is fine, and a folder from a previous build is rebuilt from scratch.
+      await rm(path.join(out, "notes.txt"));
+      expect((await buildStatic(out, { root, reportsDir })).reports.map((r) => r.id)).toEqual([BAD_CLINIC]);
+      await writeFile(path.join(out, "stale.txt"), "old build");
+      await buildStatic(out, { root, reportsDir });
+      expect(existsSync(path.join(out, "stale.txt"))).toBe(false);
+      expect(existsSync(path.join(out, BUILD_MARKER_FILE))).toBe(true);
+
+      // A run still in progress is not published.
+      const file = path.join(reportsDir, BAD_CLINIC, "report.json");
+      await writeFile(file, JSON.stringify({ ...JSON.parse(await readFile(file, "utf8")), status: "running" }));
+      await expect(buildStatic(out, { root, reportsDir })).rejects.toThrow(/still "running"/);
     } finally {
       await rm(parent, { recursive: true, force: true });
     }
@@ -230,6 +319,18 @@ describe("static demo in a browser, under a sub-path", () => {
     expect(await page.locator(".cmp-delta-num").innerText()).toBe("+100");
     await expect(page.locator("#cmp-fixed-title").innerText()).resolves.toContain("Fixed");
     if (shots) await page.screenshot({ path: path.join(shots, "compare.png") });
+
+    // Compared with an inconclusive run: no score change, and the earlier issues are not called fixed.
+    await page.goto(`${base}#/compare/${NODEJS}/${PYPI}`);
+    await page.locator(".cmp-delta-num").waitFor();
+    await expect(page.locator(".cmp-not-comparable").innerText()).resolves.toContain("Issues cannot be compared: the after run was inconclusive");
+    expect(await page.locator(".cmp-delta-label").innerText()).toBe("not scored");
+    expect(await page.locator(".cmp-delta .sr-only").innerText()).toBe("No score change: the after run was not scored.");
+    await expect(page.locator("#cmp-fixed-title").innerText()).resolves.toContain("(not compared)");
+    expect(await page.locator(".cmp-good li.cmp-issue").count()).toBe(0);
+    await expect(page.locator(".cmp-good .empty").innerText()).resolves.toContain("Not compared");
+    // The unscored run's gauge says why.
+    expect(await page.locator(".cmp-after .gauge").getAttribute("aria-label")).toBe("Not scored: test inconclusive");
 
     expect(problems).toEqual([]);
     // Every request stayed under the sub-path (no /api/ or /reports/ at the site root).

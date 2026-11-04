@@ -504,7 +504,7 @@ function runItem(run, picked, onPick) {
       ),
       h("span", { class: "run-status" }, statusBadge(run.status)),
       h("span", { class: "run-when" }, when ? h("time", { datetime: run.startedAt }, when) : null),
-      h("span", { class: "run-score" }, scorePill(run.score)),
+      h("span", { class: "run-score" }, scorePill(run.score, run.status)),
     ),
   );
 }

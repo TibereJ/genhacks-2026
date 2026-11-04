@@ -242,6 +242,15 @@ export function buildSnapshot(nodes: AXNode[], url: string, title: string): Snap
       descend(depth + 1);
       return;
     }
+    // Screen readers announce list size on entry ("list, 5 items"); it tells the user how much there is.
+    if (role === "list") {
+      const items = (node.childIds ?? []).filter((c) => { const cn = byId.get(c); return cn && !cn.ignored && str(cn.role?.value) === "listitem"; }).length;
+      if (items > 1) {
+        emit(depth, `list (${items} items)${name ? ` ${quote(name)}` : ""}`);
+        descend(depth + 1);
+        return;
+      }
+    }
     descend(depth);
   };
 

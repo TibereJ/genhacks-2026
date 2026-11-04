@@ -9,6 +9,7 @@ process.env.BLINDSPOT_REPORTS_DIR = await mkdtemp(path.join(os.tmpdir(), "blinds
 const { BrowserSession } = await import("../src/core/browser.js");
 const { runTest } = await import("../src/core/agent.js");
 const { ScriptedBrain, parseTranscript } = await import("../src/core/brains/scripted.js");
+const { scanPage } = await import("../src/core/scan.js");
 
 const PAGES: Record<string, string> = {
   "/form": `<!doctype html><html lang="en"><head><title>Form</title></head><body>
@@ -27,6 +28,23 @@ const PAGES: Record<string, string> = {
       <a id="dl" tabindex="0" onclick="void 0" style="cursor:pointer">Download audio</a>
     </main></body></html>`,
   "/done": `<!doctype html><html lang="en"><head><title>Thanks</title></head><body><main><h1>Message sent</h1></main></body></html>`,
+  "/scan": `<!doctype html><html lang="en"><head><title>Scan</title></head><body><main>
+    <h1>Products</h1>
+    <div class="card" onclick="location.href='/done'"><h2>Green tea</h2><a href="/done">Details</a></div>
+    <div class="opt" onclick="void 0"><input type="radio" id="r1" name="r"><label for="r1">Small</label></div>
+    <div class="pair" onclick="void 0"><input id="q1" aria-label="Qty 1"><input id="q2" aria-label="Qty 2"></div>
+    <ul><li style="cursor:pointer"><a href="/done">Menu link</a></li></ul>
+    <a id="nohref" tabindex="0" onclick="void 0">Download audio</a>
+    <a id="keyed" tabindex="0" role="button" onclick="void 0" onkeydown="void 0">Play</a>
+    <a id="unreachable" onclick="void 0">Share</a>
+  </main></body></html>`,
+  "/popup": `<!doctype html><html lang="en"><head><title>Popup</title></head><body><main><h1>Popups</h1>
+    <button onclick="window.open('/selfclose')">Open helper</button>
+    <button onclick="setTimeout(() => window.open('/done'), 2000)">Open later</button>
+    <button onclick="window.open('/form'); window.open('')">Open two</button>
+    </main></body></html>`,
+  "/selfclose": `<!doctype html><html lang="en"><head><title>Helper</title></head><body><main><h1>Helper</h1>
+    <button onclick="window.close()">Done</button></main></body></html>`,
   "/tabs": `<!doctype html><html lang="en"><head><title>Tabs</title></head><body><main>
     <h1>Links</h1><a href="/done" target="_blank">Open thanks in a new tab</a></main></body></html>`,
 };
@@ -95,6 +113,37 @@ describe("screen reader transcript", () => {
       expect(nav.snapshot.text).toContain("Message sent");
 
       expect((await s.act({ type: "click", id: 999 }, nav.snapshot)).ok).toBe(false);
+    } finally {
+      await s.close();
+    }
+  });
+});
+
+describe("automated scan", () => {
+  it("flags clickable wrappers around links, but not around a single form control and its label", async () => {
+    const s = await BrowserSession.open(`${base}/scan`);
+    try {
+      const findings = await scanPage(s.page, await s.snapshot());
+      const clickable = findings.find((f) => f.title.startsWith("Clickable elements"))!;
+      expect(clickable.severity).toBe("critical");
+      // The product card, the wrapper around two fields, and the <a onclick> without tabindex (Tab never reaches it).
+      expect(clickable.description).toContain("3 elements");
+      expect(clickable.description).toContain('"Green teaDetails"');
+      expect(clickable.description).toContain('"Share"');
+      expect(clickable.element?.html).toContain('class="card"');
+      expect(clickable.description).not.toContain("Small");
+      expect(clickable.description).not.toContain("Menu link");
+      expect(clickable.description).not.toContain("Download audio");
+
+      const hrefless = findings.find((f) => f.title === "Links without href may not respond to Enter")!;
+      expect(hrefless).toBeDefined();
+      expect(hrefless.severity).toBe("moderate");
+      expect(hrefless.wcag).toEqual(["2.1.1 Keyboard", "4.1.2 Name, Role, Value"]);
+      expect(hrefless.fix).toMatch(/<a href>.*<button>/);
+      expect(hrefless.description).toContain("1 link");
+      expect(hrefless.description).toContain('"Download audio"');
+      expect(hrefless.description).not.toContain("Play");
+      expect(hrefless.element).toMatchObject({ role: "link", name: "Download audio" });
     } finally {
       await s.close();
     }
@@ -238,6 +287,77 @@ describe("browser safety and states", () => {
     }
   });
 
+  it("goes back to the previous tab when a popup closes itself", async () => {
+    const s = await BrowserSession.open(`${base}/popup`);
+    try {
+      const snap = await s.snapshot();
+      const open = [...snap.elements.values()].find((e) => e.name === "Open helper")!;
+      const opened = await s.act({ type: "click", id: open.id }, snap);
+      expect(opened.result).toContain('A new tab opened: "Helper".');
+      const done = [...opened.snapshot.elements.values()].find((e) => e.name === "Done")!;
+      const closed = await s.act({ type: "click", id: done.id }, opened.snapshot);
+      expect(closed.ok).toBe(true);
+      expect(closed.result).toContain('This tab closed. Back on the previous tab: "Popup".');
+      expect(closed.snapshot.title).toBe("Popup");
+      expect(s.page.url()).toBe(`${base}/popup`);
+
+      // The popup closing itself between two actions: the next action is not performed, and says why.
+      const again = await s.act({ type: "click", id: open.id }, closed.snapshot);
+      const helper = s.page;
+      await helper.evaluate(() => window.close());
+      await expect.poll(() => helper.isClosed()).toBe(true);
+      const skipped = await s.act({ type: "press", key: "Tab" }, again.snapshot);
+      expect(skipped.ok).toBe(false);
+      expect(skipped.result).toContain("closed by itself");
+      expect(skipped.result).toContain('Back on the previous tab: "Popup"');
+      expect(await s.snapshot()).toMatchObject({ title: "Popup" });
+    } finally {
+      await s.close();
+    }
+  });
+
+  it("adopts a tab opened after the action settled at the next action", async () => {
+    const s = await BrowserSession.open(`${base}/popup`);
+    try {
+      const snap = await s.snapshot();
+      const later = [...snap.elements.values()].find((e) => e.name === "Open later")!;
+      const first = await s.act({ type: "click", id: later.id }, snap);
+      expect(first.result).not.toContain("new tab");
+      expect(s.page.url()).toBe(`${base}/popup`);
+      await expect.poll(() => s.page.context().pages().length, { timeout: 5_000 }).toBe(2);
+      const next = await s.act({ type: "press", key: "Tab" }, first.snapshot);
+      expect(next.result).toContain('A new tab opened: "Thanks".');
+      expect(s.page.url()).toBe(`${base}/done`);
+    } finally {
+      await s.close();
+    }
+  });
+
+  it("ignores blank tabs, and prefers a tab opened by the current page", async () => {
+    const s = await BrowserSession.open(`${base}/popup`);
+    try {
+      const snap = await s.snapshot();
+      const two = [...snap.elements.values()].find((e) => e.name === "Open two")!;
+      const out = await s.act({ type: "click", id: two.id }, snap);
+      expect(s.page.context().pages()).toHaveLength(3);
+      // The last tab stayed on about:blank.
+      expect(out.result).toContain('A new tab opened: "Form".');
+      expect(s.page.url()).toBe(`${base}/form`);
+
+      // Now on /form. Its tab opens /done, then the first tab (in the background) opens /tabs: /done wins.
+      const [first] = s.page.context().pages();
+      await s.page.evaluate(() => { window.open("/done"); });
+      await expect.poll(() => s.page.context().pages().length).toBe(4);
+      await first.evaluate(() => { window.open("/tabs"); });
+      await expect.poll(() => s.page.context().pages().length).toBe(5);
+      const next = await s.act({ type: "press", key: "Tab" }, out.snapshot);
+      expect(next.result).toContain('A new tab opened: "Thanks".');
+      expect(s.page.url()).toBe(`${base}/done`);
+    } finally {
+      await s.close();
+    }
+  });
+
   it("retries a snapshot once when a navigation destroyed the page mid-read", async () => {
     const s = await BrowserSession.open(`${base}/tabs`);
     try {
@@ -326,5 +446,21 @@ describe("find_text", () => {
     expect(found).toMatch(/1 match for "copy":\nline \d+: \[1\] button "Copy example"/);
     expect(snap.elements.get(1)?.name).toBe("Copy example");
     expect(findInSnapshot(snap, "nope")).toContain("was not found");
+  });
+});
+
+describe("lists", () => {
+  it("announces the number of items like a screen reader", async () => {
+    const { buildSnapshot } = await import("../src/core/ax-tree.js");
+    const snap = buildSnapshot([
+      { nodeId: "1", ignored: false, role: { value: "RootWebArea" }, childIds: ["2"] },
+      { nodeId: "2", ignored: false, role: { value: "list" }, childIds: ["3", "4", "5"] },
+      { nodeId: "3", ignored: false, role: { value: "listitem" }, childIds: ["6"] },
+      { nodeId: "4", ignored: false, role: { value: "listitem" }, childIds: [] },
+      { nodeId: "5", ignored: false, role: { value: "listitem" }, childIds: [] },
+      { nodeId: "6", ignored: false, role: { value: "link" }, name: { value: "Apples" }, backendDOMNodeId: 6 },
+    ], "http://x", "T");
+    expect(snap.text).toContain("list (3 items)");
+    expect(snap.text).toMatch(/\n {2}\[1\] link "Apples"/);
   });
 });
