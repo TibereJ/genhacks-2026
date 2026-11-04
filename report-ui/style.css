@@ -3125,6 +3125,7 @@ q.value {
 
 .cmp-section h2 {
   display: block;
+  font-size: clamp(1.625rem, 1.4rem + 0.6vw, 1.875rem);
 }
 
 .cmp-section-icon {
