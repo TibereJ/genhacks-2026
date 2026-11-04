@@ -672,6 +672,32 @@ main:focus {
   text-align: left;
 }
 
+/* Static (read-only) demo build: notice instead of the "Run a test" form; presets are links. */
+.static-notice {
+  display: grid;
+  gap: 16px;
+}
+
+.static-notice h2 {
+  margin-bottom: 0;
+}
+
+.static-notice .preset-row {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.static-notice .preset-item {
+  display: flex;
+  flex: 1 1 200px;
+}
+
+.static-notice .btn-preset {
+  flex: 1 1 auto;
+  text-decoration: none;
+}
+
 .preset-dot {
   width: 10px;
   height: 10px;

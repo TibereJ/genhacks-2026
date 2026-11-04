@@ -4,6 +4,8 @@
 
 **Lighthouse checks rules. BlindSpot checks whether a blind person can actually use your site.**
 
+**Live demo (read-only, real example runs):** https://tiberej.github.io/genhacks-2026/
+
 Give BlindSpot a URL and a task in plain language ("Book an appointment with Dr. Lee"). An AI agent tries to
 complete it using **only what a screen reader announces**. It never sees the page. You get a report: did the task
 succeed, where the agent got stuck, which WCAG 2.2 criteria are involved, and the code fix.
@@ -189,6 +191,10 @@ npm run examples
 
 Opens the UI on `examples/reports/` (the four real agent runs above).
 
+The same reports are published as a static, read-only site (the [live demo](https://tiberej.github.io/genhacks-2026/)):
+`npm run build:static` writes it to `dist-static/`, and `.github/workflows/pages.yml` deploys it to GitHub Pages
+on every push to `main`. See [docs/DEPLOY.md](docs/DEPLOY.md#static-read-only-demo-github-pages).
+
 ### CLI
 
 ```bash
@@ -247,6 +253,7 @@ src/
 ├── cli.ts              npm run blindspot -- <url> "<task>" [--scripted]
 ├── ci.ts               CI mode entry point (see docs/CI.md)
 ├── mcp.ts              MCP server: an MCP client becomes the agent
+├── build-static.ts     read-only static demo (GitHub Pages): UI + demo sites + example reports
 └── core/
     ├── ax-tree.ts      accessibility tree → numbered screen reader transcript
     ├── browser.ts      Playwright/CDP session: snapshot, click/type/select/press/back, screenshots
@@ -296,6 +303,8 @@ tests/                  vitest: transcript, agent loop, scan, MCP, CI, export, U
 - `tsx`, `typescript`, `vitest`: running, type checking, tests
 - Web Speech API (browser built-in): the **Listen** button
 - **GitHub Actions** with `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4`
+- **GitHub Pages** (`actions/configure-pages@v5`, `actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4`):
+  hosting of the read-only live demo
 - **Docker**, with the official Playwright image `mcr.microsoft.com/playwright:v1.63.0-noble` (Microsoft)
 - WCAG 2.2 (W3C): the criteria cited in reports
 

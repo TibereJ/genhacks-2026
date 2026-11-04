@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "examples": "tsx src/examples.ts",
     "mcp": "tsx src/mcp.ts",
-    "ci": "tsx src/ci.ts"
+    "ci": "tsx src/ci.ts",
+    "build:static": "tsx src/build-static.ts"
   },
   "engines": {
     "node": ">=20"

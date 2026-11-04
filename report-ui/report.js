@@ -2,10 +2,11 @@
 // "What you see" vs "What a screen reader user hears" comparison.
 
 import { h, icon, replaceChildren } from "./dom.js";
-import { getReport } from "./api.js";
+import { getReport, SCREENSHOT_BASE, STATIC_MODE } from "./api.js";
 import {
   actionSegments,
   actionText,
+  demoSiteHref,
   countBySeverity,
   duration,
   prettyUrl,
@@ -266,6 +267,8 @@ function renderHead(head, r, steps, issues) {
   const took = duration(r.startedAt, r.finishedAt);
   const started = relativeTime(r.startedAt);
   const urlIsHttp = /^https?:\/\//i.test(r.url ?? "") || String(r.url ?? "").startsWith("/");
+  // The static demo ships a copy of the demo sites: link to it instead of the localhost server the run used.
+  const siteHref = (STATIC_MODE && demoSiteHref(r.url)) || r.url;
 
   replaceChildren(
     head,
@@ -279,7 +282,7 @@ function renderHead(head, r, steps, issues) {
         "p",
         { class: "head-url" },
         urlIsHttp
-          ? h("a", { href: r.url, target: "_blank", rel: "noopener noreferrer" }, prettyUrl(r.url), h("span", { class: "sr-only" }, " (opens in a new tab)"))
+          ? h("a", { href: siteHref, target: "_blank", rel: "noopener noreferrer" }, prettyUrl(r.url), h("span", { class: "sr-only" }, " (opens in a new tab)"))
           : prettyUrl(r.url),
       ),
       h(
@@ -479,7 +482,7 @@ function actionSentence(action) {
 }
 
 function seePane(reportId, step, n) {
-  const src = screenshotUrl(reportId, step.screenshot);
+  const src = screenshotUrl(reportId, step.screenshot, SCREENSHOT_BASE);
   const frame = h("div", { class: "shot-frame" });
   const placeholder = (text) =>
     h("div", { class: "shot-missing" }, icon("image"), h("p", {}, text), h("p", { class: "muted" }, "Screenshots are for humans. The agent never sees them."));
