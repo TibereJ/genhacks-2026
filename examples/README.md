@@ -1,6 +1,6 @@
 # Example reports
 
-Six real BlindSpot runs: four on the bundled demo sites and two on real public websites, viewable with `npm run examples` (then open http://localhost:3000).
+Seven real BlindSpot runs: four on the bundled demo sites and three on real public websites, viewable with `npm run examples` (then open http://localhost:3000).
 
 | Report | Site | Result |
 |---|---|---|
@@ -9,6 +9,7 @@ Six real BlindSpot runs: four on the bundled demo sites and two on real public w
 | `20261104164652-tbhon8` | GreenCart shop, inaccessible | blocked, 0/100, 8 issues |
 | `20261104165344-bsrrv6` | GreenCart shop, fixed | success, 100/100 |
 | `20261104172502-oh6mrq` | **nodejs.org** (real site): find the LTS version and the Windows download | success, 91/100, 3 issues |
+| `20261104173322-401re7` | **jsr.io** (real site): find a package's latest version | success, 78/100, 4 issues (long, repetitive result link names; unnamed copy buttons) |
 | `20261104172549-si9xd8` | **pypi.org** (real site): find a package's version and license | inconclusive: a bot check (CAPTCHA with an audio alternative) appeared after searching; BlindSpot does not bypass CAPTCHAs |
 
 **How they were made.** The agent was Claude, running in Claude Code, driving BlindSpot through its
