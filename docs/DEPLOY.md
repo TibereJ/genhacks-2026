@@ -35,6 +35,8 @@ after resolving symbolic links). Every build writes a `.blindspot-static` file i
 without that file is never deleted.
 
 `.github/workflows/pages.yml` builds and deploys it on every push to `main` (and on demand from the Actions tab).
+The workflow token is read-only (`contents: read`, plus `pages: read` for the build job); only the deploy job gets
+`pages: write` and `id-token: write`.
 **The repository owner must enable Pages once:** Settings → Pages → Build and deployment → Source:
 **GitHub Actions**. Until then the deploy job fails.
 
