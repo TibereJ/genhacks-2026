@@ -119,3 +119,18 @@ describe("agent loop", () => {
     expect(report.score).toBeLessThan(100);
   });
 });
+
+describe("composite widgets", () => {
+  it("reports focus inside a date field as focus on the date field", async () => {
+    const { buildSnapshot } = await import("../src/core/ax-tree.js");
+    const nodes = [
+      { nodeId: "1", ignored: false, role: { value: "RootWebArea" }, childIds: ["2"] },
+      { nodeId: "2", ignored: false, role: { value: "Date" }, name: { value: "Date" }, value: { value: "2026-11-05" }, backendDOMNodeId: 2, childIds: ["3"], properties: [{ name: "focusable", value: { value: true } }] },
+      { nodeId: "3", ignored: false, role: { value: "spinbutton" }, name: { value: "Month" }, backendDOMNodeId: 3, properties: [{ name: "focused", value: { value: true } }] },
+    ];
+    const snap = buildSnapshot(nodes, "http://x", "T");
+    expect(snap.focused).toBe('date field "Date"');
+    expect(snap.text).toContain('[1] date field "Date" value "2026-11-05" ← focus');
+    expect(snap.text).not.toContain("Month");
+  });
+});

@@ -48,8 +48,14 @@ export async function runTest(opts: RunOptions): Promise<Report> {
       const key = s.url.split("#")[0];
       if (scanned.has(key)) return;
       scanned.add(key);
+      const page = s.title || s.url;
       for (const f of await scanPage(session!.page, s)) {
-        if (report.issues.some((i) => i.source === "scan" && i.title === f.title && i.description === f.description)) continue;
+        // The same rule failing on several pages (e.g. a shared header) is one issue, not one per page.
+        const existing = report.issues.find((i) => i.source === "scan" && i.title === f.title);
+        if (existing) {
+          if (!existing.description.includes(`"${page}"`)) existing.description += ` The same problem is also on "${page}".`;
+          continue;
+        }
         report.issues.push({ ...f, id: `scan-${report.issues.length + 1}`, stepIndex, source: "scan", blocking: false });
       }
     };

@@ -51,6 +51,8 @@ const LANDMARKS = new Set([
   "dialog", "alertdialog",
 ]);
 
+const COMPOSITE = new Set(["Date", "DateTime", "InputTime"]);
+
 const LIVE = new Set(["alert", "status", "log", "marquee", "timer"]);
 
 /** Roles whose children are only their name: print the node and don't descend. */
@@ -143,6 +145,12 @@ export function buildSnapshot(nodes: AXNode[], url: string, title: string): Snap
     return parts.join(" ").replace(/\s+/g, " ").trim();
   };
 
+  const hasFocusedDescendant = (node: AXNode): boolean =>
+    (node.childIds ?? []).some((c) => {
+      const cn = byId.get(c);
+      return !!cn && (prop(cn, "focused") === true || hasFocusedDescendant(cn));
+    });
+
   const collectOptions = (node: AXNode): string[] => {
     const out: string[] = [];
     const walk = (n: AXNode) => {
@@ -167,7 +175,8 @@ export function buildSnapshot(nodes: AXNode[], url: string, title: string): Snap
     flat.push({ role, name, backendNodeId: node.backendDOMNodeId, level });
 
     const focusable = prop(node, "focusable") === true;
-    const isFocused = prop(node, "focused") === true && role !== "RootWebArea";
+    // Composite native widgets (date/time inputs) put focus on an inner part we don't print.
+    const isFocused = role !== "RootWebArea" && (prop(node, "focused") === true || (COMPOSITE.has(role) && hasFocusedDescendant(node)));
     // Options of a native <select> are listed on the combobox line itself.
     if (role === "MenuListOption" || role === "MenuListPopup") return;
 
