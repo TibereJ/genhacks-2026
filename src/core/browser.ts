@@ -1,4 +1,4 @@
-import { chromium, type Browser, type BrowserContext, type CDPSession, type Page } from "playwright";
+import { chromium, type Browser, type BrowserContext, type CDPSession, type LaunchOptions, type Page } from "playwright";
 import { buildSnapshot, type AXNode, type Snapshot, type SnapshotElement } from "./ax-tree.js";
 
 export type BrowserAction =
@@ -18,16 +18,35 @@ export interface ActionOutcome {
 
 /**
  * Full Chromium in headless mode is closer to real Chrome than Playwright's lighter headless shell (and uses
- * the system certificate store on Linux). Fall back to the default build if it isn't installed.
- * Override with BLINDSPOT_BROWSER_CHANNEL (e.g. "chrome", "msedge", or "default" for the headless shell).
+ * the system certificate store on Linux). Falls back to the default build only when full Chromium isn't installed
+ * ("Executable doesn't exist"), saying so on stderr; any other failure is thrown.
+ * Override with BLINDSPOT_BROWSER_CHANNEL (e.g. "chrome", "msedge", or "default" for the headless shell): a channel
+ * chosen there never falls back.
  */
-async function launchBrowser(): Promise<Browser> {
-  const channel = process.env.BLINDSPOT_BROWSER_CHANNEL || "chromium";
-  if (channel === "default") return chromium.launch();
+export async function launchBrowser(
+  launch: (options?: LaunchOptions) => Promise<Browser> = (options) => chromium.launch(options),
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<Browser> {
+  const explicit = env.BLINDSPOT_BROWSER_CHANNEL?.trim();
+  const channel = explicit || "chromium";
+  if (channel === "default") return launch();
   try {
-    return await chromium.launch({ channel });
-  } catch {
-    return chromium.launch();
+    return await launch({ channel });
+  } catch (err) {
+    const first = (err as Error).message ?? String(err);
+    if (explicit) {
+      throw new Error(`Could not start the browser channel "${channel}" set in BLINDSPOT_BROWSER_CHANNEL: ${first}`, { cause: err });
+    }
+    if (!/Executable doesn't exist/i.test(first)) throw err;
+    console.error(`BlindSpot: full Chromium is not installed (${first.split("\n")[0]}). Falling back to Playwright's default headless browser.`);
+    try {
+      return await launch();
+    } catch (second) {
+      throw new Error(
+        `Could not start a browser.\nFull Chromium: ${first}\nDefault build: ${(second as Error).message ?? String(second)}`,
+        { cause: second },
+      );
+    }
   }
 }
 
