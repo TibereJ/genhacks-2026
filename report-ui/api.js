@@ -68,6 +68,22 @@ export async function getReport(id) {
   return getJson(`/api/reports/${encodeURIComponent(id)}`);
 }
 
+/** URL of the Markdown export (served as a download). Not available in fixture mode. */
+export function markdownUrl(id) {
+  return `/api/reports/${encodeURIComponent(id)}/markdown`;
+}
+
+/** The report as Markdown, ready to paste into a GitHub issue. */
+export async function getMarkdown(id) {
+  const res = await fetch(markdownUrl(id), { headers: { Accept: "text/markdown" } });
+  if (!res.ok) {
+    const err = new Error(`${res.status} ${res.statusText}`);
+    err.status = res.status;
+    throw err;
+  }
+  return res.text();
+}
+
 export async function startRun({ url, task, brain }) {
   if (FIXTURE_MODE) {
     liveStartedAt = null;

@@ -33,6 +33,7 @@ demo-site/bad|fixed/   site de clinique fictif, version inaccessible et version 
 | `GET /demo/bad/…`, `GET /demo/fixed/…` | site de démo |
 | `GET /api/reports` | liste `{id, url, task, status, score, startedAt}[]`, plus récent d'abord |
 | `GET /api/reports/:id` | le `Report` complet (voir `src/core/types.ts`) ; `status: "running"` pendant le test |
+| `GET /api/reports/:id/markdown` | le rapport en Markdown (issue GitHub), téléchargé en `blindspot-<id>.md` |
 | `GET /reports/:id/:file` | captures d'écran |
 | `POST /api/runs` body `{url, task, brain?: "claude" \| "scripted"}` | lance un test, répond `{id}` |
 
