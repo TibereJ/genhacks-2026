@@ -294,3 +294,17 @@ describe("inconclusive runs", () => {
     expect(report.steps.at(-1)?.result).toContain("not an accessibility verdict");
   });
 });
+
+describe("focusable wrappers", () => {
+  it("reads the content of a focusable wrapper such as a skip-link target", async () => {
+    const { buildSnapshot } = await import("../src/core/ax-tree.js");
+    const snap = buildSnapshot([
+      { nodeId: "1", ignored: false, role: { value: "RootWebArea" }, childIds: ["2"] },
+      { nodeId: "2", ignored: false, role: { value: "generic" }, backendDOMNodeId: 2, childIds: ["3", "4"], properties: [{ name: "focusable", value: { value: true } }] },
+      { nodeId: "3", ignored: false, role: { value: "heading" }, name: { value: "Packages" }, backendDOMNodeId: 3, properties: [{ name: "level", value: { value: 1 } }] },
+      { nodeId: "4", ignored: false, role: { value: "link" }, name: { value: "@std/path" }, backendDOMNodeId: 4 },
+    ], "http://x", "T");
+    expect(snap.text).toContain('heading level 1 "Packages"');
+    expect(snap.text).toMatch(/\[\d+\] link "@std\/path"/);
+  });
+});

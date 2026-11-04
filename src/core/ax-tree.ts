@@ -200,7 +200,8 @@ export function buildSnapshot(nodes: AXNode[], url: string, title: string): Snap
       if (node.backendDOMNodeId !== undefined) elements.set(id, el);
       emit(depth, line);
       // Links and buttons announce their content as their name; other widgets may contain more.
-      if (role === "listbox" || role === "radiogroup") descend(depth + 1);
+      // Focusable wrappers (e.g. a skip-link target <div tabindex="-1"> around the page) are read through.
+      if (role === "listbox" || role === "radiogroup" || !INTERACTIVE.has(role)) descend(depth + 1);
       return;
     }
 
