@@ -13,7 +13,10 @@ export interface RunOptions {
   task: string;
   brain: Brain;
   id?: string;
+  /** Maximum number of browser actions (default 30). */
   maxSteps?: number;
+  /** Maximum number of brain turns, including turns without an action (default 2 × maxSteps). */
+  maxTurns?: number;
   /** Blocks requests the browser must not make (see BrowserSession.open). */
   requestGuard?: RequestGuard;
   /** Called after every change to the report (it is also saved to disk). */
@@ -25,6 +28,7 @@ const transcriptBlock = (s: Snapshot) => `Screen reader transcript:\n${s.text}`;
 /** Runs one test: the brain tries to complete the task using only the screen reader transcript. */
 export async function runTest(opts: RunOptions): Promise<Report> {
   const maxSteps = opts.maxSteps ?? 30;
+  const maxTurns = opts.maxTurns ?? 2 * maxSteps;
   const report: Report = {
     id: opts.id ?? newReportId(),
     url: opts.url,
@@ -65,12 +69,22 @@ export async function runTest(opts: RunOptions): Promise<Report> {
     await publish();
 
     let turn: BrainTurn = await opts.brain.start(opts.task, snapshot.text);
+    let turns = 1;
     let idleTurns = 0;
+    // Turns that only report issues or are refused don't use steps, so cap turns too (cost and runaway loops).
+    const outOfTurns = () => {
+      if (turns < maxTurns) return false;
+      report.status = "step_limit";
+      report.summary = `The agent used all ${maxTurns} turns (${report.steps.length} actions) without completing the task. This usually means the task is very hard to do with a screen reader, or the agent kept going in circles.`;
+      return true;
+    };
 
     while (report.status === "running") {
       if (turn.calls.length === 0) {
         if (++idleTurns > 2) throw new Error("The agent stopped calling tools.");
+        if (outOfTurns()) break;
         turn = await opts.brain.nudge("Please continue the test by calling one of the tools (an action, report_issue, or finish).");
+        turns++;
         continue;
       }
       idleTurns = 0;
@@ -102,6 +116,11 @@ export async function runTest(opts: RunOptions): Promise<Report> {
         }
 
         if (name === "finish") {
+          if (actionDone) {
+            // The brain decided before seeing what its action did: make it look first.
+            outcomes.push({ id: call.id, isError: true, content: "Look at the result of your action before finishing." });
+            continue;
+          }
           const f = input as { status: "success" | "blocked"; summary: string };
           report.steps.push({
             index: report.steps.length, url: snapshot.url, reason: f.summary, heard: snapshot.text,
@@ -142,11 +161,13 @@ export async function runTest(opts: RunOptions): Promise<Report> {
         report.summary = `The agent used all ${maxSteps} steps without completing the task. This usually means the task is very hard to do with a screen reader.`;
         break;
       }
+      if (outOfTurns()) break;
       // Answer every tool call of the turn, even those after "finish" or invalid ones.
       for (const call of turn.calls) {
         if (!outcomes.some((o) => o.id === call.id)) outcomes.push({ id: call.id, content: "Not performed." });
       }
       turn = await opts.brain.continue(outcomes);
+      turns++;
     }
   } catch (err) {
     report.status = "error";

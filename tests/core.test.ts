@@ -123,6 +123,65 @@ describe("agent loop", () => {
   });
 });
 
+/** A brain that replays fixed turns (then repeats the last one) and records what it was told. */
+function recordingBrain(turns: { name: string; input: unknown }[][]) {
+  const received: { id: string; content: string; isError?: boolean }[][] = [];
+  let i = 0;
+  let n = 0;
+  const next = async () => ({ calls: turns[Math.min(i++, turns.length - 1)].map((c) => ({ ...c, id: `t${++n}` })), text: "" });
+  return {
+    received,
+    calls: () => n,
+    brain: {
+      model: "test",
+      start: next,
+      continue: async (o: { id: string; content: string; isError?: boolean }[]) => { received.push(o); return next(); },
+      nudge: next,
+    },
+  };
+}
+
+describe("agent loop limits", () => {
+  it("refuses finish in the same turn as an action and keeps going", async () => {
+    // Transcript ids are stable for the same page, so read them from a first visit.
+    const snap = await (async () => { const s = await BrowserSession.open(`${base}/form`); try { return await s.snapshot(); } finally { await s.close(); } })();
+    const name = [...snap.elements.values()].find((e) => e.role === "textbox" && e.name === "Name")!;
+    const r = recordingBrain([
+      [
+        { name: "type_text", input: { id: name.id, text: "Alex", reason: "fill" } },
+        { name: "finish", input: { status: "success", summary: "Too early." } },
+        { name: "report_issue", input: { severity: "minor", title: "After finish", description: "d", wcag: [], fix: "f", element_id: null, blocking: false } },
+      ],
+      [{ name: "finish", input: { status: "blocked", summary: "Looked first." } }],
+    ]);
+    const report = await runTest({ url: `${base}/form`, task: "t", brain: r.brain });
+    expect(report.status).toBe("blocked");
+    expect(report.summary).toBe("Looked first.");
+    expect(report.steps.map((s) => s.action.type)).toEqual(["type", "finish"]);
+    const firstAnswers = r.received[0];
+    expect(firstAnswers.map((o) => o.id)).toEqual(["t1", "t2", "t3"]);
+    expect(firstAnswers[1]).toMatchObject({ isError: true, content: "Look at the result of your action before finishing." });
+    expect(firstAnswers[2].content).toBe("Issue recorded.");
+  });
+
+  it("stops with step_limit after maxTurns brain turns, even without actions", async () => {
+    const r = recordingBrain([[{ name: "report_issue", input: { severity: "minor", title: "Again", description: "d", wcag: [], fix: "f", element_id: null, blocking: false } }]]);
+    const report = await runTest({ url: `${base}/form`, task: "t", brain: r.brain, maxSteps: 2 });
+    expect(report.status).toBe("step_limit");
+    expect(r.calls()).toBe(4); // default maxTurns = 2 × maxSteps
+    expect(report.summary).toContain("all 4 turns");
+    expect(report.issues.filter((i) => i.title === "Again")).toHaveLength(4);
+  });
+
+  it("counts turns without tool calls too", async () => {
+    let turns = 0;
+    const brain = { model: "test", start: async () => { turns++; return { calls: [], text: "" }; }, continue: async () => { turns++; return { calls: [], text: "" }; }, nudge: async () => { turns++; return { calls: [], text: "" }; } };
+    const report = await runTest({ url: `${base}/form`, task: "t", brain, maxSteps: 1, maxTurns: 2 });
+    expect(report.status).toBe("step_limit");
+    expect(turns).toBe(2);
+  });
+});
+
 describe("composite widgets", () => {
   it("reports focus inside a date field as focus on the date field", async () => {
     const { buildSnapshot } = await import("../src/core/ax-tree.js");
