@@ -1,6 +1,6 @@
 import { runTest } from "./core/agent.js";
 import { ClaudeBrain } from "./core/brains/claude.js";
-import { ScriptedBrain, clinicDemoPlan } from "./core/brains/scripted.js";
+import { ScriptedBrain, demoPlanFor } from "./core/brains/scripted.js";
 import { reportDir } from "./core/report.js";
 
 const args = process.argv.slice(2);
@@ -12,7 +12,7 @@ if (!url || !task) {
   process.exit(1);
 }
 
-const brain = scripted ? new ScriptedBrain(clinicDemoPlan) : new ClaudeBrain();
+const brain = scripted ? new ScriptedBrain(demoPlanFor(url)) : new ClaudeBrain();
 let printed = 0;
 
 const report = await runTest({

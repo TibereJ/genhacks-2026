@@ -8,9 +8,14 @@ import { statusBadge, scorePill, emptyState, errorBox } from "./components.js";
 const DEMO_TASK =
   "Book an appointment with Dr. Lee for any available time. Use the name Alex Doe and the email alex@example.com.";
 
+const SHOP_TASK =
+  "Buy 2 kg of apples and a loaf of bread, then check out with home delivery. Use the name Alex Doe, address 12 Elm Street, and accept the terms.";
+
 const PRESETS = [
-  { label: "Demo: inaccessible clinic", url: "/demo/bad/index.html", tone: "bad" },
-  { label: "Demo: fixed clinic", url: "/demo/fixed/index.html", tone: "good" },
+  { label: "Demo: inaccessible clinic", url: "/demo/bad/index.html", task: DEMO_TASK, tone: "bad" },
+  { label: "Demo: fixed clinic", url: "/demo/fixed/index.html", task: DEMO_TASK, tone: "good" },
+  { label: "Demo: inaccessible shop", url: "/demo/shop/bad/index.html", task: SHOP_TASK, tone: "bad" },
+  { label: "Demo: fixed shop", url: "/demo/shop/fixed/index.html", task: SHOP_TASK, tone: "good" },
 ];
 
 const LIST_REFRESH_MS = 3000;
@@ -56,7 +61,7 @@ export function renderHome(root) {
         class: `btn btn-preset preset-${p.tone}`,
         onclick: () => {
           urlInput.value = p.url;
-          taskInput.value = DEMO_TASK;
+          taskInput.value = p.task;
           replaceChildren(formError);
           submit.focus();
         },

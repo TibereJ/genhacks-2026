@@ -10,7 +10,7 @@ import { z } from "zod";
 import { runTest } from "./agent.js";
 import type { Brain } from "./brains/brain.js";
 import { ClaudeBrain } from "./brains/claude.js";
-import { ScriptedBrain, clinicDemoPlan } from "./brains/scripted.js";
+import { ScriptedBrain, demoPlanFor } from "./brains/scripted.js";
 import { reportDir } from "./report.js";
 import type { Issue, Report, Severity } from "./types.js";
 
@@ -234,8 +234,8 @@ export async function startStaticServer(root = DEMO_ROOT): Promise<{ baseUrl: st
 
 // ---------------------------------------------------------------- running
 
-export function makeBrain(name: BrainName): Brain {
-  return name === "scripted" ? new ScriptedBrain(clinicDemoPlan) : new ClaudeBrain();
+export function makeBrain(name: BrainName, url = ""): Brain {
+  return name === "scripted" ? new ScriptedBrain(demoPlanFor(url)) : new ClaudeBrain();
 }
 
 export interface RunJourneysOptions {
@@ -259,7 +259,7 @@ export async function runJourneys(config: CiConfig, opts: RunJourneysOptions): P
     const startedAt = new Date().toISOString();
     let report: Report;
     try {
-      report = await runTest({ url, task: journey.task, brain: (opts.brainFactory ?? makeBrain)(opts.brain) });
+      report = await runTest({ url, task: journey.task, brain: opts.brainFactory ? opts.brainFactory(opts.brain) : makeBrain(opts.brain, url) });
     } catch (err) {
       report = { id: "none", url, task: journey.task, model: opts.brain, status: "error", summary: "", startedAt, steps: [], issues: [], error: (err as Error).message };
     }

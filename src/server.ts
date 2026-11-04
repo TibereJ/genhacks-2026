@@ -3,7 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { runTest } from "./core/agent.js";
 import { ClaudeBrain } from "./core/brains/claude.js";
-import { ScriptedBrain, clinicDemoPlan } from "./core/brains/scripted.js";
+import { ScriptedBrain, demoPlanFor } from "./core/brains/scripted.js";
 import { callAgentSession, startAgentSession } from "./core/brains/external.js";
 import { listReports, loadReport, newReportId, reportDir } from "./core/report.js";
 import { reportToMarkdown } from "./core/export.js";
@@ -103,7 +103,7 @@ const server = http.createServer(async (req, res) => {
       if (brainName === "claude" && !process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
         return send(res, 400, { error: "No Claude API key configured on the server (set ANTHROPIC_API_KEY). Use the scripted demo instead." });
       }
-      const brain = brainName === "scripted" ? new ScriptedBrain(clinicDemoPlan) : new ClaudeBrain();
+      const brain = brainName === "scripted" ? new ScriptedBrain(demoPlanFor(target.href)) : new ClaudeBrain();
       const id = newReportId();
       activeRuns++;
       const requestGuard = isPublicInstance()

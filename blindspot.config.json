@@ -15,6 +15,20 @@
       "task": "Book an appointment with Dr. Lee as Alex Doe (alex@example.com).",
       "mustSucceed": false,
       "note": "Known-bad example: the time slots cannot be selected with a screen reader, so this journey is expected to be blocked. It is reported but does not fail the build."
+    },
+    {
+      "name": "Checkout (fixed shop)",
+      "url": "/shop/fixed/index.html",
+      "task": "Buy 2 kg of apples and a loaf of bread, then check out with home delivery. Use the name Alex Doe, address 12 Elm Street, and accept the terms.",
+      "mustSucceed": true,
+      "minScore": 90
+    },
+    {
+      "name": "Checkout (inaccessible shop)",
+      "url": "/shop/bad/index.html",
+      "task": "Buy 2 kg of apples and a loaf of bread, then check out with home delivery. Use the name Alex Doe, address 12 Elm Street, and accept the terms.",
+      "mustSucceed": false,
+      "note": "Known-bad example: the terms checkbox is a plain div, so a screen reader user cannot place the order. Reported, does not fail the build."
     }
   ]
 }
