@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book an appointment - Maple Grove Clinic</title>
+  <link rel="icon" href="../shared/logo.svg">
+  <link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo-link" href="index.html">
+        <img class="logo" src="../shared/logo.svg" alt="Maple Grove Clinic home" width="186" height="44">
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a class="nav-link" href="index.html">Home</a></li>
+          <li><a class="nav-link" href="index.html#doctors">Doctors</a></li>
+          <li>
+            <a class="nav-icon-link" href="book.html" aria-label="Book" aria-current="page">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18M12 13.5v4M10 15.5h4"/></svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="page-head">
+        <h1 class="page-title">Book an appointment</h1>
+        <p class="page-lead">Choose a doctor and a time that suits you. It takes less than a minute.</p>
+      </div>
+
+      <div class="booking-layout">
+        <form class="card" id="booking-form" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="doctor">Doctor</label>
+              <select class="input" id="doctor" name="doctor">
+                <option value="">Choose a doctor</option>
+                <option value="Dr. Lee">Dr. Lee — Family medicine</option>
+                <option value="Dr. Patel">Dr. Patel — Pediatrics</option>
+                <option value="Dr. Moreau">Dr. Moreau — Dermatology</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label" for="date">Date</label>
+              <input class="input" type="date" id="date" name="date">
+            </div>
+          </div>
+
+          <fieldset class="slots-group" id="time-group">
+            <legend class="field-label">Available times</legend>
+            <div class="slots">
+              <label class="slot"><input class="slot-input" type="radio" name="time" value="9:00"><span>9:00</span></label>
+              <label class="slot"><input class="slot-input" type="radio" name="time" value="10:30"><span>10:30</span></label>
+              <label class="slot"><input class="slot-input" type="radio" name="time" value="11:45" disabled><span>11:45</span></label>
+              <label class="slot"><input class="slot-input" type="radio" name="time" value="14:00"><span>14:00</span></label>
+              <label class="slot"><input class="slot-input" type="radio" name="time" value="16:15"><span>16:15</span></label>
+            </div>
+            <p class="slots-hint">Crossed-out times are already taken.</p>
+          </fieldset>
+
+          <div class="form-section">
+            <h2 class="form-section-title">Your details</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label class="visually-hidden" for="name">Full name</label>
+                <input class="input" type="text" id="name" name="name" placeholder="Full name" autocomplete="name">
+              </div>
+              <div class="field">
+                <label class="field-label" for="email">Email</label>
+                <input class="input" type="email" id="email" name="email" autocomplete="email">
+              </div>
+            </div>
+          </div>
+
+          <p class="form-error" id="form-error" role="alert"></p>
+
+          <div class="form-actions">
+            <p class="form-note">We will email you a confirmation. You can cancel free of charge up to 24 hours before.</p>
+            <button class="submit-pill" type="submit">
+              <span>Book appointment</span>
+              <span class="submit-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </span>
+            </button>
+          </div>
+        </form>
+
+        <aside aria-label="Clinic information">
+          <div class="card info-card">
+            <h2 class="info-title">Clinic information</h2>
+            <ul class="info-list">
+              <li><strong>Address</strong>120 Orchard Lane, Maple Grove</li>
+              <li><strong>Opening hours</strong>Mon to Fri 8:00 to 18:00, Sat 9:00 to 13:00</li>
+              <li><strong>Visit length</strong>20 minutes. Please arrive 10 minutes early.</li>
+            </ul>
+          </div>
+          <div class="help-card">
+            <strong>Need help booking?</strong>
+            Call us on 555-0142 and we will book for you.
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-title">Maple Grove Clinic</p>
+          <p class="footer-text">120 Orchard Lane, Maple Grove</p>
+          <p class="footer-text">Phone: 555-0142</p>
+        </div>
+        <div>
+          <p class="footer-title">Opening hours</p>
+          <p class="footer-text">Mon to Fri: 8:00 to 18:00</p>
+          <p class="footer-text">Saturday: 9:00 to 13:00</p>
+        </div>
+        <div>
+          <p class="footer-title">Visit</p>
+          <p class="footer-text"><a href="book.html">Book online</a></p>
+          <p class="footer-text"><a href="index.html#doctors">Our doctors</a></p>
+        </div>
+      </div>
+      <p class="footer-bottom">Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.</p>
+    </div>
+  </footer>
+
+  <script src="../shared/date-default.js"></script>
+  <script src="book.js"></script>
+</body>
+</html>

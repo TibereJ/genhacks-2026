@@ -1,0 +1,268 @@
+{
+  "id": "sample",
+  "url": "http://localhost:3000/demo/bad/index.html",
+  "task": "Book an appointment with Dr. Lee for any available time. Use the name Alex Doe and the email alex@example.com.",
+  "model": "claude-sonnet-4-5",
+  "status": "blocked",
+  "summary": "I chose Dr. Lee and a date and filled in my name and email, but I could not pick a time. The available times (9:00, 10:30, 14:00) are announced as plain text, not as buttons or options, and the unnamed submit button stays disabled until a time is chosen. A blind user cannot book an appointment on this site.",
+  "startedAt": "2026-11-04T14:02:11.000Z",
+  "finishedAt": "2026-11-04T14:03:26.000Z",
+  "steps": [
+    {
+      "index": 1,
+      "url": "http://localhost:3000/demo/bad/index.html",
+      "reason": "My task is to book an appointment. The main content has a link named \"Book an appointment\", which is the obvious way in.",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 3,
+          "role": "link",
+          "name": "Book an appointment"
+        }
+      },
+      "result": "New page loaded: \"Book an appointment – Maple Grove Clinic\". Focus is on heading level 1 \"Book an appointment\".",
+      "ok": true,
+      "screenshot": "step-1.png",
+      "heard": "Page: Maple Grove Clinic – Family medicine in Maple Grove\nbanner\n  image (no description)\n  navigation\n    [1] link \"Home\"\n    [2] link \"\"\nmain\n  heading level 1 \"Care for the whole family\"\n  text \"Same-week appointments with our family doctors.\"\n  [3] link \"Book an appointment\"\n  heading level 2 \"Our doctors\"\n  text \"Dr. Patel · Dr. Lee · Dr. Okafor\"\ncontentinfo\n  text \"© 2026 Maple Grove Clinic\"\n  [4] link \"Privacy policy\""
+    },
+    {
+      "index": 2,
+      "url": "http://localhost:3000/demo/bad/book.html",
+      "reason": "There is a text \"Doctor\" just before a combobox with no name whose value is \"Choose a doctor\". I am guessing this combobox picks the doctor, but nothing actually tells me so.",
+      "action": {
+        "type": "select",
+        "target": {
+          "id": 3,
+          "role": "combobox",
+          "name": ""
+        },
+        "value": "Dr. Lee"
+      },
+      "result": "combobox \"\" value \"Dr. Lee\"",
+      "ok": true,
+      "screenshot": "step-2.png",
+      "heard": "Page: Book an appointment – Maple Grove Clinic\nbanner\n  image (no description)\n  navigation\n    [1] link \"Home\"\n    [2] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Doctor\"\n  [3] combobox \"\" value \"Choose a doctor\"\n  [4] textbox \"Date\"\n  text \"Available times\"\n  text \"9:00\"  text \"10:30\"  text \"14:00\"\n  [5] textbox \"Full name\" (from placeholder)\n  [6] textbox \"\"\n  [7] button \"\"\ncontentinfo\n  text \"© 2026 Maple Grove Clinic\""
+    },
+    {
+      "index": 3,
+      "url": "http://localhost:3000/demo/bad/book.html",
+      "reason": "The task says any available time, so I will pick the earliest date I can: the next weekday.",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 4,
+          "role": "textbox",
+          "name": "Date"
+        },
+        "value": "2026-11-12"
+      },
+      "result": "textbox \"Date\" value \"2026-11-12\"",
+      "ok": true,
+      "screenshot": "step-3.png",
+      "heard": "Page: Book an appointment – Maple Grove Clinic\nbanner\n  image (no description)\n  navigation\n    [1] link \"Home\"\n    [2] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Doctor\"\n  [3] combobox \"\" value \"Dr. Lee\"\n  [4] textbox \"Date\"\n  text \"Available times\"\n  text \"9:00\"  text \"10:30\"  text \"14:00\"\n  [5] textbox \"Full name\" (from placeholder)\n  [6] textbox \"\"\n  [7] button \"\"\ncontentinfo\n  text \"© 2026 Maple Grove Clinic\""
+    },
+    {
+      "index": 4,
+      "url": "http://localhost:3000/demo/bad/book.html",
+      "reason": "\"Available times\" is followed by 9:00, 10:30 and 14:00, but they are announced as plain text: none of them is a button, link or radio button I can activate. I will fill in the rest of the form and see if a time can be chosen later.",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 5,
+          "role": "textbox",
+          "name": "Full name"
+        },
+        "value": "Alex Doe"
+      },
+      "result": "textbox \"Full name\" value \"Alex Doe\"",
+      "ok": true,
+      "screenshot": "step-4.png",
+      "heard": "Page: Book an appointment – Maple Grove Clinic\nbanner\n  image (no description)\n  navigation\n    [1] link \"Home\"\n    [2] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Doctor\"\n  [3] combobox \"\" value \"Dr. Lee\"\n  [4] textbox \"Date\" value \"2026-11-12\"\n  text \"Available times\"\n  text \"9:00\"  text \"10:30\"  text \"14:00\"\n  [5] textbox \"Full name\" (from placeholder)\n  [6] textbox \"\"\n  [7] button \"\"\ncontentinfo\n  text \"© 2026 Maple Grove Clinic\""
+    },
+    {
+      "index": 5,
+      "url": "http://localhost:3000/demo/bad/book.html",
+      "reason": "The next textbox has no name at all. Since it comes right after \"Full name\" it is probably the email field, so I will try my email there.",
+      "action": {
+        "type": "type",
+        "target": {
+          "id": 6,
+          "role": "textbox",
+          "name": ""
+        },
+        "value": "alex@example.com"
+      },
+      "result": "textbox \"\" value \"alex@example.com\"",
+      "ok": true,
+      "screenshot": "step-5.png",
+      "heard": "Page: Book an appointment – Maple Grove Clinic\nbanner\n  image (no description)\n  navigation\n    [1] link \"Home\"\n    [2] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Doctor\"\n  [3] combobox \"\" value \"Dr. Lee\"\n  [4] textbox \"Date\" value \"2026-11-12\"\n  text \"Available times\"\n  text \"9:00\"  text \"10:30\"  text \"14:00\"\n  [5] textbox \"Full name\" (from placeholder) value \"Alex Doe\"\n  [6] textbox \"\"\n  [7] button \"\"\ncontentinfo\n  text \"© 2026 Maple Grove Clinic\""
+    },
+    {
+      "index": 6,
+      "url": "http://localhost:3000/demo/bad/book.html",
+      "reason": "The only remaining control is a button with no name. It is probably the submit button, so I will try it.",
+      "action": {
+        "type": "click",
+        "target": {
+          "id": 7,
+          "role": "button",
+          "name": ""
+        }
+      },
+      "result": "Could not click button \"\": it is disabled. Nothing was announced, so I do not know what is missing.",
+      "ok": false,
+      "screenshot": "step-6.png",
+      "heard": "Page: Book an appointment – Maple Grove Clinic\nbanner\n  image (no description)\n  navigation\n    [1] link \"Home\"\n    [2] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Doctor\"\n  [3] combobox \"\" value \"Dr. Lee\"\n  [4] textbox \"Date\" value \"2026-11-12\"\n  text \"Available times\"\n  text \"9:00\"  text \"10:30\"  text \"14:00\"\n  [5] textbox \"Full name\" (from placeholder) value \"Alex Doe\"\n  [6] textbox \"\" value \"alex@example.com\"\n  [7] button \"\" (disabled)\ncontentinfo\n  text \"© 2026 Maple Grove Clinic\""
+    },
+    {
+      "index": 7,
+      "url": "http://localhost:3000/demo/bad/book.html",
+      "reason": "I have tried every control on the page. The times 9:00, 10:30 and 14:00 are only announced as text and cannot be focused or activated, and the unnamed button stays disabled until a time is chosen. A screen reader user cannot book here.",
+      "action": {
+        "type": "finish",
+        "value": "blocked"
+      },
+      "result": "Gave up: no way to choose a time slot.",
+      "ok": true,
+      "screenshot": "step-7.png",
+      "heard": "Page: Book an appointment – Maple Grove Clinic\nbanner\n  image (no description)\n  navigation\n    [1] link \"Home\"\n    [2] link \"\"\nmain\n  heading level 1 \"Book an appointment\"\n  text \"Doctor\"\n  [3] combobox \"\" value \"Dr. Lee\"\n  [4] textbox \"Date\" value \"2026-11-12\"\n  text \"Available times\"\n  text \"9:00\"  text \"10:30\"  text \"14:00\"\n  [5] textbox \"Full name\" (from placeholder) value \"Alex Doe\"\n  [6] textbox \"\" value \"alex@example.com\"\n  [7] button \"\" (disabled)\ncontentinfo\n  text \"© 2026 Maple Grove Clinic\""
+    }
+  ],
+  "issues": [
+    {
+      "id": "agent-unnamed-combobox",
+      "severity": "serious",
+      "title": "Doctor dropdown has no accessible name",
+      "description": "The doctor picker is announced as \"combobox\" with no name. The visible word \"Doctor\" is plain text that is not associated with the control, so a screen reader user has to guess what it is for.",
+      "wcag": [
+        "4.1.2 Name, Role, Value",
+        "1.3.1 Info and Relationships"
+      ],
+      "fix": "Associate the visible text with the control using a real <label>:\n\n<label for=\"doctor\">Doctor</label>\n<select id=\"doctor\" name=\"doctor\">\n  <option value=\"\">Choose a doctor</option>\n  <option>Dr. Patel</option>\n  <option>Dr. Lee</option>\n  <option>Dr. Okafor</option>\n</select>",
+      "stepIndex": 2,
+      "element": {
+        "role": "combobox",
+        "name": "",
+        "html": "<span>Doctor</span> <select id=\"doc\">…</select>"
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "scan-placeholder-label",
+      "severity": "moderate",
+      "title": "\"Full name\" field is labelled only by its placeholder",
+      "description": "The name field has no label; its name comes from the placeholder text, which disappears as soon as the user starts typing and is not reliably announced by every screen reader.",
+      "wcag": [
+        "3.3.2 Labels or Instructions",
+        "1.3.1 Info and Relationships"
+      ],
+      "fix": "Add a visible, programmatic label and keep the placeholder for examples only:\n\n<label for=\"name\">Full name</label>\n<input id=\"name\" name=\"name\" autocomplete=\"name\">",
+      "stepIndex": 4,
+      "element": {
+        "role": "textbox",
+        "name": "Full name",
+        "html": "<input type=\"text\" placeholder=\"Full name\">"
+      },
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "id": "agent-time-slots-not-operable",
+      "severity": "critical",
+      "title": "Time slots cannot be selected with a screen reader",
+      "description": "The available times (9:00, 10:30, 14:00) are clickable <div>s. They have no role, cannot receive keyboard focus and are announced as plain text, so a blind user can hear the times but has no way to choose one. Because a time is required, the booking cannot be completed.",
+      "wcag": [
+        "2.1.1 Keyboard",
+        "4.1.2 Name, Role, Value",
+        "1.3.1 Info and Relationships"
+      ],
+      "fix": "Use native radio buttons inside a fieldset; they are focusable, announced and selectable with the keyboard:\n\n<fieldset>\n  <legend>Available times</legend>\n  <label><input type=\"radio\" name=\"time\" value=\"09:00\"> 9:00</label>\n  <label><input type=\"radio\" name=\"time\" value=\"10:30\"> 10:30</label>\n  <label><input type=\"radio\" name=\"time\" value=\"14:00\"> 14:00</label>\n</fieldset>\n\nStyle the labels as tiles with CSS if you want to keep the current look.",
+      "stepIndex": 7,
+      "element": {
+        "role": "text",
+        "name": "10:30",
+        "html": "<div class=\"slot\" onclick=\"pickSlot(this)\">10:30</div>"
+      },
+      "source": "agent",
+      "blocking": true
+    },
+    {
+      "id": "agent-unnamed-email",
+      "severity": "serious",
+      "title": "Email field has no label",
+      "description": "The email field is announced as \"textbox\" with nothing else. The agent only guessed its purpose from its position after \"Full name\"; a screen reader user navigating by form fields would get no clue at all.",
+      "wcag": [
+        "1.3.1 Info and Relationships",
+        "3.3.2 Labels or Instructions",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "<label for=\"email\">Email</label>\n<input id=\"email\" name=\"email\" type=\"email\" autocomplete=\"email\">",
+      "stepIndex": 5,
+      "element": {
+        "role": "textbox",
+        "name": "",
+        "html": "<input type=\"email\" class=\"field\">"
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "agent-unnamed-submit",
+      "severity": "serious",
+      "title": "Submit button has no accessible name, and its disabled state is unexplained",
+      "description": "The submit button contains only an icon, so it is announced as \"button\" with no name. It is also disabled until a time slot is chosen, without any message explaining why, so a screen reader user cannot tell what is missing.",
+      "wcag": [
+        "4.1.2 Name, Role, Value",
+        "3.3.1 Error Identification"
+      ],
+      "fix": "Give the button visible text (or at least an accessible name), and keep it enabled so you can explain errors on submit:\n\n<button type=\"submit\">\n  <svg aria-hidden=\"true\" focusable=\"false\">…</svg>\n  Book appointment\n</button>\n\nOn submit, show the error next to the field and announce it:\n<p id=\"time-error\" role=\"alert\">Please choose a time.</p>",
+      "stepIndex": 6,
+      "element": {
+        "role": "button",
+        "name": "",
+        "html": "<button class=\"btn-icon\" disabled><svg>…</svg></button>"
+      },
+      "source": "agent",
+      "blocking": false
+    },
+    {
+      "id": "scan-unnamed-link",
+      "severity": "serious",
+      "title": "Navigation link has no accessible name",
+      "description": "A link in the header contains only an icon and is announced as \"link\" with no name, so its purpose cannot be determined.",
+      "wcag": [
+        "2.4.4 Link Purpose (In Context)",
+        "4.1.2 Name, Role, Value"
+      ],
+      "fix": "<a href=\"/contact.html\" aria-label=\"Contact us\">\n  <svg aria-hidden=\"true\" focusable=\"false\">…</svg>\n</a>",
+      "stepIndex": 1,
+      "element": {
+        "role": "link",
+        "name": "",
+        "html": "<a href=\"contact.html\"><svg>…</svg></a>"
+      },
+      "source": "scan",
+      "blocking": false
+    },
+    {
+      "id": "scan-logo-alt",
+      "severity": "moderate",
+      "title": "Clinic logo has no text alternative",
+      "description": "The logo image in the header has no alt attribute, so screen readers announce it as an unlabelled image (or read out the file name).",
+      "wcag": [
+        "1.1.1 Non-text Content"
+      ],
+      "fix": "<img src=\"logo.svg\" alt=\"Maple Grove Clinic\">",
+      "stepIndex": 1,
+      "element": {
+        "role": "image",
+        "name": "",
+        "html": "<img src=\"logo.svg\">"
+      },
+      "source": "scan",
+      "blocking": false
+    }
+  ],
+  "score": 35
+}

@@ -96,45 +96,8 @@ export async function scanPage(page: Page, snapshot: Snapshot): Promise<ScanFind
   }
 
   // 3. DOM checks the accessibility tree alone cannot show.
-  const dom = await page.evaluate((): DomFinding[] => {
-    const out: DomFinding[] = [];
-    const snippet = (el: Element) => {
-      const clone = el.cloneNode(true) as Element;
-      clone.querySelectorAll("svg").forEach((s) => s.replaceChildren());
-      return clone.outerHTML.replace(/\s+/g, " ").slice(0, 160);
-    };
-    const hidden = (el: Element) => el.closest('[aria-hidden="true"], [hidden]') !== null || getComputedStyle(el).display === "none" || getComputedStyle(el).visibility === "hidden";
-
-    if (!document.documentElement.getAttribute("lang")) out.push({ kind: "no-lang", html: "<html>", text: "" });
-
-    document.querySelectorAll("img:not([alt])").forEach((img) => {
-      if (!hidden(img) && !img.getAttribute("aria-label") && !img.getAttribute("aria-labelledby") && img.getAttribute("role") !== "presentation") {
-        out.push({ kind: "img-no-alt", html: snippet(img), text: img.getAttribute("src") ?? "" });
-      }
-    });
-
-    const NATIVE = "a[href], button, input, select, textarea, summary, label, option, [contenteditable='true']";
-    const ROLES = new Set(["button", "link", "checkbox", "radio", "tab", "menuitem", "option", "switch", "combobox", "slider", "textbox"]);
-    const seen = new Set<Element>();
-    document.querySelectorAll("body *").forEach((el) => {
-      if (hidden(el) || el.matches(NATIVE) || el.closest(NATIVE)) return;
-      const role = el.getAttribute("role");
-      if (role && ROLES.has(role) && el.hasAttribute("tabindex")) return;
-      const clickable = el.hasAttribute("onclick") || (getComputedStyle(el).cursor === "pointer" && getComputedStyle(el.parentElement!).cursor !== "pointer");
-      if (!clickable) return;
-      if ((el as HTMLElement).tabIndex >= 0 && role && ROLES.has(role)) return;
-      for (const s of seen) if (s.contains(el)) return;
-      seen.add(el);
-      out.push({ kind: "clickable-not-operable", html: snippet(el), text: (el.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 60) });
-    });
-
-    document.querySelectorAll("input:not([type=hidden]):not([type=submit]):not([type=button]), textarea").forEach((el) => {
-      const input = el as HTMLInputElement;
-      const hasLabel = (input.labels && input.labels.length > 0) || input.getAttribute("aria-label") || input.getAttribute("aria-labelledby") || input.getAttribute("title");
-      if (!hasLabel && input.placeholder && !hidden(el)) out.push({ kind: "placeholder-only", html: snippet(el), text: input.placeholder });
-    });
-    return out;
-  });
+  // Passed as a string: tsx/esbuild can inject helpers (e.g. __name) into functions, which do not exist in the page.
+  const dom = (await page.evaluate(DOM_CHECKS)) as DomFinding[];
 
   const imgs = dom.filter((d) => d.kind === "img-no-alt");
   if (imgs.length) {
@@ -185,3 +148,42 @@ export async function scanPage(page: Page, snapshot: Snapshot): Promise<ScanFind
 
   return findings;
 }
+
+/** Runs in the page. Plain JavaScript on purpose (see scanPage). */
+const DOM_CHECKS = `(() => {
+  const out = [];
+  const snippet = (el) => {
+    const clone = el.cloneNode(true);
+    clone.querySelectorAll("svg").forEach((s) => s.replaceChildren());
+    return clone.outerHTML.replace(/\\s+/g, " ").slice(0, 160);
+  };
+  const hidden = (el) => el.closest('[aria-hidden="true"], [hidden]') !== null || getComputedStyle(el).display === "none" || getComputedStyle(el).visibility === "hidden";
+
+  if (!document.documentElement.getAttribute("lang")) out.push({ kind: "no-lang", html: "<html>", text: "" });
+
+  document.querySelectorAll("img:not([alt])").forEach((img) => {
+    if (!hidden(img) && !img.getAttribute("aria-label") && !img.getAttribute("aria-labelledby") && img.getAttribute("role") !== "presentation") {
+      out.push({ kind: "img-no-alt", html: snippet(img), text: img.getAttribute("src") || "" });
+    }
+  });
+
+  const NATIVE = "a[href], button, input, select, textarea, summary, label, option, [contenteditable='true']";
+  const ROLES = new Set(["button", "link", "checkbox", "radio", "tab", "menuitem", "option", "switch", "combobox", "slider", "textbox"]);
+  const seen = new Set();
+  document.querySelectorAll("body *").forEach((el) => {
+    if (hidden(el) || el.matches(NATIVE) || el.closest(NATIVE)) return;
+    const role = el.getAttribute("role");
+    if (role && ROLES.has(role) && el.hasAttribute("tabindex")) return;
+    const clickable = el.hasAttribute("onclick") || (getComputedStyle(el).cursor === "pointer" && getComputedStyle(el.parentElement).cursor !== "pointer");
+    if (!clickable) return;
+    for (const s of seen) if (s.contains(el)) return;
+    seen.add(el);
+    out.push({ kind: "clickable-not-operable", html: snippet(el), text: (el.textContent || "").replace(/\\s+/g, " ").trim().slice(0, 60) });
+  });
+
+  document.querySelectorAll("input:not([type=hidden]):not([type=submit]):not([type=button]), textarea").forEach((input) => {
+    const hasLabel = (input.labels && input.labels.length > 0) || input.getAttribute("aria-label") || input.getAttribute("aria-labelledby") || input.getAttribute("title");
+    if (!hasLabel && input.placeholder && !hidden(input)) out.push({ kind: "placeholder-only", html: snippet(input), text: input.placeholder });
+  });
+  return out;
+})()`;

@@ -110,7 +110,7 @@ export const clinicDemoPlan: PlanStep[] = [
     return calls;
   },
   (_t, find) => {
-    const date = find("textbox", /date/i);
+    const date = find("date field") ?? find("textbox", /date/i);
     return date
       ? [{ name: "type_text", input: { id: date.id, text: "2026-12-15", reason: `I fill in textbox "${date.name}".` } }]
       : [{ name: "finish", input: { status: "blocked", summary: "I could not find the date field." } }];

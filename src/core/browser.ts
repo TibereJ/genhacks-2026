@@ -92,7 +92,7 @@ export class BrowserSession {
           break;
         }
         case "type": {
-          if (!["textbox", "searchbox", "combobox", "spinbutton"].includes(el!.role)) {
+          if (!["textbox", "searchbox", "combobox", "spinbutton", "date field", "time field", "date and time field"].includes(el!.role)) {
             return fail(`${el!.role} "${el!.name}" is not a text field, so you cannot type into it.`);
           }
           const objectId = await this.resolve(el!);
@@ -100,15 +100,15 @@ export class BrowserSession {
             this.scrollIntoView({ block: "center" });
             this.focus();
             if (this.type === "date" || this.type === "time" || this.type === "datetime-local" || this.type === "month") {
-              this.dataset.bsDateInput = "1";
+              this.dataset.bsDateInput = this.type;
             } else if (typeof this.select === "function") { this.select(); }
             else if (this.isContentEditable) { document.getSelection().selectAllChildren(this); }
           }`);
-          const isDate = await this.call(objectId, `function () { return this.dataset.bsDateInput === "1"; }`);
-          if (isDate) {
-            // Date inputs take keyboard entry in locale order; set the value directly as a screen reader's edit field would.
-            const value = normalizeDate(action.text);
-            if (!value) return fail(`Could not understand "${action.text}" as a date. Use the format YYYY-MM-DD.`);
+          const dateType = (await this.call(objectId, `function () { return this.dataset.bsDateInput || ""; }`)) as string;
+          if (dateType) {
+            // Date/time inputs take keyboard entry in locale order; set the value directly, as typing a full date would.
+            const value = normalizeDateValue(dateType, action.text);
+            if (!value) return fail(`Could not understand "${action.text}" for this ${dateType} field. Use ${DATE_FORMATS[dateType] ?? "YYYY-MM-DD"}.`);
             await this.call(objectId, `function (v) {
               delete this.dataset.bsDateInput;
               this.value = v;
@@ -183,8 +183,20 @@ export class BrowserSession {
   }
 }
 
-function normalizeDate(input: string): string | undefined {
+const DATE_FORMATS: Record<string, string> = { date: "YYYY-MM-DD", time: "HH:MM (24h)", "datetime-local": "YYYY-MM-DDTHH:MM", month: "YYYY-MM" };
+
+function normalizeDateValue(type: string, input: string): string | undefined {
   const s = input.trim();
+  if (type === "time") {
+    const m = /^(\d{1,2})[:h.](\d{2})\s*(am|pm)?$/i.exec(s);
+    if (!m) return undefined;
+    let h = Number(m[1]);
+    if (m[3]?.toLowerCase() === "pm" && h < 12) h += 12;
+    if (m[3]?.toLowerCase() === "am" && h === 12) h = 0;
+    return h < 24 ? `${String(h).padStart(2, "0")}:${m[2]}` : undefined;
+  }
+  if (type === "month") return /^\d{4}-\d{2}$/.test(s) ? s : undefined;
+  if (type === "datetime-local") return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s) ? s : undefined;
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
   const d = new Date(s);
   if (Number.isNaN(d.getTime())) return undefined;

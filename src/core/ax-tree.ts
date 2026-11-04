@@ -43,6 +43,7 @@ const INTERACTIVE = new Set([
   "button", "link", "textbox", "searchbox", "combobox", "listbox", "option", "checkbox", "radio",
   "switch", "slider", "spinbutton", "menuitem", "menuitemcheckbox", "menuitemradio", "tab",
   "treeitem", "MenuListOption", "PopUpButton", "ToggleButton", "textField", "DisclosureTriangle",
+  "Date", "DateTime", "InputTime",
 ]);
 
 const LANDMARKS = new Set([
@@ -88,6 +89,9 @@ function spokenRole(role: string): string {
     case "PopUpButton": return "button menu";
     case "ToggleButton": return "toggle button";
     case "textField": return "textbox";
+    case "Date": return "date field";
+    case "DateTime": return "date and time field";
+    case "InputTime": return "time field";
     default: return role;
   }
 }

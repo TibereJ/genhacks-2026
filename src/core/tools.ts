@@ -37,7 +37,7 @@ export const TOOLS: Anthropic.Beta.BetaTool[] = [
   },
   {
     name: "type_text",
-    description: "Focus a text field and replace its content with the given text. For date fields use YYYY-MM-DD.",
+    description: "Focus a text, date or time field and replace its content with the given text. For date fields use YYYY-MM-DD, for time fields HH:MM.",
     input_schema: { type: "object", properties: { id, text: { type: "string" }, reason }, required: ["id", "text", "reason"], additionalProperties: false },
     strict: true,
   },

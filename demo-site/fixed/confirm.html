@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Appointment confirmed - Maple Grove Clinic</title>
+  <link rel="icon" href="../shared/logo.svg">
+  <link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo-link" href="index.html">
+        <img class="logo" src="../shared/logo.svg" alt="Maple Grove Clinic home" width="186" height="44">
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a class="nav-link" href="index.html">Home</a></li>
+          <li><a class="nav-link" href="index.html#doctors">Doctors</a></li>
+          <li>
+            <a class="nav-icon-link" href="book.html" aria-label="Book">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18M12 13.5v4M10 15.5h4"/></svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container confirm-wrap">
+      <div class="card confirm-card">
+        <div class="confirm-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </div>
+        <h1 class="confirm-title">Appointment confirmed</h1>
+        <p class="confirm-lead">Thank you. We have saved your visit and sent the details to your email.</p>
+        <dl class="details">
+          <div class="details-row"><dt>Doctor</dt><dd data-field="doctor"></dd></div>
+          <div class="details-row"><dt>Date</dt><dd data-field="date"></dd></div>
+          <div class="details-row"><dt>Time</dt><dd data-field="time"></dd></div>
+          <div class="details-row"><dt>Patient</dt><dd data-field="name"></dd></div>
+        </dl>
+        <a class="btn btn-ghost" href="index.html">Back to home</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-title">Maple Grove Clinic</p>
+          <p class="footer-text">120 Orchard Lane, Maple Grove</p>
+          <p class="footer-text">Phone: 555-0142</p>
+        </div>
+        <div>
+          <p class="footer-title">Opening hours</p>
+          <p class="footer-text">Mon to Fri: 8:00 to 18:00</p>
+          <p class="footer-text">Saturday: 9:00 to 13:00</p>
+        </div>
+        <div>
+          <p class="footer-title">Visit</p>
+          <p class="footer-text"><a href="book.html">Book online</a></p>
+          <p class="footer-text"><a href="index.html#doctors">Our doctors</a></p>
+        </div>
+      </div>
+      <p class="footer-bottom">Maple Grove Clinic is a fictional clinic created for the BlindSpot demo. No real appointments are made.</p>
+    </div>
+  </footer>
+
+  <script src="../shared/confirm.js"></script>
+</body>
+</html>
