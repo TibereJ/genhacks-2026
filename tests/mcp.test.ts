@@ -63,6 +63,19 @@ describe("MCP server", () => {
     expect((after as { isError?: boolean }).isError).toBe(true);
   }, 60_000);
 
+  it("refuses a second action sent before the first one is answered", async () => {
+    const start = textOf(await client.callTool({ name: "blindspot_start", arguments: { url: "/demo/fixed/index.html", task: "Book with Dr. Lee" } }));
+    const session = /Session: (\S+)/.exec(start)![1];
+    const link = idOf(start, /link "Book an appointment"/);
+    const [first, second] = await Promise.all([
+      client.callTool({ name: "blindspot_click", arguments: { session, id: link, reason: "go to form" } }),
+      client.callTool({ name: "blindspot_click", arguments: { session, id: link, reason: "again" } }),
+    ]);
+    expect(textOf(first)).toContain("New page loaded");
+    expect((second as { isError?: boolean }).isError).toBe(true);
+    expect(textOf(second)).toBe("Wait for the result of your previous action before sending another one.");
+    await client.callTool({ name: "blindspot_finish", arguments: { session, status: "blocked", summary: "Done." } });
+  }, 60_000);
 
   it("answers 400 to a malformed URL on the demo server and keeps running", async () => {
     const start = textOf(await client.callTool({ name: "blindspot_start", arguments: { url: "/demo/bad/index.html", task: "Look around" } }));

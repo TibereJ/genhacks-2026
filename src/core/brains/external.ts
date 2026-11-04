@@ -9,6 +9,8 @@ import type { Brain, BrainTurn, ToolCall, ToolOutcome } from "./brain.js";
 
 const IDLE_TIMEOUT_MS = Number(process.env.BLINDSPOT_EXTERNAL_TIMEOUT_MS || 15 * 60_000);
 
+export const BUSY_MESSAGE = "Wait for the result of your previous action before sending another one.";
+
 interface Deferred<T> { promise: Promise<T>; resolve(v: T): void; reject(e: Error): void }
 function deferred<T>(): Deferred<T> {
   let resolve!: (v: T) => void;
@@ -50,9 +52,13 @@ export class ExternalBrain implements Brain {
     return this.awaitTurn();
   }
 
-  /** Called by the external agent. Resolves with the tool result text. */
+  /**
+   * Called by the external agent. Resolves with the tool result text. One call at a time: a second call sent
+   * before the first is answered would act on a transcript the caller has not seen yet, so it is refused.
+   */
   submit(name: string, input: unknown): Promise<string> {
     if (this.closedMessage !== undefined) return Promise.reject(new Error(`This test has already ended. ${this.closedMessage}`));
+    if (this.waiting.size > 0) return Promise.reject(new Error(BUSY_MESSAGE));
     const call: ToolCall = { id: `ext_${++this.counter}`, name, input };
     const result = deferred<string>();
     this.waiting.set(call.id, result);
