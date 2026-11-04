@@ -35,7 +35,7 @@ describe("config validation", () => {
   it("accepts the repository's blindspot.config.json", async () => {
     const raw = JSON.parse(await readFile(new URL("../blindspot.config.json", import.meta.url), "utf8"));
     const cfg = parseConfig(raw);
-    expect(cfg.journeys.map((j) => j.mustSucceed)).toEqual([true, false]);
+    expect(cfg.journeys.map((j) => j.mustSucceed)).toEqual([true, false, true, false]);
   });
 
   it("reports every problem with its path", () => {
@@ -177,8 +177,8 @@ describe("markdown summary", () => {
   });
 });
 
-describe("CI run on the demo clinic (scripted agent, --serve)", () => {
-  it("passes: fixed succeeds, bad is blocked but allowed", async () => {
+describe("CI run on the demo sites (scripted agent, --serve)", () => {
+  it("passes: fixed versions succeed, bad versions are blocked but allowed", async () => {
     const summary = path.join(tmp, "summary.md");
     const stepSummary = path.join(tmp, "step-summary.md");
     await writeFile(stepSummary, "previous step\n");
@@ -189,7 +189,9 @@ describe("CI run on the demo clinic (scripted agent, --serve)", () => {
     );
     expect(code, lines.join("\n")).toBe(0);
     const md = await readFile(summary, "utf8");
-    expect(md).toContain("**2/2 journeys passed**");
+    expect(md).toContain("**4/4 journeys passed**");
+    expect(md).toMatch(/\| Checkout \(fixed shop\) \| \*\*PASS\*\* \| success \| \d+ \(min 90\) \| 0 \| - \|/);
+    expect(md).toMatch(/\| Checkout \(inaccessible shop\) \| \*\*PASS\*\* \(known issue\) \| blocked \| \d+ \| [1-9]\d* \| Terms of sale cannot be accepted \|/);
     expect(md).toMatch(/\| Book appointment \(fixed clinic\) \| \*\*PASS\*\* \| success \| \d+ \(min 90\) \| 0 \| - \|/);
     expect(md).toMatch(/\| Book appointment \(inaccessible clinic\) \| \*\*PASS\*\* \(known issue\) \| blocked \| \d+ \| [1-9]\d* \| Time slots cannot be selected \|/);
     const step = await readFile(stepSummary, "utf8");
