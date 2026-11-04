@@ -12,6 +12,7 @@ import {
   statusLabel,
   stripIds,
   toSpeech,
+  toSpeechLines,
   tokenizeTranscript,
 } from "../report-ui/format.js";
 
@@ -80,6 +81,20 @@ describe("transcripts", () => {
 
   it("turns the transcript into screen-reader-like sentences", () => {
     expect(toSpeech(heard)).toEqual(["main.", "combobox value Choose a doctor.", "Date, textbox.", "9:00. 10:30."]);
+  });
+
+  it("keeps the transcript line of each spoken sentence, so Listen can highlight it", () => {
+    const withBlank = 'main\n\n  [3] button ""\n  [12]\n  text "Done"';
+    const spoken = toSpeechLines(withBlank);
+    expect(spoken).toEqual([
+      { line: 0, text: "main." },
+      { line: 2, text: "button." },
+      { line: 4, text: "Done." },
+    ]);
+    // Indices point at the same lines as tokenizeTranscript.
+    const lines = tokenizeTranscript(withBlank);
+    expect(lines[2].tokens.map((t) => t.text).join("")).toContain("button");
+    expect(toSpeech(withBlank)).toEqual(spoken.map((s) => s.text));
   });
 
   it("tokenizes ids and empty names for highlighting", () => {

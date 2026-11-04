@@ -180,25 +180,37 @@ export function stripIds(text) {
  * Returns an array so the speech can be queued in short utterances.
  */
 export function toSpeech(heard) {
-  return stripIds(heard)
+  return toSpeechLines(heard).map((l) => l.text);
+}
+
+/**
+ * Same as toSpeech, keeping where each sentence comes from: `line` is the index of its line in the transcript
+ * (as split by tokenizeTranscript), so the UI can highlight the line being spoken.
+ */
+export function toSpeechLines(heard) {
+  return String(heard ?? "")
     .split("\n")
-    .map((line) =>
-      line
-        .trim()
-        // value "x" -> value x
-        .replace(/\bvalue "([^"]*)"/g, (_, v) => `value ${v}`)
-        // role "" -> role (a screen reader announces only the role)
-        .replace(/\b([a-z][a-z0-9 ]*?) ""/g, "$1")
-        // text "x" -> x
-        .replace(/\btext "([^"]*)"/g, "$1")
-        // role "name" -> name, role
-        .replace(/\b([a-z][a-z0-9 ]*?) "([^"]*)"/g, "$2, $1")
-        .replace(/\s{2,}/g, ". ")
-        .replace(/"/g, "")
-        .trim(),
-    )
-    .filter(Boolean)
-    .map((line) => (/[.!?:]$/.test(line) ? line : `${line}.`));
+    .map((line, index) => ({ line: index, text: speakLine(line) }))
+    .filter((l) => l.text)
+    .map((l) => ({ line: l.line, text: /[.!?:]$/.test(l.text) ? l.text : `${l.text}.` }));
+}
+
+function speakLine(line) {
+  return (
+    stripIds(line)
+      .trim()
+      // value "x" -> value x
+      .replace(/\bvalue "([^"]*)"/g, (_, v) => `value ${v}`)
+      // role "" -> role (a screen reader announces only the role)
+      .replace(/\b([a-z][a-z0-9 ]*?) ""/g, "$1")
+      // text "x" -> x
+      .replace(/\btext "([^"]*)"/g, "$1")
+      // role "name" -> name, role
+      .replace(/\b([a-z][a-z0-9 ]*?) "([^"]*)"/g, "$2, $1")
+      .replace(/\s{2,}/g, ". ")
+      .replace(/"/g, "")
+      .trim()
+  );
 }
 
 /**

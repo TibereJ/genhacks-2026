@@ -66,6 +66,8 @@ const ICONS = {
   download: ["M12 4v11", "M7 10l5 5 5-5", "M5 20h14"],
   compare: ["M4 7h13", "M13 3l4 4-4 4", "M20 17H7", "M11 13l-4 4 4 4"],
   plus: ["M12 5v14", "M5 12h14"],
+  minus: ["M5 12h14"],
+  power: ["M12 3v8", "M6.3 6.8a8 8 0 1 0 11.4 0"],
 };
 
 export function icon(name, extraClass = "") {

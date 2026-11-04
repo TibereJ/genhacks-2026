@@ -39,6 +39,7 @@ export function actionSegments(action: ActionLike | undefined): Segment[];
 export function actionText(action: ActionLike | undefined): string;
 export function stripIds(text: string | undefined): string;
 export function toSpeech(heard: string | undefined): string[];
+export function toSpeechLines(heard: string | undefined): { line: number; text: string }[];
 export function tokenizeTranscript(heard: string | undefined): TranscriptLine[];
 export function relativeTime(iso: string, now?: number): string;
 export function duration(startIso: string | undefined, endIso: string | undefined): string;

@@ -9,6 +9,7 @@ import { renderHome } from "./home.js";
 import { renderReport } from "./report.js";
 import { renderCompare } from "./compare.js";
 import { initLightbox } from "./lightbox.js";
+import { initHearMode } from "./hear.js";
 import { stopSpeaking } from "./speech.js";
 import { FIXTURE_MODE, STATIC_MODE } from "./api.js";
 
@@ -60,5 +61,6 @@ if (STATIC_MODE) {
   }
 }
 initLightbox();
+initHearMode();
 window.addEventListener("hashchange", route);
 route();

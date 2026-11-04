@@ -1,7 +1,8 @@
 // "Listen" buttons: read a transcript aloud with the Web Speech API, one utterance per line
 // (long single utterances get cut off in some browsers). Only one transcript plays at a time.
+// Each utterance reports when it starts, so the UI can highlight the line being spoken, like captions.
 
-import { toSpeech } from "./format.js";
+import { toSpeechLines } from "./format.js";
 
 const synth = typeof window !== "undefined" ? window.speechSynthesis : undefined;
 export const SPEECH_SUPPORTED = Boolean(synth && typeof SpeechSynthesisUtterance !== "undefined");
@@ -37,18 +38,24 @@ export function stopSpeaking() {
 }
 
 /**
- * Speak `heard`. `onStop` is called once when playback ends, is stopped, or is
+ * Speak `heard`. `onLine(index)` is called when the sentence of transcript line `index` starts
+ * (indices as in tokenizeTranscript). `onStop` is called once when playback ends, is stopped, or is
  * replaced by another transcript.
  */
-export function speak(heard, onStop) {
+export function speak(heard, onStop, onLine) {
   if (!SPEECH_SUPPORTED) return false;
   stopSpeaking();
-  const lines = toSpeech(heard);
+  const lines = toSpeechLines(heard);
   if (!lines.length) return false;
   const session = { onStop };
   current = session;
-  lines.forEach((line, i) => {
-    const u = new SpeechSynthesisUtterance(line);
+  lines.forEach(({ line: index, text }, i) => {
+    const u = new SpeechSynthesisUtterance(text);
+    if (onLine) {
+      u.addEventListener("start", () => {
+        if (current === session) onLine(index);
+      });
+    }
     if (voice) u.voice = voice;
     u.lang = voice?.lang ?? "en-US";
     u.rate = 1.2;

@@ -1,9 +1,9 @@
-// Home view: the pitch with a transcript specimen, the "run a test" form with demo presets, and the list of past runs.
+// Home view: the pitch with a "screen on / screen off" demo, the "run a test" form with demo presets, and the list of past runs.
 
 import { h, icon, replaceChildren } from "./dom.js";
 import { listReports, startRun, FIXTURE_MODE, STATIC_MODE } from "./api.js";
 import { orderRuns, prettyUrl, relativeTime, tokenizeTranscript } from "./format.js";
-import { statusBadge, scorePill, emptyState, errorBox } from "./components.js";
+import { statusBadge, scorePill, emptyState, errorBox, announce, roleTag, listRole, quoted } from "./components.js";
 
 const DEMO_TASK =
   "Book an appointment with Dr. Lee for any available time. Use the name Alex Doe and the email alex@example.com.";
@@ -19,30 +19,45 @@ const PRESETS = [
 ];
 
 /**
- * An excerpt of what the agent heard on the inaccessible demo clinic's booking form (step 4 of the example run),
- * shown on the home page as a specimen. `note` points at the numbered remarks under it; "…" marks lines left out.
+ * The hero demo: the inaccessible demo clinic's booking form (screenshot of step 5 of the example run, in img/) next
+ * to what the agent heard there (an excerpt of the same step's transcript). `note` points at the numbered remarks
+ * under it; "…" marks lines left out.
  */
-const SPECIMEN = [
-  { line: '[6] date field "Date" value "2026-11-05" ← focus' },
-  { line: 'text "Available times"' },
-  { line: 'text "9:00"', note: 1 },
-  { line: 'text "10:30"', note: 1 },
-  { line: 'text "11:45"', note: 1 },
-  { line: 'text "14:00"', note: 1 },
-  { line: 'text "16:15"', note: 1 },
-  { line: "…" },
-  { line: '[7] textbox "Full name"' },
-  { line: 'text "Email"' },
-  { line: '[8] textbox ""', note: 2 },
-  { line: "…" },
-  { line: 'text "Book appointment"' },
-  { line: '[9] button ""', note: 3 },
+const DEMO_LINES = [
+  { line: 'heading level 1 "Book an appointment"' },
+  { line: "form" },
+  { line: '  text "Doctor"' },
+  { line: '  [5] combobox "" value "Dr. Lee — Family medicine"', note: 1 },
+  { line: '  text "Date"' },
+  { line: '  [6] date field "Date" value "2026-11-05" ← focus' },
+  { line: '  text "Available times"' },
+  { line: '  text "9:00"', note: 2 },
+  { line: '  text "10:30"', note: 2 },
+  { line: '  text "11:45"', note: 2 },
+  { line: '  text "14:00"', note: 2 },
+  { line: '  text "16:15"', note: 2 },
+  { line: '  heading level 2 "Your details"' },
+  { line: '  [7] textbox "Full name"' },
+  { line: '  text "Email"' },
+  { line: '  [8] textbox ""', note: 3 },
+  { line: "  …" },
+  { line: '  text "Book appointment"' },
+  { line: '  [9] button ""', note: 4 },
 ];
 
-const SPECIMEN_NOTES = [
-  "The time slots are plain text with no number, so nothing can focus or choose them. Tab goes from the date straight to Full name.",
-  "The email field has no label. “Email” is only nearby text.",
-  "The button that books is announced as a button, with no name.",
+const DEMO_NOTES = [
+  { text: "The doctor list has no name. You hear “combobox”, not “Doctor”." },
+  { text: "The time slots are plain text. Nothing can focus or choose them: Tab goes from the date straight to Full name.", blocking: true },
+  { text: "The email field has no label. “Email” is only nearby text." },
+  { text: "The button that books has no name. It is announced as just “button”." },
+];
+
+/** Where each note's element sits on the screenshot (percent of the image), for the numbered pins. */
+const DEMO_PINS = [
+  { note: 1, x: 10.7, y: 37.2 },
+  { note: 2, x: 10.7, y: 49.6 },
+  { note: 3, x: 37.2, y: 73.8 },
+  { note: 4, x: 44.3, y: 83.4 },
 ];
 
 /** The example runs of the demo clinic (examples/reports/), linked from the hero when they are in the list. */
@@ -210,6 +225,7 @@ export function renderHome(root) {
   }
 
   // ---- runs list ----
+  const runsRole = roleTag("list");
   const runsBody = h("div", { class: "runs-body", "aria-busy": "true" }, h("p", { class: "muted runs-loading" }, "Loading runs…"));
   let runsKey = "";
   let runs = [];
@@ -263,6 +279,7 @@ export function renderHome(root) {
       if (!alive) return;
       runsBody.setAttribute("aria-busy", "false");
       runs = Array.isArray(list) ? list : [];
+      runsRole.textContent = runs.length ? listRole(runs.length) : "list";
       const known = new Set(runs.map((r) => r.id));
       for (const id of selected) if (!known.has(id)) selected.delete(id);
       compareBar.hidden = runs.length < 2;
@@ -323,32 +340,30 @@ export function renderHome(root) {
         "section",
         { class: "hero", "aria-labelledby": "page-title" },
         h(
-          "h1",
-          { id: "page-title", tabindex: "-1" },
-          h("span", { class: "hero-quiet" }, "Lighthouse checks rules."),
-          " ",
-          h("span", { class: "hero-loud" }, "BlindSpot checks whether a blind person can ", h("em", {}, "actually"), " use your site."),
-        ),
-        h(
           "div",
-          { class: "hero-body" },
+          { class: "hero-head" },
+          announce(
+            "heading level 1",
+            h("h1", { id: "page-title", tabindex: "-1" }, quoted("Can a blind person actually use your site?")),
+            "announce-hero",
+          ),
           h(
             "div",
-            { class: "hero-text" },
+            { class: "hero-intro" },
             h(
-              "p",
-              { class: "lede" },
-              "Give it a web address and a task, the way you would brief a person: book an appointment, check out, find a price. An agent then tries to do it with nothing but what a screen reader announces. It never sees the page.",
-            ),
-            h(
-              "p",
-              { class: "lede-2" },
-              "When it gets stuck, the report shows the exact step, what it heard there, the WCAG criterion involved and the code that fixes it.",
+              "div",
+              { class: "hero-text" },
+              h("p", { class: "lede" }, "Lighthouse checks rules. BlindSpot checks whether a blind person can actually use your site."),
+              h(
+                "p",
+                { class: "lede-2" },
+                "Give it a web address and a task, the way you would brief a person: book an appointment, check out, find a price. An agent tries to do it with nothing but what a screen reader announces. It never sees the page. When it gets stuck, the report shows the step, what it heard there, the WCAG criterion and the code that fixes it.",
+              ),
             ),
             heroLinks,
           ),
-          specimen(),
         ),
+        screenDemo(),
       ),
       STATIC_MODE
         ? staticNotice()
@@ -358,7 +373,7 @@ export function renderHome(root) {
             h(
               "div",
               { class: "run-intro" },
-              h("h2", { id: "run-title" }, "Run a test"),
+              announce("region", h("h2", { id: "run-title" }, "Run a test")),
               h(
                 "p",
                 { class: "section-note" },
@@ -373,7 +388,7 @@ export function renderHome(root) {
         h(
           "div",
           { class: "section-head" },
-          h("h2", { id: "runs-title" }, STATIC_MODE ? "Example runs" : "Recent runs"),
+          announce(runsRole, h("h2", { id: "runs-title" }, STATIC_MODE ? "Example runs" : "Recent runs")),
           FIXTURE_MODE ? h("span", { class: "badge status-info" }, "Sample data") : null,
           STATIC_MODE
             ? h("p", { class: "section-note" }, "Real runs by the agent: both demo sites, broken and fixed, and three public websites.")
@@ -396,45 +411,102 @@ export function renderHome(root) {
   };
 }
 
-/** The transcript excerpt shown in the hero: real output, typeset like a specimen with numbered remarks. */
-function specimen() {
-  const rows = SPECIMEN.map(({ line, note }, i) => {
-    const first = note && SPECIMEN[i - 1]?.note !== note;
-    const last = note && SPECIMEN[i + 1]?.note !== note;
-    if (line === "…") return h("span", { class: "sp-row sp-gap" }, h("span", { class: "sp-code" }, "…"));
+/**
+ * "Screen on / Screen off": the booking form as a sighted user sees it, next to what a screen reader announces.
+ * The toggle is a real button with aria-pressed. Turning the screen off fades the screenshot to black and lights the
+ * transcript up line by line, like captions (no animation with prefers-reduced-motion). The visual changes are
+ * aria-hidden decoration: the transcript and the notes are always there for screen reader users.
+ */
+function screenDemo() {
+  const toggle = h(
+    "button",
+    { type: "button", class: "screen-toggle", "aria-pressed": "false", "aria-describedby": "demo-title" },
+    h("span", { class: "switch", "aria-hidden": "true" }, h("span", { class: "switch-knob" })),
+    "Screen off",
+  );
+
+  const rows = DEMO_LINES.map(({ line, note }, i) => {
+    const first = note && DEMO_LINES[i - 1]?.note !== note;
+    const last = note && DEMO_LINES[i + 1]?.note !== note;
+    const gap = line.trim() === "…";
     const [tokens] = tokenizeTranscript(line);
     return h(
       "span",
-      { class: `sp-row${note ? " is-noted" : ""}${first ? " is-first" : ""}${last ? " is-last" : ""}` },
+      {
+        class: `dl${gap ? " is-gap" : ""}${note ? " is-barrier" : ""}${first ? " is-first" : ""}${last ? " is-last" : ""}`,
+        style: `--i: ${i}`,
+      },
       h(
         "span",
-        { class: "sp-code" },
+        { class: "dl-code", style: `--in: ${line.match(/^ */)[0].length}` },
         tokens.tokens.map((t) => (t.kind === "text" ? t.text : h("span", { class: `t-${t.kind}` }, t.text))),
       ),
-      first ? h("span", { class: "sp-mark", "aria-hidden": "true" }, String(note)) : null,
+      first ? h("span", { class: "note-num", "aria-hidden": "true" }, String(note)) : null,
     );
   });
-  return h(
+
+  const figure = h(
     "figure",
-    { class: "specimen", "aria-labelledby": "specimen-title" },
+    { class: "demo", "aria-labelledby": "demo-title" },
     h(
       "div",
-      { class: "specimen-head" },
-      h("p", { class: "specimen-title", id: "specimen-title" }, "What the agent heard on a booking form"),
-      h("p", { class: "specimen-source" }, "Maple Grove Clinic, inaccessible version, step 4"),
+      { class: "demo-bar" },
+      h(
+        "div",
+        { class: "demo-heading" },
+        h("p", { class: "demo-title", id: "demo-title" }, "The same booking form, seen and heard"),
+        h("p", { class: "demo-source" }, "Maple Grove Clinic, inaccessible version. A real run, step 5."),
+      ),
+      toggle,
     ),
-    h("pre", { class: "specimen-code", tabindex: "0", "aria-label": "Screen reader transcript excerpt" }, rows),
+    h(
+      "div",
+      { class: "demo-panes" },
+      h(
+        "div",
+        { class: "demo-screen" },
+        h("span", { class: "screen-label", "aria-hidden": "true" }, h("span", { class: "screen-label-on" }, "Screen on"), h("span", { class: "screen-label-off" }, "Screen off")),
+        h(
+          "div",
+          { class: "demo-shot" },
+          h("img", {
+            src: "img/clinic-booking-form.png",
+            width: 1280,
+            height: 820,
+            alt: "Screenshot of the clinic's booking form: a doctor list, a date, five time slot buttons from 9:00 to 16:15, name and email fields, and a Book appointment button.",
+            decoding: "async",
+          }),
+          DEMO_PINS.map((p) => h("span", { class: "pin", style: `left: ${p.x}%; top: ${p.y}%`, "aria-hidden": "true" }, String(p.note))),
+          h("p", { class: "demo-off-caption", "aria-hidden": "true" }, "This is what a screen reader user gets", h("span", { class: "demo-off-arrow" }, icon("arrow"))),
+        ),
+      ),
+      h(
+        "div",
+        { class: "demo-hear" },
+        h("p", { class: "pane-head" }, h("span", { class: "pane-icon" }, icon("ear")), h("span", { class: "pane-title" }, "What a screen reader announces")),
+        h("pre", { class: "demo-transcript", tabindex: "0", "aria-label": "Screen reader transcript of the booking form, excerpt" }, rows),
+      ),
+    ),
     h(
       "figcaption",
-      { class: "specimen-notes" },
+      { class: "demo-notes" },
       h(
         "ol",
         {},
-        SPECIMEN_NOTES.map((text) => h("li", {}, text)),
+        DEMO_NOTES.map(({ text, blocking }) =>
+          h("li", { class: blocking ? "is-blocking" : "" }, h("span", { class: "note-text" }, text), blocking ? h("span", { class: "note-flag" }, "Blocks the task") : null),
+        ),
       ),
-      h("p", { class: "specimen-foot" }, "A mouse user books without noticing any of it."),
+      h("p", { class: "demo-foot" }, "A mouse user books without noticing any of it."),
     ),
   );
+
+  toggle.addEventListener("click", () => {
+    const off = toggle.getAttribute("aria-pressed") !== "true";
+    toggle.setAttribute("aria-pressed", String(off));
+    figure.classList.toggle("is-screen-off", off);
+  });
+  return figure;
 }
 
 /**
@@ -448,7 +520,7 @@ function staticNotice() {
     h(
       "div",
       { class: "run-intro" },
-      h("h2", { id: "run-title" }, "Run a test"),
+      announce("region", h("h2", { id: "run-title" }, "Run a test")),
       h(
         "p",
         { class: "static-text" },

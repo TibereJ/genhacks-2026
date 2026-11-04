@@ -17,15 +17,13 @@ import {
   tokenizeTranscript,
   SEVERITY_ORDER,
 } from "./format.js";
-import { statusBadge, scoreGauge, elementChip, wcagChip, emptyState, errorBox } from "./components.js";
+import { statusBadge, scoreGauge, elementChip, wcagChip, emptyState, errorBox, announce, roleTag, listRole, quoted, severityLabel } from "./components.js";
 import { speak, stopSpeaking, SPEECH_SUPPORTED } from "./speech.js";
 import { openLightbox } from "./lightbox.js";
 import { reportActions } from "./report-actions.js";
 
 const POLL_MS = 1500;
 const RETRY_MS = 3000;
-
-const SEVERITY_LABELS = { critical: "Critical", serious: "Serious", moderate: "Moderate", minor: "Minor" };
 
 export function renderReport(root, id) {
   let alive = true;
@@ -41,12 +39,14 @@ export function renderReport(root, id) {
   const head = h(
     "header",
     { class: "card report-head" },
-    h("div", { class: "head-main" }, h("p", { class: "head-kicker" }, "Report"), h("h1", { id: "page-title", tabindex: "-1" }, "Loading report…")),
+    h("div", { class: "head-main" }, announce("heading level 1", h("h1", { id: "page-title", tabindex: "-1" }, "Loading report…"))),
   );
   const liveRegion = h("div", { class: "live-banner", role: "status", "aria-live": "polite" });
   // Export / compare toolbar, filled in once the run has finished.
   const actionsSlot = h("div", { class: "report-actions-slot" });
   const issuesCount = h("span", { class: "count" });
+  const issuesRole = roleTag("list");
+  const stepsRole = roleTag("list");
   const severitySummary = h("div", { class: "sev-summary" });
   const issuesBody = h("div", { class: "issues-body" });
   const stepsCount = h("span", { class: "count" });
@@ -63,13 +63,13 @@ export function renderReport(root, id) {
     h(
       "nav",
       { class: "jump", "aria-label": "Report sections" },
-      h("a", { href: "#issues-title", onclick: jumpTo("issues-title") }, "Issues"),
+      h("a", { href: "#issues-title", onclick: jumpTo("issues-title") }, "Blind spots"),
       h("a", { href: "#steps-title", onclick: jumpTo("steps-title") }, "What the agent did"),
     ),
     h(
       "section",
       { class: "issues-section", "aria-labelledby": "issues-title" },
-      h("div", { class: "section-head" }, h("h2", { id: "issues-title", tabindex: "-1" }, "Issues ", issuesCount), severitySummary),
+      h("div", { class: "section-head" }, announce(issuesRole, h("h2", { id: "issues-title", tabindex: "-1" }, "Blind spots ", issuesCount)), severitySummary),
       issuesBody,
     ),
     h(
@@ -78,7 +78,7 @@ export function renderReport(root, id) {
       h(
         "div",
         { class: "section-head" },
-        h("h2", { id: "steps-title", tabindex: "-1" }, "What the agent did ", stepsCount),
+        announce(stepsRole, h("h2", { id: "steps-title", tabindex: "-1" }, "What the agent did ", stepsCount)),
         h("p", { class: "section-note" }, "The agent never sees the screen. It acts only on what a screen reader announces."),
       ),
       stepsList,
@@ -138,7 +138,7 @@ export function renderReport(root, id) {
         h(
           "span",
           { class: "live-text" },
-          h("strong", {}, "Agent is navigating…"),
+          h("strong", {}, "The agent is listening…"),
           " ",
           steps.length ? `Step ${steps.length}: ${actionText(steps.at(-1).action)}` : "Opening the page and listening to it.",
         ),
@@ -147,7 +147,7 @@ export function renderReport(root, id) {
       liveRegion.className = "live-banner is-done sr-only";
       replaceChildren(
         liveRegion,
-        `Test finished: ${statusLabel(r.status)}.${typeof r.score === "number" ? ` Score ${Math.round(r.score)} out of 100.` : ""} ${issues.length} issues found.`,
+        `Test finished: ${statusLabel(r.status)}.${typeof r.score === "number" ? ` Score ${Math.round(r.score)} out of 100.` : ""} ${issues.length} ${issues.length === 1 ? "blind spot" : "blind spots"} found.`,
       );
     } else {
       liveRegion.className = "live-banner sr-only";
@@ -187,6 +187,7 @@ export function renderReport(root, id) {
       }
     }
     stepsCount.textContent = steps.length ? String(steps.length) : "";
+    stepsRole.textContent = steps.length ? listRole(steps.length) : "list";
 
     if (running) {
       replaceChildren(
@@ -209,17 +210,18 @@ export function renderReport(root, id) {
   function renderIssues(issues, steps, running) {
     const sorted = sortIssues(issues);
     issuesCount.textContent = issues.length ? String(issues.length) : "";
+    issuesRole.textContent = issues.length ? listRole(issues.length) : "list";
     const counts = countBySeverity(issues);
     replaceChildren(
       severitySummary,
-      SEVERITY_ORDER.filter((s) => counts[s]).map((s) => h("span", { class: `sev-count sev-${s}` }, h("strong", {}, String(counts[s])), ` ${SEVERITY_LABELS[s].toLowerCase()}`)),
+      SEVERITY_ORDER.filter((s) => counts[s]).map((s) => h("span", { class: `sev-count sev-${s}` }, h("strong", {}, String(counts[s])), ` ${s}`)),
     );
     if (!sorted.length) {
       replaceChildren(
         issuesBody,
         running
-          ? emptyState("No issues yet", "Issues appear here as the agent finds them.")
-          : emptyState("No issues found", "The agent did not report any barrier on this task."),
+          ? emptyState("No blind spots yet", "They appear here as the agent finds them.")
+          : emptyState("No blind spots found", "The agent did not report any barrier on this task."),
       );
       return;
     }
@@ -275,8 +277,7 @@ function renderHead(head, r, steps, issues) {
     h(
       "div",
       { class: "head-main" },
-      h("p", { class: "head-kicker" }, "Task"),
-      h("h1", { id: "page-title", tabindex: "-1" }, r.task || "Untitled task"),
+      announce("heading level 1", h("h1", { id: "page-title", tabindex: "-1" }, quoted(r.task || "Untitled task"))),
       h(
         "p",
         { class: "head-url" },
@@ -291,7 +292,7 @@ function renderHead(head, r, steps, issues) {
       { class: "head-stats", role: "list" },
       h("li", { class: "stat stat-status" }, h("span", { class: "stat-label" }, "Result"), h("span", { class: "stat-value" }, statusBadge(r.status))),
       stat(String(steps.length), steps.length === 1 ? "Step" : "Steps"),
-      stat(String(issues.length), issues.length === 1 ? "Issue" : "Issues"),
+      stat(String(issues.length), issues.length === 1 ? "Blind spot" : "Blind spots"),
       stat(String(blocking), "Blocking", blocking ? "bad" : ""),
       took ? stat(took, "Duration") : null,
       started ? h("li", { class: "stat stat-time" }, h("span", { class: "stat-label" }, "Started"), h("span", { class: "stat-value" }, h("time", { datetime: r.startedAt }, started))) : null,
@@ -332,9 +333,8 @@ function renderIssue(issue, steps, n) {
         "div",
         { class: "issue-top" },
         h("span", { class: "issue-num", "aria-hidden": "true" }, String(n).padStart(2, "0")),
-        h("span", { class: `badge sev sev-${issue.severity}` }, SEVERITY_LABELS[issue.severity] ?? issue.severity),
-        issue.blocking ? h("span", { class: "badge blocking-flag" }, icon("alert"), "Blocks the task") : null,
-        h("span", { class: `badge source source-${issue.source}` }, issue.source === "scan" ? "Automated scan" : "Found by agent"),
+        severityLabel(issue),
+        h("span", { class: `source source-${issue.source}` }, issue.source === "scan" ? "Automated scan" : "Found by agent"),
         pos !== null
           ? h(
               "a",
@@ -421,14 +421,14 @@ function renderStep(reportId, step, pos, stepIssues, isNew) {
       tabindex: "-1",
       "aria-labelledby": titleId,
     },
-    h("div", { class: "step-rail", "aria-hidden": "true" }, h("span", { class: "step-num" }, String(n))),
+    h("div", { class: "step-rail", "aria-hidden": "true" }, h("span", { class: "step-num" }, String(n).padStart(2, "0"))),
     h(
       "div",
       { class: "step-card card" },
       h(
         "div",
         { class: "step-head" },
-        h("span", { class: "step-num-inline", "aria-hidden": "true" }, String(n)),
+        h("span", { class: "step-num-inline", "aria-hidden": "true" }, `step ${n}`),
         h("h3", { class: "step-title", id: titleId }, h("span", { class: "sr-only" }, `Step ${n}: `), actionSentence(action)),
         h(
           "span",
@@ -447,8 +447,8 @@ function renderStep(reportId, step, pos, stepIssues, isNew) {
       h(
         "div",
         { class: "compare" },
-        seePane(reportId, step, n),
         hearPane(step, n),
+        seePane(reportId, step, n),
       ),
       step.url ? h("p", { class: "step-url" }, h("span", { class: "sr-only" }, "Page: "), prettyUrl(step.url)) : null,
     ),
@@ -459,7 +459,7 @@ function stepIssueLinks(stepIssues, n) {
   if (!stepIssues.length) return null;
   return h(
     "ul",
-    { class: "step-issues", role: "list", "aria-label": `Issues found at step ${n}` },
+    { class: "step-issues", role: "list", "aria-label": `Blind spots found at step ${n}` },
     stepIssues.map((i) =>
       h(
         "li",
@@ -512,7 +512,13 @@ function seePane(reportId, step, n) {
   return h(
     "figure",
     { class: "pane pane-see" },
-    h("figcaption", { class: "pane-head" }, h("span", { class: "pane-icon" }, icon("eye")), h("span", { class: "pane-title" }, "What you see")),
+    h(
+      "figcaption",
+      { class: "pane-head" },
+      h("span", { class: "pane-icon" }, icon("eye")),
+      h("span", { class: "pane-title" }, "What you see"),
+      h("span", { class: "screen-label", "aria-hidden": "true" }, "Screen on"),
+    ),
     frame,
   );
 }
@@ -527,7 +533,7 @@ function hearPane(step, n) {
       const isTarget = typeof targetId === "number" && line.ids.includes(targetId);
       return h(
         "span",
-        { class: `t-line${isTarget ? " is-target" : ""}` },
+        { class: `t-line${isTarget ? " is-target" : ""}`, style: `--in: ${leadingSpaces(line)}` },
         line.tokens.map((t) => (t.kind === "text" ? t.text : h("span", { class: `t-${t.kind}` }, t.text))),
         isTarget ? h("span", { class: "t-acted" }, " agent acted here") : null,
       );
@@ -541,9 +547,11 @@ function hearPane(step, n) {
   const setPlaying = (on) => {
     playing = on;
     listen.classList.toggle("is-playing", on);
+    pre.classList.toggle("is-speaking", on);
     label.textContent = on ? "Stop" : "Listen";
     labelSuffix.textContent = on ? ` reading step ${n}` : ` to step ${n}`;
     replaceChildren(btnIcon, icon(on ? "stop" : "speaker"));
+    if (!on) highlightLine(pre, -1);
   };
   const listen = h(
     "button",
@@ -551,11 +559,11 @@ function hearPane(step, n) {
       type: "button",
       class: "btn btn-listen btn-sm",
       disabled: !SPEECH_SUPPORTED || !step.heard,
-      title: SPEECH_SUPPORTED ? "Read this transcript aloud, like a screen reader" : "Speech synthesis is not supported in this browser",
+      title: SPEECH_SUPPORTED ? "Read this transcript aloud, like a screen reader, with captions" : "Speech synthesis is not supported in this browser",
       onclick: () => {
         if (playing) {
           stopSpeaking();
-        } else if (speak(step.heard, () => setPlaying(false))) {
+        } else if (speak(step.heard, () => setPlaying(false), (index) => highlightLine(pre, index))) {
           setPlaying(true);
         }
       },
@@ -577,4 +585,22 @@ function hearPane(step, n) {
     ),
     step.heard ? pre : h("div", { class: "transcript transcript-empty" }, "Nothing was announced."),
   );
+}
+
+/** Number of leading spaces of a tokenized transcript line (its depth in the tree). */
+function leadingSpaces(line) {
+  return line.tokens.map((t) => t.text).join("").match(/^ */)[0].length;
+}
+
+/**
+ * Captions for Listen: mark transcript line `index` as the one being spoken (-1 clears) and scroll it into view
+ * inside the transcript panel only, never the page. Exported so the highlight can be shown without speech.
+ */
+export function highlightLine(pre, index) {
+  pre.querySelector(".t-line.is-current")?.classList.remove("is-current");
+  const line = index >= 0 ? pre.querySelectorAll(".t-line")[index] : null;
+  if (!line) return;
+  line.classList.add("is-current");
+  const top = line.offsetTop - pre.clientHeight / 2 + line.offsetHeight / 2;
+  pre.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
 }

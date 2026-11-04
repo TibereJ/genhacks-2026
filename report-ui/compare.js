@@ -4,12 +4,11 @@
 import { h, icon, replaceChildren } from "./dom.js";
 import { getReport } from "./api.js";
 import { compareIssues, duration, issueComparability, prettyUrl, relativeTime, scoreDelta, statusLabel } from "./format.js";
-import { statusBadge, scoreGauge, elementChip, wcagChip, emptyState, errorBox } from "./components.js";
+import { statusBadge, scoreGauge, elementChip, wcagChip, emptyState, errorBox, announce, listRole, quoted, severityLabel } from "./components.js";
 
 const POLL_MS = 1500;
 const RETRY_MS = 3000;
 
-const SEVERITY_LABELS = { critical: "Critical", serious: "Serious", moderate: "Moderate", minor: "Minor" };
 
 export function renderCompare(root, beforeId, afterId) {
   let alive = true;
@@ -19,7 +18,7 @@ export function renderCompare(root, beforeId, afterId) {
   const body = h(
     "div",
     { class: "cmp-body" },
-    h("header", { class: "card cmp-head" }, h("p", { class: "head-kicker" }, "Before / after"), h("h1", { id: "page-title", tabindex: "-1" }, "Loading comparison…")),
+    h("header", { class: "card cmp-head" }, h("p", { class: "head-kicker" }, "Before / after"), announce("heading level 1", h("h1", { id: "page-title", tabindex: "-1" }, "Loading comparison…"))),
   );
   replaceChildren(
     root,
@@ -71,7 +70,13 @@ export function renderCompare(root, beforeId, afterId) {
 }
 
 function header(title, ...extra) {
-  return h("header", { class: "card cmp-head" }, h("p", { class: "head-kicker" }, "Before / after"), h("h1", { id: "page-title", tabindex: "-1" }, title), ...extra);
+  return h(
+    "header",
+    { class: "card cmp-head" },
+    h("p", { class: "head-kicker" }, "Before / after"),
+    announce("heading level 1", h("h1", { id: "page-title", tabindex: "-1" }, title)),
+    ...extra,
+  );
 }
 
 function renderComparison(before, after) {
@@ -86,7 +91,7 @@ function renderComparison(before, after) {
 
   return [
     header(
-      sameTask ? after.task || "Untitled task" : "Two different tasks",
+      sameTask ? quoted(after.task || "Untitled task") : "Two different tasks",
       sameTask ? null : h("p", { class: "cmp-note" }, icon("alert"), "These runs did not test the same task, so the comparison may be misleading."),
       running ? h("p", { class: "cmp-note", role: "status" }, h("span", { class: "spinner", "aria-hidden": "true" }), "A run is still in progress. This page updates on its own.") : null,
       comparable ? null : h("p", { class: "cmp-note cmp-not-comparable" }, icon("alert"), reason),
@@ -117,12 +122,12 @@ function renderComparison(before, after) {
       tone: "good",
       iconName: "check",
       title: "Fixed",
-      note: "Found before, gone after.",
+      note: "Blind spots found before, gone after.",
       items: comparable ? fixed.map((i) => ({ issue: i })) : [],
       count: comparable ? undefined : "not compared",
       empty: !comparable
-        ? "Not compared: one of these runs did not test the whole task, so earlier issues cannot be called fixed."
-        : before.issues?.length ? "None of the earlier issues were fixed." : "The earlier run had no issues.",
+        ? "Not compared: one of these runs did not test the whole task, so earlier blind spots cannot be called fixed."
+        : before.issues?.length ? "None of the earlier blind spots were fixed." : "The earlier run had no blind spots.",
     }),
     issueSection({
       id: "cmp-still-title",
@@ -131,7 +136,7 @@ function renderComparison(before, after) {
       title: "Still present",
       note: "Found in both runs.",
       items: stillPresent.map(({ before: b, after: a }) => ({ issue: a, was: b })),
-      empty: "No earlier issue is still there.",
+      empty: "No earlier blind spot is still there.",
     }),
     issueSection({
       id: "cmp-new-title",
@@ -140,7 +145,7 @@ function renderComparison(before, after) {
       title: "New",
       note: "Only found in the later run.",
       items: added.map((i) => ({ issue: i })),
-      empty: "No new issues.",
+      empty: "No new blind spots.",
     }),
   ];
 }
@@ -153,14 +158,14 @@ function runCard(label, r) {
   return h(
     "article",
     { class: `card cmp-run cmp-${label.toLowerCase()}`, "aria-labelledby": titleId },
-    h("h2", { id: titleId, class: "cmp-run-label" }, label),
+    announce("region", h("h2", { id: titleId, class: "cmp-run-label" }, label)),
     scoreGauge(r.score, r.status),
     h("div", { class: "cmp-run-status" }, statusBadge(r.status)),
     h(
       "ul",
       { class: "cmp-run-facts", role: "list" },
       h("li", { class: "cmp-run-url" }, prettyUrl(r.url)),
-      h("li", {}, `${issues} ${issues === 1 ? "issue" : "issues"}`, took ? ` · ${took}` : ""),
+      h("li", {}, `${issues} ${issues === 1 ? "blind spot" : "blind spots"}`, took ? ` · ${took}` : ""),
       when ? h("li", {}, h("time", { datetime: r.startedAt }, when)) : null,
     ),
     h(
@@ -197,13 +202,16 @@ function issueSection({ id, tone, iconName, title, note, items, empty, count }) 
     h(
       "div",
       { class: "section-head" },
-      h(
-        "h2",
-        { id, tabindex: "-1" },
-        h("span", { class: `cmp-section-icon tone-${tone}` }, icon(iconName)),
-        title,
-        " ",
-        h("span", { class: "count" }, `(${count ?? items.length})`),
+      announce(
+        items.length ? listRole(items.length) : "region",
+        h(
+          "h2",
+          { id, tabindex: "-1" },
+          h("span", { class: `cmp-section-icon tone-${tone}` }, icon(iconName)),
+          title,
+          " ",
+          h("span", { class: "count" }, `(${count ?? items.length})`),
+        ),
       ),
       h("p", { class: "section-note" }, note),
     ),
@@ -213,7 +221,7 @@ function issueSection({ id, tone, iconName, title, note, items, empty, count }) 
 
 function cmpIssue({ issue, was }) {
   const changes = [];
-  if (was && was.severity !== issue.severity) changes.push(`was ${SEVERITY_LABELS[was.severity]?.toLowerCase() ?? was.severity}`);
+  if (was && was.severity !== issue.severity) changes.push(`was ${was.severity}`);
   if (was && Boolean(was.blocking) !== Boolean(issue.blocking)) changes.push(was.blocking ? "no longer blocks the task" : "now blocks the task");
   return h(
     "li",
@@ -221,9 +229,8 @@ function cmpIssue({ issue, was }) {
     h(
       "div",
       { class: "issue-top" },
-      h("span", { class: `badge sev sev-${issue.severity}` }, SEVERITY_LABELS[issue.severity] ?? issue.severity),
-      issue.blocking ? h("span", { class: "badge blocking-flag" }, icon("alert"), "Blocks the task") : null,
-      h("span", { class: `badge source source-${issue.source}` }, issue.source === "scan" ? "Automated scan" : "Found by agent"),
+      severityLabel(issue),
+      h("span", { class: `source source-${issue.source}` }, issue.source === "scan" ? "Automated scan" : "Found by agent"),
       changes.length ? h("span", { class: "cmp-change" }, changes.join(", ")) : null,
     ),
     h("h3", { class: "cmp-issue-title" }, issue.title),
