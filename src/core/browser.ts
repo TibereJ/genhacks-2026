@@ -228,7 +228,8 @@ export class BrowserSession {
 
 const DATE_FORMATS: Record<string, string> = { date: "YYYY-MM-DD", time: "HH:MM (24h)", "datetime-local": "YYYY-MM-DDTHH:MM", month: "YYYY-MM" };
 
-function normalizeDateValue(type: string, input: string): string | undefined {
+/** Turns what the agent typed into the value an <input type="date|time|datetime-local|month"> takes. */
+export function normalizeDateValue(type: string, input: string): string | undefined {
   const s = input.trim();
   if (type === "time") {
     const m = /^(\d{1,2})[:h.](\d{2})\s*(am|pm)?$/i.exec(s);
@@ -241,9 +242,12 @@ function normalizeDateValue(type: string, input: string): string | undefined {
   if (type === "month") return /^\d{4}-\d{2}$/.test(s) ? s : undefined;
   if (type === "datetime-local") return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s) ? s : undefined;
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // Free-form dates ("December 15, 2026") parse as local midnight: read them back in local time,
+  // since toISOString() would shift the day east of UTC.
   const d = new Date(s);
   if (Number.isNaN(d.getTime())) return undefined;
-  return d.toISOString().slice(0, 10);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 /** Summarise what a screen reader user would notice after an action. */
