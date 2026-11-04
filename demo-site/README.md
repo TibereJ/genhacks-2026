@@ -44,3 +44,11 @@ To keep the before/after visually identical, `fixed/` still shows the selected t
 its fill color only. Assistive tech now gets the state (`radio, checked`), which fixes it for screen
 readers, but a full 1.4.1 fix for sighted users would add a non-color cue (for example a check icon).
 The full name label is visually hidden for the same reason. A production site should show it.
+
+## Second demo: GreenCart
+
+`shop/` is a second fictional site, a grocery store, with different barriers from the clinic:
+a cookie modal that is not a dialog, steppers named only "−" / "+", silent cart updates, delivery
+options whose selected state is visual only, and a custom terms checkbox that blocks checkout.
+Same rules: `shop/bad/` and `shop/fixed/` render pixel-identically. Task, pages and answer key:
+[`shop/README.md`](shop/README.md). Entry points: `/demo/shop/bad/index.html` and `/demo/shop/fixed/index.html`.
