@@ -328,3 +328,19 @@ describe("find_text", () => {
     expect(findInSnapshot(snap, "nope")).toContain("was not found");
   });
 });
+
+describe("lists", () => {
+  it("announces the number of items like a screen reader", async () => {
+    const { buildSnapshot } = await import("../src/core/ax-tree.js");
+    const snap = buildSnapshot([
+      { nodeId: "1", ignored: false, role: { value: "RootWebArea" }, childIds: ["2"] },
+      { nodeId: "2", ignored: false, role: { value: "list" }, childIds: ["3", "4", "5"] },
+      { nodeId: "3", ignored: false, role: { value: "listitem" }, childIds: ["6"] },
+      { nodeId: "4", ignored: false, role: { value: "listitem" }, childIds: [] },
+      { nodeId: "5", ignored: false, role: { value: "listitem" }, childIds: [] },
+      { nodeId: "6", ignored: false, role: { value: "link" }, name: { value: "Apples" }, backendDOMNodeId: 6 },
+    ], "http://x", "T");
+    expect(snap.text).toContain("list (3 items)");
+    expect(snap.text).toMatch(/\n {2}\[1\] link "Apples"/);
+  });
+});
