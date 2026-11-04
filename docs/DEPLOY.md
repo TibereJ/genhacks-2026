@@ -1,0 +1,74 @@
+# Deploying BlindSpot
+
+BlindSpot ships as a standard container (`Dockerfile` at the repository root). It runs `src/server.ts`: the
+HTTP API, the report UI and the demo clinic, on one port. Any container host works (Deployxa, Fly.io, Render,
+Cloud Run, a VM with Docker...).
+
+The image is based on the official Playwright image `mcr.microsoft.com/playwright:v1.63.0-noble`, which already
+contains Chromium and its system libraries. Its version must match the `playwright` npm package: when you upgrade
+`playwright` in `package.json`, change the `FROM` line too.
+
+## Run locally with Docker
+
+```bash
+docker build -t blindspot .
+docker run --rm --init --ipc=host -p 3000:3000 --env-file .env blindspot
+# open http://localhost:3000
+```
+
+- `--init` reaps Chromium's child processes; `--ipc=host` avoids Chromium crashes caused by Docker's small
+  default `/dev/shm` (recommended by Playwright). If your host does not allow `--ipc=host`, use `--shm-size=1gb`.
+- The container runs as the image's non-root user `pwuser`.
+- Reports are written to `/app/reports` inside the container and are lost when it is removed. Mount a volume to
+  keep them: `-v blindspot-reports:/app/reports`.
+- A `HEALTHCHECK` polls `GET /api/reports`.
+
+## Environment variables
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PORT` | `3000` | HTTP port |
+| `ANTHROPIC_API_KEY` | none | Claude API key for the AI agent. Without it only the scripted demo works |
+| `BLINDSPOT_MODEL` | `claude-opus-5-5` | Model used by the agent (`claude-haiku-5-5` is much cheaper) |
+| `BLINDSPOT_MAX_RUNS` | `2` | Maximum number of tests running at the same time (each one is a Chromium instance) |
+| `BLINDSPOT_PUBLIC` | unset | `1` for an internet-facing instance: turns on the protections below |
+| `BLINDSPOT_ALLOW_CLAUDE` | unset | With `BLINDSPOT_PUBLIC=1`, `1` re-enables the Claude agent |
+| `BLINDSPOT_REPORTS_DIR` | `reports` | Where reports are written |
+
+Pass secrets through your host's secret manager or `--env-file`, never in the image: `.env` is excluded by
+`.dockerignore`.
+
+## Security warning: public instances
+
+**A BlindSpot server makes a real browser visit whatever URL it is given, and spends your Claude API key on every
+test.** On a public instance, without protection, anyone can:
+
+- **SSRF**: make the server's browser load internal addresses such as `http://169.254.169.254/` (cloud metadata,
+  which can leak credentials), `http://localhost:...` or services on your private network, and read the result in
+  the report (transcript and screenshots);
+- **spend your API key**: every test is tens of Claude calls.
+
+So for a public deployment (for example the hackathon demo):
+
+1. Set `BLINDSPOT_PUBLIC=1`. The server then:
+   - refuses URLs whose hostname resolves to a private, loopback, link-local or otherwise non-public address
+     (IPv4 `0/8`, `10/8`, `100.64/10`, `127/8`, `169.254/16`, `172.16/12`, `192.168/16`, multicast...;
+     IPv6 `::1`, `fc00::/7`, `fe80::/10`, multicast, and IPv4-mapped forms like `::ffff:127.0.0.1`), except its
+     own `/demo/` pages;
+   - only allows the scripted agent (the demo clinic before/after), unless `BLINDSPOT_ALLOW_CLAUDE=1`.
+2. Keep the Claude agent disabled publicly. If you need it, put the instance behind authentication (your host's
+   access control, a reverse proxy with basic auth, or a VPN) before setting `BLINDSPOT_ALLOW_CLAUDE=1`, and set a
+   spending limit on the API key in the Anthropic console.
+3. Keep `BLINDSPOT_MAX_RUNS` low.
+
+Known limits of the URL guard (`src/core/url-guard.ts`): it checks the URL that starts the test. A public page can
+still redirect, or the agent can follow a link, to an internal address, and a hostname can resolve differently
+when the browser loads it (DNS rebinding). Closing those gaps needs request interception inside the browser
+session (Playwright `page.route`) or a network policy that blocks private ranges for the container. For a public
+instance, also run it on a host or network where the container cannot reach anything sensitive.
+
+## Deployxa
+
+For the "Best Use of Deployxa" prize: Deployxa-specific steps will be added here once we have their docs. The image
+is a standard container listening on `$PORT`, so it should only need the image (or this repository with the
+`Dockerfile`), the port, and the environment variables above, with `BLINDSPOT_PUBLIC=1`.

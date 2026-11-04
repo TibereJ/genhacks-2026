@@ -7,3 +7,4 @@ dist/
 *.bundle
 reports/
 .claude/worktrees/
+blindspot-summary.md

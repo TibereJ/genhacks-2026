@@ -1,0 +1,47 @@
+# Runs the unit tests, then BlindSpot's own accessibility journeys (blindspot.config.json)
+# against the bundled demo clinic, with the scripted agent: no API key needed. See docs/CI.md.
+name: BlindSpot
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  accessibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Type check
+        run: npx tsc --noEmit -p .
+
+      - name: Unit and integration tests
+        run: npx vitest run
+
+      - name: Accessibility journeys (BlindSpot CI mode)
+        run: npx tsx src/ci.ts blindspot.config.json --brain scripted --serve
+
+      - name: Upload BlindSpot reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blindspot-reports
+          path: |
+            reports/
+            blindspot-summary.md
+          if-no-files-found: ignore
+          retention-days: 14

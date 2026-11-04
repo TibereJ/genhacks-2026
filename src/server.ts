@@ -7,6 +7,7 @@ import { ScriptedBrain, clinicDemoPlan } from "./core/brains/scripted.js";
 import { callAgentSession, startAgentSession } from "./core/brains/external.js";
 import { listReports, loadReport, newReportId, reportDir } from "./core/report.js";
 import { reportToMarkdown } from "./core/export.js";
+import { checkPublicTarget, claudeAllowed, isPublicInstance } from "./core/url-guard.js";
 
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = process.cwd();
@@ -93,6 +94,12 @@ const server = http.createServer(async (req, res) => {
       if (activeRuns >= MAX_CONCURRENT_RUNS) return send(res, 429, { error: "Too many tests running, try again in a minute" });
 
       const brainName = body.brain === "scripted" ? "scripted" : "claude";
+      if (isPublicInstance()) {
+        // Public instance: no private/local targets (SSRF) and no spending the API key unless allowed. See docs/DEPLOY.md.
+        if (brainName === "claude" && !claudeAllowed()) return send(res, 403, { error: "The Claude agent is disabled on this public instance. Use the scripted demo instead." });
+        const verdict = await checkPublicTarget(target, { selfPort: PORT });
+        if (!verdict.ok) return send(res, 403, { error: verdict.reason });
+      }
       if (brainName === "claude" && !process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
         return send(res, 400, { error: "No Claude API key configured on the server (set ANTHROPIC_API_KEY). Use the scripted demo instead." });
       }
@@ -107,7 +114,7 @@ const server = http.createServer(async (req, res) => {
 
     // External agent API: another AI agent (e.g. Claude Code) drives the test one tool call at a time.
     // Disabled on public instances: it lets the caller steer the server's browser.
-    if (req.method === "POST" && p.startsWith("/api/agent/") && process.env.BLINDSPOT_PUBLIC !== "1") {
+    if (req.method === "POST" && p.startsWith("/api/agent/") && !isPublicInstance()) {
       const body = (await readJson(req).catch(() => null)) as Record<string, unknown> | null;
       if (!body) return send(res, 400, { error: "Expected a JSON body" });
       if (p === "/api/agent/start") {
