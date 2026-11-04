@@ -16,7 +16,7 @@ npx tsx src/ci.ts [config] [--brain scripted|claude] [--serve] [--base-url <url>
 | Option | Meaning |
 |---|---|
 | `config` | Config file, default `blindspot.config.json` |
-| `--brain` | `claude` (the AI agent, needs `ANTHROPIC_API_KEY`) or `scripted` (fixed plan, only for the bundled demo clinic). Default: the config's `brain`, else `claude` |
+| `--brain` | `claude` (the AI agent, needs `ANTHROPIC_API_KEY`) or `scripted` (fixed plan, only for the bundled demo sites: clinic and GreenCart shop). Default: the config's `brain`, else `claude` |
 | `--serve` | Serve the bundled `demo-site/` on a free local port and use it as `baseUrl` (no need to start `src/server.ts`) |
 | `--base-url` | Base URL for relative journey URLs, e.g. your preview deployment. Overrides the config's `baseUrl` |
 | `--summary` | Where to write the Markdown summary, default `blindspot-summary.md` |
@@ -79,9 +79,10 @@ A journey **fails** when:
 - `mustSucceed` is true (the default) and the agent did not complete the task (`blocked` or `step_limit`);
 - a minimum score applies and the score is below it.
 
-The repository's own `blindspot.config.json` has two journeys on the demo clinic: the fixed version must succeed
-with a score of at least 90, and the inaccessible version is a **known-bad example** (`mustSucceed: false`): it
-shows up in the summary as blocked, with its blocking issue, without failing the build.
+The repository's own `blindspot.config.json` has four journeys, two per demo site (clinic booking and GreenCart
+checkout): each fixed version must succeed with a score of at least 90, and each inaccessible version is a
+**known-bad example** (`mustSucceed: false`): it shows up in the summary as blocked, with its blocking issue,
+without failing the build.
 
 ## BlindSpot's own pipeline
 

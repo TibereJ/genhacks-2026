@@ -4,7 +4,7 @@
 
 **Lighthouse checks rules. BlindSpot checks whether a blind person can actually use your site.**
 
-**Live demo (read-only, real example runs):** https://tiberej.github.io/genhacks-2026/
+**Live demo (read-only, the seven real example runs):** https://tiberej.github.io/genhacks-2026/
 
 Give BlindSpot a URL and a task in plain language ("Book an appointment with Dr. Lee"). An AI agent tries to
 complete it using **only what a screen reader announces**. It never sees the page. You get a report: did the task
@@ -29,38 +29,54 @@ Built solo for [GenHacks 2026](https://genhacks-open.devpost.com), track *AI, Ag
 
 BlindSpot tests the **journey**, not just the markup.
 
-## Results on the demo sites
+## Results
+
+### Two demo sites, each in two pixel-identical versions
 
 The repository ships two fictional sites, *Maple Grove Clinic* (book an appointment) and *GreenCart* (grocery
-checkout), each in two versions that are **pixel-identical** (tests compare byte-equal screenshots). Only the
-accessibility tree differs.
+checkout). Each has a `bad/` and a `fixed/` version that are **pixel-identical** (tests compare byte-equal
+screenshots). Only the accessibility tree differs.
 
-| Version | Agent result | Score | Issues |
-|---|---|---|---|
-| `demo-site/bad/` | **Blocked** after 11 steps: "Time slots cannot be selected" | 0/100 | 15 |
-| `demo-site/fixed/` | **Success**: appointment booked | 100/100 | 0 |
-| `demo-site/shop/bad/` (GreenCart grocery checkout) | **Blocked** after 13 steps: "Terms of sale cannot be accepted" | 0/100 | 8 |
-| `demo-site/shop/fixed/` | **Success**: order placed | 100/100 | 0 |
+| Site | Version | Agent result | Score | Issues |
+|---|---|---|---|---|
+| Maple Grove Clinic | `demo-site/bad/` | **Blocked** after 11 steps: "Time slots cannot be selected" | 0/100 | 15 |
+| Maple Grove Clinic | `demo-site/fixed/` | **Success**: appointment booked | 100/100 | 0 |
+| GreenCart checkout | `demo-site/shop/bad/` | **Blocked** after 13 steps: "Terms of sale cannot be accepted" | 0/100 | 8 |
+| GreenCart checkout | `demo-site/shop/fixed/` | **Success**: order placed | 100/100 | 0 |
 
-**On real websites** (run from a cloud sandbox where most sites are blocked, so only two could be reached):
-
-| Site | Task | Result |
-|---|---|---|
-| nodejs.org | Find the current LTS version and the Windows download | **Success**, 91/100: two drop-downs share the name "Operating System", an unnamed popup list and code block |
-| pypi.org | Find a package's latest version and license | **Inconclusive**: the search triggered a bot check. It offers an audio CAPTCHA (good), but its field only mentions the image. BlindSpot never tries to bypass a CAPTCHA |
-
-These are real runs where Claude (in Claude Code) played the screen reader user through BlindSpot's external-agent
-API. All six reports ship in `examples/reports/`: run `npm run examples` and open http://localhost:3000 to browse
-them without an API key. On the clinic, the time
-slots are clickable `<div>`s: a screen reader announces them as plain text, and pressing Tab jumps from the date
-field straight to "Full name". Submitting anyway shows a red "Please choose a time slot" message that is never
-announced. A sighted mouse user books without noticing anything.
+On the clinic, the time slots are clickable `<div>`s. A screen reader announces them as plain text, and pressing
+Tab jumps from the date field straight to "Full name". If you submit anyway, a red "Please choose a time slot"
+message appears but is never announced. On GreenCart, the terms checkbox is a plain `<div>`, and the barriers along
+the way are different: a cookie banner that is not a dialog, "+" and "Add" buttons that all have the same name,
+silent cart updates, a delivery choice with no selected state. A sighted mouse user gets through both sites without
+noticing anything.
 
 ![What you see vs what a screen reader user hears](docs/screenshots/side-by-side.png)
 
 Fix the markup, run again, compare: 0 → 100.
 
 ![Before/after comparison](docs/screenshots/compare.png)
+
+### Three real public websites
+
+These ran from a cloud sandbox that blocks most sites, so only a few could be reached.
+
+| Site | Task | Result |
+|---|---|---|
+| nodejs.org | Find the current LTS version and the Windows download | **Success**, 91/100, 3 real small issues: two different drop-downs both named "Operating System", an open option list with no name, a focusable code block with no name |
+| jsr.io | Find the package `@std/path` and its latest version | **Success**, 78/100, 4 issues: search result links have very long, repetitive names (runtime compatibility read twice, an unexplained "100", the exact match only third), the header search label is read twice, the results-page search field only has a placeholder, and 10 icon-only "copy" buttons have no name (serious) |
+| pypi.org | Find a package's latest version and license | **Inconclusive**: the search triggered a bot check. It offers an audio CAPTCHA (good), but its field label only mentions the image. BlindSpot never tries to bypass a CAPTCHA |
+
+### How these runs were made
+
+In all seven runs, Claude (in Claude Code) played the screen reader user through BlindSpot's external-agent HTTP API.
+It only got the transcripts BlindSpot sent back, and it chose every action and every issue itself. The two clinic
+reports were re-executed with the same decisions after a fix that merges repeated scan findings across pages, and
+the fixed shop was re-run after a scan false positive was fixed. Details:
+[examples/README.md](examples/README.md).
+
+All seven reports ship in `examples/reports/`. Browse them in the [live demo](https://tiberej.github.io/genhacks-2026/),
+or locally with `npm run examples` (http://localhost:3000, no API key needed).
 
 ## How it works
 
@@ -98,17 +114,28 @@ Fix the markup, run again, compare: 0 → 100.
    coordinates). After each action, the agent hears what changed: a new page, an announced alert or status
    message, a focus move, or "Nothing was announced".
 3. **Reports like an auditor.** The agent records each barrier with `report_issue` (severity, WCAG criteria, fix,
-   blocking or not) and ends with `finish` (`success` only if the site confirmed the task). A deterministic scan
-   runs on every new page in parallel and catches the classic rule-based problems, so the AI can focus on the task.
-4. **Scores the journey.** 100 if the task succeeded, 40 if not, minus a penalty per issue (critical 25,
-   serious 10, moderate 5, minor 2), capped so that minor issues alone cannot sink a site that works.
+   blocking or not). A deterministic scan runs on every new page in parallel and catches the classic rule-based
+   problems, so the AI can focus on the task.
+4. **Ends with an honest status.**
+
+   | Status | Meaning |
+   |---|---|
+   | `success` | The site confirmed the task was done |
+   | `blocked` | A screen reader user could not complete the task because of the site |
+   | `inconclusive` | A CAPTCHA, bot check or login wall stopped the test. No score: this is not an accessibility verdict. CI treats it as a failure, because nothing was verified |
+   | `step_limit` | The agent ran out of steps (30 by default) without finishing |
+   | `error` | The run crashed (site unreachable, browser error) |
+
+5. **Scores the journey.** 100 if the task succeeded, 40 if not, minus a penalty per issue (critical 25,
+   serious 10, moderate 5, minor 2). A site where the task works never drops below 50, so minor issues alone
+   cannot sink it.
 
 Screenshots (with the target element outlined in red) are saved for the humans reading the report. The agent
 never receives them.
 
 ### What the agent hears on the bad booking form
 
-Real output from the run above (cut after the form):
+Real output from the clinic run above (cut after the form):
 
 ```
 Page: Book an appointment - Maple Grove Clinic
@@ -165,8 +192,8 @@ The times are there, but as text: there is nothing to activate.
 | Brain | What decides | Needs |
 |---|---|---|
 | **Claude API** (`src/core/brains/claude.ts`) | Claude with tool use. Default model `claude-opus-5-5`, set `BLINDSPOT_MODEL` to change it | `ANTHROPIC_API_KEY` |
-| **MCP server** (`src/mcp.ts`) | Your own MCP client, e.g. Claude Code, plays the screen reader user | An MCP client |
-| **Scripted demo** (`src/core/brains/scripted.ts`) | A fixed plan for the demo clinic. Deterministic: blocked on `bad/`, success on `fixed/`. Used in CI | Nothing |
+| **External agent** (`src/core/brains/external.ts`) | Another agent sends one tool call at a time: through the **MCP server** (`src/mcp.ts`, e.g. Claude Code) or the **HTTP agent API** | An MCP client, or any HTTP client |
+| **Scripted demo** (`src/core/brains/scripted.ts`) | A fixed plan for the two demo sites. Deterministic: blocked on `bad/`, success on `fixed/`. Used in CI | Nothing |
 
 In every mode, BlindSpot owns the browser, the transcript, the scan and the report: the agent only ever gets what a
 screen reader would say.
@@ -184,28 +211,30 @@ cp .env.example .env          # add ANTHROPIC_API_KEY for the AI agent (optional
 npm start                     # http://localhost:3000
 ```
 
-Open <http://localhost:3000>, click **Demo: inaccessible clinic** (or **Demo: fixed clinic**), choose the agent
-(**Claude (AI agent)** or **Scripted demo (no API key)**) and click **Run test**. The report updates live while the
-agent works. On each step, **Listen** reads aloud what the agent heard (Web Speech API). Once both clinics have been
-tested, tick both runs (or use **Compare with…** on a report) for the before / after view. Reports can be
-downloaded as Markdown or copied as a GitHub issue.
+Open <http://localhost:3000> and pick a demo: **Demo: inaccessible clinic**, **Demo: fixed clinic**,
+**Demo: inaccessible shop** or **Demo: fixed shop**. Choose the agent (**Claude (AI agent)** or
+**Scripted demo (no API key)**) and click **Run test**. The report updates live while the agent works. On each
+step, **Listen** reads aloud what the agent heard (Web Speech API). Once both versions of a site have been tested,
+tick both runs and click **Compare selected** (or use **Compare with…** on a report) for the before / after view.
+Reports can be downloaded as Markdown or copied as a GitHub issue.
 
-### Browse the example reports
+| Script | What it does |
+|---|---|
+| `npm start` | Server: API, report UI and the demo sites at `/demo/` |
+| `npm run examples` | Same server, on the seven example reports in `examples/reports/` |
+| `npm run blindspot -- <url> "<task>" [--scripted]` | CLI: one test, printed to the terminal |
+| `npm run mcp` | MCP server (Claude Code starts it for you, see below) |
+| `npm run ci -- blindspot.config.json [--brain scripted] [--serve]` | CI mode: accessibility regression tests |
+| `npm run build:static` | Read-only static demo in `dist-static/` (what GitHub Pages serves) |
+| `npm test`, `npm run typecheck` | vitest suites, TypeScript check |
 
-```bash
-npm run examples
-```
-
-Opens the UI on `examples/reports/` (the six real agent runs above).
-
-The same reports are published as a static, read-only site (the [live demo](https://tiberej.github.io/genhacks-2026/)):
-`npm run build:static` writes it to `dist-static/`, and `.github/workflows/pages.yml` deploys it to GitHub Pages
-on every push to `main`. See [docs/DEPLOY.md](docs/DEPLOY.md#static-read-only-demo-github-pages).
+BlindSpot runs full headless Chromium by default (closer to real Chrome than Playwright's headless shell). Set
+`BLINDSPOT_BROWSER_CHANNEL` to use another build, e.g. `chrome`, or `default` for the headless shell.
 
 ### CLI
 
 ```bash
-# with the server running (it serves the demo clinic at /demo/)
+# with the server running (it serves the demo sites at /demo/)
 npm run blindspot -- http://localhost:3000/demo/bad/index.html "Book an appointment with Dr. Lee as Alex Doe (alex@example.com)." --scripted
 
 # any site, with the Claude agent
@@ -228,22 +257,31 @@ Tools: `blindspot_start`, then `blindspot_click`, `blindspot_type_text`, `blinds
 the source files. If `npm start` is running, the report appears live in the UI. Other MCP clients can use the same
 command.
 
-Without MCP, the server also exposes the same tools over HTTP for any external agent: `POST /api/agent/start`
-with `{url, task}`, then `POST /api/agent/<id>/<tool>` (disabled on public instances).
+Without MCP, the server exposes the same tools over HTTP for any external agent: `POST /api/agent/start`
+with `{url, task}`, then `POST /api/agent/<id>/<tool>` (disabled on public instances). This is how the example
+reports were made.
 
 ### CI: accessibility regression tests
 
-Describe the journeys that must keep working in `blindspot.config.json`; the build fails when one is blocked or
-its score drops below a threshold.
+Describe the journeys that must keep working in `blindspot.config.json`. The build fails when a journey that must
+succeed is blocked, when its score drops below a threshold, or when the run is inconclusive or crashes.
 
 ```bash
-npx tsx src/ci.ts blindspot.config.json --brain scripted --serve
+npm run ci -- blindspot.config.json --brain scripted --serve
 ```
 
-This repository runs it on every push in `.github/workflows/blindspot.yml`. Full guide, including a workflow that
-tests your preview deployments with the Claude agent: [docs/CI.md](docs/CI.md).
+This repository runs it on every push in `.github/workflows/blindspot.yml`, with four journeys: both fixed demos
+must succeed with a score of at least 90, and both bad demos are reported as known-bad examples (blocked, without
+failing the build). Full guide, including a workflow that tests your preview deployments with the Claude agent:
+[docs/CI.md](docs/CI.md).
 
-### Docker and deployment
+### Static demo, Docker and deployment
+
+The [live demo](https://tiberej.github.io/genhacks-2026/) is a static, read-only build: you can browse the
+example runs, every step and screenshot, Listen, compare and export, but not start a test. `npm run build:static`
+writes it to `dist-static/`, and `.github/workflows/pages.yml` deploys it to GitHub Pages on every push to `main`
+(the repository owner enables Pages once: Settings → Pages → Source: **GitHub Actions**). See
+[docs/DEPLOY.md](docs/DEPLOY.md#static-read-only-demo-github-pages).
 
 ```bash
 docker build -t blindspot .
@@ -256,10 +294,11 @@ Read [docs/DEPLOY.md](docs/DEPLOY.md) before exposing an instance to the interne
 
 ```
 src/
-├── server.ts           HTTP API, report UI and demo site on one port
+├── server.ts           HTTP API, report UI and demo sites on one port
 ├── cli.ts              npm run blindspot -- <url> "<task>" [--scripted]
 ├── ci.ts               CI mode entry point (see docs/CI.md)
 ├── mcp.ts              MCP server: an MCP client becomes the agent
+├── examples.ts         npm run examples: the server on examples/reports/
 ├── build-static.ts     read-only static demo (GitHub Pages): UI + demo sites + example reports
 └── core/
     ├── ax-tree.ts      accessibility tree → numbered screen reader transcript
@@ -271,16 +310,31 @@ src/
     ├── export.ts       Markdown / GitHub issue export (all report text escaped)
     ├── ci.ts           config validation (zod), journeys, summary, exit codes
     ├── url-guard.ts    SSRF protection for public instances
-    ├── types.ts        Report, Step, Issue
+    ├── types.ts        Report, Step, Issue, run statuses
     └── brains/
         ├── brain.ts    Brain interface
         ├── claude.ts   Claude API (tool use, prompt caching)
-        ├── scripted.ts fixed plan for the demo clinic
+        ├── scripted.ts fixed plans for the two demo sites
         └── external.ts driven from outside (MCP, HTTP agent API)
 report-ui/              static web UI: run a test, live report, Listen, compare, export
-demo-site/              Maple Grove Clinic: bad/ and fixed/ (answer key in demo-site/README.md)
-tests/                  vitest: transcript, agent loop, scan, MCP, CI, export, URL guard, UI, demo site
+demo-site/              Maple Grove Clinic bad/ + fixed/, GreenCart shop/bad/ + shop/fixed/ (answer keys in the READMEs)
+examples/reports/       the seven real agent runs
+tests/                  vitest: transcript, agent loop, scan, Claude brain, MCP, HTTP agent API, server, CI,
+                        export, compare, URL guard, UI, static build, both demo sites
 ```
+
+## Security
+
+A server that opens any URL in a real browser is an SSRF risk and a way to spend someone's API key. After a
+security review:
+
+- the server listens on `127.0.0.1` by default (the Docker image sets `0.0.0.0`);
+- every `POST` requires `content-type: application/json` and refuses cross-origin requests (CSRF);
+- with `BLINDSPOT_PUBLIC=1`, every request the test browser makes (page loads, assets, new tabs, each hop of a
+  redirect chain) is checked against private, loopback and link-local addresses, the external agent API is off,
+  and the Claude agent is disabled unless `BLINDSPOT_ALLOW_CLAUDE=1`;
+- known limits (DNS rebinding, WebSockets) are documented in [docs/DEPLOY.md](docs/DEPLOY.md#known-limits), with
+  the network-level protection a public deployment needs.
 
 ## Limitations (honestly)
 
@@ -289,17 +343,19 @@ tests/                  vitest: transcript, agent loop, scan, MCP, CI, export, U
   transcript is an approximation.
 - **The agent can be wrong.** It can miss a barrier, report a false one, or take a different path on another run.
   Every report shows exactly what it heard and did at each step, so you can check its reasoning.
+- **CAPTCHAs and login walls stop it.** BlindSpot never tries to bypass a bot check and never creates accounts: the
+  run ends as `inconclusive`, with no score.
+- **Only tested on three real sites so far**, because the development sandbox blocked most of the web.
 - **Not a substitute for testing with disabled users** or for a full manual WCAG audit. It is a fast first line
   of defence that catches journey-breaking problems before they ship.
 - **Only http(s) pages in Chromium.** No native apps, no other browsers. The agent submits real forms: use staging
   sites and test data.
-- **Public instances need protection.** The server makes a real browser visit any URL it is given and spends your
-  API key. Follow [docs/DEPLOY.md](docs/DEPLOY.md) (`BLINDSPOT_PUBLIC=1`, SSRF guard, Claude disabled by default).
 
 ## Built with
 
 - **Claude Code** (Anthropic): AI coding agents used to write part of the project (a project-lead session plus
-  builder, reviewer and pitch-writer agents, see `.claude/agents/`)
+  builder, reviewer and pitch-writer agents, see `.claude/agents/`), and the agent that played the screen reader
+  user in the example runs
 - **Claude API** (Anthropic, `claude-opus-5-5` by default): the brain of the BlindSpot agent, through tool use
 - **Model Context Protocol** with `@modelcontextprotocol/sdk`: the MCP server
 - TypeScript, Node.js 22, HTML/CSS/JavaScript
@@ -318,7 +374,7 @@ tests/                  vitest: transcript, agent loop, scan, MCP, CI, export, U
 ## Credits
 
 Built by [TibereJ](https://github.com/TibereJ) during GenHacks 2026 (November–December 2026), with Claude Code
-agents. Maple Grove Clinic is fictional; no real appointments are made.
+agents. Maple Grove Clinic and GreenCart are fictional: no real appointments or orders are made.
 
 ## License
 
