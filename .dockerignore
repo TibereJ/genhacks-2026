@@ -1,0 +1,9 @@
+node_modules
+reports
+.git
+*.bundle
+.env
+.env.*
+!.env.example
+.claude
+blindspot-summary.md

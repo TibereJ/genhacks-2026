@@ -14,6 +14,12 @@ _Obligatoire : tout lister dans la description Devpost (« Built with »)._
 - `playwright` + Chromium — pilotage du navigateur ; Chrome DevTools Protocol (`Accessibility.getFullAXTree`) pour l'arbre d'accessibilité
 - `zod` — validation des entrées des outils de l'agent
 - `tsx`, `typescript`, `vitest` — exécution, typage, tests
+- `zod` sert aussi à valider `blindspot.config.json` (mode CI)
+
+## CI et déploiement
+- **GitHub Actions** — `.github/workflows/blindspot.yml` : tests + parcours d'accessibilité à chaque push/PR ; actions officielles `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4`
+- **Docker** — `Dockerfile` pour déployer le serveur dans un conteneur
+- **Image Docker officielle Playwright** (`mcr.microsoft.com/playwright:v1.63.0-noble`, Microsoft) — Node + Chromium et ses dépendances système
 
 ## Références
 - WCAG 2.2 (W3C) — critères cités dans les rapports

@@ -5,6 +5,7 @@ import { runTest } from "./core/agent.js";
 import { ClaudeBrain } from "./core/brains/claude.js";
 import { ScriptedBrain, clinicDemoPlan } from "./core/brains/scripted.js";
 import { listReports, loadReport, newReportId, reportDir } from "./core/report.js";
+import { checkPublicTarget, claudeAllowed, isPublicInstance } from "./core/url-guard.js";
 
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = process.cwd();
@@ -79,6 +80,12 @@ const server = http.createServer(async (req, res) => {
       if (activeRuns >= MAX_CONCURRENT_RUNS) return send(res, 429, { error: "Too many tests running, try again in a minute" });
 
       const brainName = body.brain === "scripted" ? "scripted" : "claude";
+      if (isPublicInstance()) {
+        // Public instance: no private/local targets (SSRF) and no spending the API key unless allowed. See docs/DEPLOY.md.
+        if (brainName === "claude" && !claudeAllowed()) return send(res, 403, { error: "The Claude agent is disabled on this public instance. Use the scripted demo instead." });
+        const verdict = await checkPublicTarget(target, { selfPort: PORT });
+        if (!verdict.ok) return send(res, 403, { error: verdict.reason });
+      }
       if (brainName === "claude" && !process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
         return send(res, 400, { error: "No Claude API key configured on the server (set ANTHROPIC_API_KEY). Use the scripted demo instead." });
       }
