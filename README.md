@@ -10,7 +10,7 @@ Give BlindSpot a URL and a task in plain language ("Book an appointment with Dr.
 complete it using **only what a screen reader announces**. It never sees the page. You get a report: did the task
 succeed, where the agent got stuck, which WCAG 2.2 criteria are involved, and the code fix.
 
-![BlindSpot report](docs/screenshots/report.png)
+![Running a BlindSpot test on the inaccessible demo clinic](docs/screenshots/demo.gif)
 
 Built solo for [GenHacks 2026](https://genhacks-open.devpost.com), track *AI, Agentic Systems, Cybersecurity, and Dev Tools*.
 
