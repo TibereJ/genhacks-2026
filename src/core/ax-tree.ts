@@ -22,6 +22,8 @@ export interface SnapshotElement {
   value?: string;
   /** For comboboxes and listboxes: option labels. */
   options?: string[];
+  /** Announced states such as "checked", "expanded", "required". */
+  states?: string[];
 }
 
 export interface Snapshot {
@@ -193,6 +195,7 @@ export function buildSnapshot(nodes: AXNode[], url: string, title: string): Snap
       }
       const st = states(node, role);
       if (st.length) line += ` (${st.join(", ")})`;
+      el.states = st;
       if (isFocused) { line += " ← focus"; focused = `${spokenRole(role)} ${quote(name)}`; }
       if (node.backendDOMNodeId !== undefined) elements.set(id, el);
       emit(depth, line);

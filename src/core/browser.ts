@@ -16,6 +16,8 @@ export interface ActionOutcome {
   snapshot: Snapshot;
 }
 
+export type RequestGuard = (url: URL) => Promise<string | null>;
+
 const ALLOWED_KEYS = new Set(["Enter", "Escape", "Tab", "Shift+Tab", "Space", "ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Home", "End"]);
 
 /** One Chromium tab driven only through what the accessibility tree exposes. */
@@ -26,16 +28,57 @@ export class BrowserSession {
     private readonly cdp: CDPSession,
   ) {}
 
-  static async open(url: string): Promise<BrowserSession> {
+  /**
+   * @param requestGuard Called for every request the page makes (navigations, redirects, assets).
+   *   Return a reason to block it, or null to allow it. Used by public instances against SSRF.
+   */
+  static async open(url: string, requestGuard?: RequestGuard): Promise<BrowserSession> {
     const browser = await chromium.launch();
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    if (requestGuard) {
+      const verdicts = new Map<string, Promise<string | null>>();
+      await context.route("**/*", async (route) => {
+        const target = new URL(route.request().url());
+        if (target.protocol === "data:" || target.protocol === "blob:") return route.continue();
+        const key = `${target.protocol}//${target.host}${target.pathname.startsWith("/demo/") ? "/demo/" : ""}`;
+        if (!verdicts.has(key)) verdicts.set(key, requestGuard(target).catch(() => "guard error"));
+        const reason = await verdicts.get(key)!;
+        if (reason) return route.abort("blockedbyclient");
+        // The browser follows redirects without calling this route again, so walk the redirect
+        // chain here, checking every hop, then send the browser straight to the final URL.
+        try {
+          let response = await route.fetch({ maxRedirects: 0 });
+          let current = target;
+          for (let hop = 0; response.status() >= 300 && response.status() < 400; hop++) {
+            const location = response.headers()["location"];
+            if (!location || hop >= 5) break;
+            const next = new URL(location, current);
+            const why = await requestGuard(next).catch(() => "guard error");
+            if (why) return route.abort("blockedbyclient");
+            current = next;
+            response = await route.fetch({ url: next.href, maxRedirects: 0 });
+          }
+          if (current.href !== target.href) {
+            return route.fulfill({ status: 302, headers: { location: current.href } });
+          }
+          return route.fulfill({ response });
+        } catch {
+          return route.abort("failed");
+        }
+      });
+    }
     const page = await context.newPage();
     const cdp = await context.newCDPSession(page);
     await cdp.send("DOM.enable");
     await cdp.send("Accessibility.enable");
     const session = new BrowserSession(browser, page, cdp);
-    await page.goto(url, { waitUntil: "load", timeout: 30_000 });
-    await session.settle();
+    try {
+      await page.goto(url, { waitUntil: "load", timeout: 30_000 });
+      await session.settle();
+    } catch (err) {
+      await browser.close().catch(() => {});
+      throw err;
+    }
     return session;
   }
 
@@ -214,6 +257,10 @@ export function describeChange(before: Snapshot, after: Snapshot, action: Browse
   if (action.type === "type" || action.type === "select") {
     const same = [...after.elements.values()].find((e) => e.role === el?.role && e.name === el?.name);
     if (same) parts.push(`${same.role} "${same.name}" now has value "${same.value ?? ""}".`);
+  }
+  if (action.type === "click" && el && el.states !== undefined) {
+    const same = [...after.elements.values()].find((e) => e.role === el.role && e.name === el.name);
+    if (same?.states && same.states.join() !== el.states.join()) parts.push(`${same.role} "${same.name}" is now ${same.states.join(", ")}.`);
   }
   if (after.focused && after.focused !== before.focused) parts.push(`Focus moved to ${after.focused}.`);
   if (parts.length === 0) {

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
-import { BrowserSession, type BrowserAction } from "./browser.js";
+import { BrowserSession, type BrowserAction, type RequestGuard } from "./browser.js";
 import type { Snapshot } from "./ax-tree.js";
 import { scanPage } from "./scan.js";
 import { computeScore, newReportId, reportDir, saveReport } from "./report.js";
@@ -14,6 +14,8 @@ export interface RunOptions {
   brain: Brain;
   id?: string;
   maxSteps?: number;
+  /** Blocks requests the browser must not make (see BrowserSession.open). */
+  requestGuard?: RequestGuard;
   /** Called after every change to the report (it is also saved to disk). */
   onUpdate?: (report: Report) => void;
 }
@@ -41,7 +43,7 @@ export async function runTest(opts: RunOptions): Promise<Report> {
 
   let session: BrowserSession | undefined;
   try {
-    session = await BrowserSession.open(opts.url);
+    session = await BrowserSession.open(opts.url, opts.requestGuard);
     let snapshot = await session.snapshot();
     const scanned = new Set<string>();
     const scan = async (s: Snapshot, stepIndex: number) => {

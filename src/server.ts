@@ -106,7 +106,10 @@ const server = http.createServer(async (req, res) => {
       const brain = brainName === "scripted" ? new ScriptedBrain(clinicDemoPlan) : new ClaudeBrain();
       const id = newReportId();
       activeRuns++;
-      runTest({ id, url: target.href, task: body.task.trim().slice(0, 500), brain })
+      const requestGuard = isPublicInstance()
+        ? async (u: URL) => { const v = await checkPublicTarget(u, { selfPort: PORT }); return v.ok ? null : v.reason; }
+        : undefined;
+      runTest({ id, url: target.href, task: body.task.trim().slice(0, 500), brain, requestGuard })
         .catch((err) => console.error("run failed", err))
         .finally(() => { activeRuns--; });
       return send(res, 202, { id });

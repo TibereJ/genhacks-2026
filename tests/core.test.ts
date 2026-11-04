@@ -22,6 +22,8 @@ const PAGES: Record<string, string> = {
       <button onclick="document.getElementById('msg').textContent='Sent!'"><svg width="10" height="10"></svg></button>
       <button onclick="location.href='/done'">Send</button>
       <div role="status" id="msg"></div>
+      <input type="checkbox" id="terms"><label for="terms">I accept the terms</label>
+      <a href="/redirect">Partner site</a>
     </main></body></html>`,
   "/done": `<!doctype html><html lang="en"><head><title>Thanks</title></head><body><main><h1>Message sent</h1></main></body></html>`,
 };
@@ -31,6 +33,7 @@ let base = "";
 
 beforeAll(async () => {
   server = http.createServer((req, res) => {
+    if (req.url === "/redirect") { res.writeHead(302, { location: "http://127.0.0.2:8080/secret" }); res.end(); return; }
     const page = PAGES[req.url ?? ""];
     res.writeHead(page ? 200 : 404, { "content-type": "text/html" });
     res.end(page ?? "not found");
@@ -132,5 +135,34 @@ describe("composite widgets", () => {
     expect(snap.focused).toBe('date field "Date"');
     expect(snap.text).toContain('[1] date field "Date" value "2026-11-05" ← focus');
     expect(snap.text).not.toContain("Month");
+  });
+});
+
+describe("browser safety and states", () => {
+  it("announces checkbox state changes", async () => {
+    const s = await BrowserSession.open(`${base}/form`);
+    try {
+      const snap = await s.snapshot();
+      const box = [...snap.elements.values()].find((e) => e.role === "checkbox")!;
+      expect(snap.text).toContain('checkbox "I accept the terms" (not checked)');
+      const out = await s.act({ type: "click", id: box.id }, snap);
+      expect(out.result).toContain('checkbox "I accept the terms" is now checked');
+    } finally {
+      await s.close();
+    }
+  });
+
+  it("blocks requests the guard refuses, including redirects", async () => {
+    const guard = async (u: URL) => (u.hostname === "127.0.0.2" ? "private address" : null);
+    const s = await BrowserSession.open(`${base}/form`, guard);
+    try {
+      const snap = await s.snapshot();
+      const link = [...snap.elements.values()].find((e) => e.role === "link" && e.name === "Partner site")!;
+      await s.act({ type: "click", id: link.id }, snap);
+      expect(s.page.url()).not.toContain("127.0.0.2");
+    } finally {
+      await s.close();
+    }
+    await expect(BrowserSession.open(`${base}/redirect`, guard)).rejects.toThrow(/BLOCKED_BY_CLIENT/);
   });
 });
