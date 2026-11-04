@@ -222,6 +222,20 @@ MCP, CI), **Creativity** (the agent hears, never sees; Listen), **Presentation**
                      → web UI (Listen, compare) · Markdown / GitHub issue · CI summary
 ```
 
+### Recording without an API key
+
+The draft cut (`blindspot-demo-draft.mp4`, made from Playwright recordings of the real app) uses the example
+reports in `examples/reports/` and a scripted demo run, so it needs no API key. For the live AI part, record
+Claude Code driving BlindSpot through MCP on your own machine (prompt below) while the BlindSpot UI shows the
+live report; that is a real agent run paid by your Claude subscription.
+
+Prompt for Claude Code, in the repo folder (approve the `blindspot` MCP server when asked, and keep `npm start`
+running in another terminal so the live report shows at http://localhost:3000):
+
+> Use the BlindSpot MCP tools to test /demo/bad/index.html with the task "Book an appointment with Dr. Lee for any
+> available time. Use the name Alex Doe and the email alex@example.com." Act only on what the transcript tells
+> you, report every barrier with blindspot_report_issue, and finish when done or blocked.
+
 ### Recording checklist
 
 1. **Fresh reports folder** so "Recent runs" only shows the demo:
