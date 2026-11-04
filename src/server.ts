@@ -5,11 +5,13 @@ import { runTest } from "./core/agent.js";
 import { ClaudeBrain } from "./core/brains/claude.js";
 import { ScriptedBrain, demoPlanFor } from "./core/brains/scripted.js";
 import { callAgentSession, startAgentSession } from "./core/brains/external.js";
-import { listReports, loadReport, newReportId, reportDir } from "./core/report.js";
+import { listReports, loadReport, markInterruptedReports, newReportId, reportDir } from "./core/report.js";
 import { reportToMarkdown } from "./core/export.js";
 import { checkPublicTarget, claudeAllowed, isPublicInstance } from "./core/url-guard.js";
 
 const PORT = Number(process.env.PORT || 3000);
+// Loopback by default: the API drives a real browser, so only expose it on purpose (the Docker image sets HOST=0.0.0.0).
+const HOST = process.env.HOST || "127.0.0.1";
 const ROOT = process.cwd();
 const MAX_CONCURRENT_RUNS = Number(process.env.BLINDSPOT_MAX_RUNS || 2);
 let activeRuns = 0;
@@ -25,9 +27,15 @@ function send(res: http.ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body));
 }
 
-/** Serve a file from `base`, refusing anything that resolves outside it. */
+/** Serve a file from `base`, refusing anything that resolves outside it. Answers 400 to malformed escapes. */
 async function serveStatic(res: http.ServerResponse, base: string, rel: string): Promise<boolean> {
-  const decoded = decodeURIComponent(rel);
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(rel);
+  } catch {
+    send(res, 400, { error: "Malformed URL" });
+    return true;
+  }
   const file = path.resolve(base, "." + path.posix.normalize("/" + decoded));
   if (file !== base && !file.startsWith(base + path.sep)) return false;
   let target = file;
@@ -53,10 +61,41 @@ async function readJson(req: http.IncomingMessage): Promise<unknown> {
   return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
 }
 
+/** POST bodies must be JSON (which forces a CORS preflight on cross-site requests). */
+function isJsonRequest(req: http.IncomingMessage): boolean {
+  const type = req.headers["content-type"];
+  return typeof type === "string" && type.split(";")[0].trim().toLowerCase() === "application/json";
+}
+
+/**
+ * Refuses requests sent by another site's page (CSRF): when the browser sends an Origin header, its host must be
+ * this server's Host (or X-Forwarded-Host, for reverse proxies that rewrite Host). No Origin (curl, MCP) is fine.
+ */
+function isSameOrigin(req: http.IncomingMessage): boolean {
+  const origin = req.headers.origin;
+  if (origin === undefined) return true;
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host.toLowerCase();
+  } catch {
+    return false; // "null" (sandboxed iframes, file://) or garbage
+  }
+  const forwarded = req.headers["x-forwarded-host"];
+  const hosts = [req.headers.host, ...(typeof forwarded === "string" ? forwarded.split(",") : forwarded ?? [])]
+    .filter((h): h is string => typeof h === "string" && h.trim() !== "")
+    .map((h) => h.trim().toLowerCase());
+  return hosts.includes(originHost);
+}
+
 const server = http.createServer(async (req, res) => {
   try {
-    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+    const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname;
+
+    if (req.method === "POST") {
+      if (!isSameOrigin(req)) return send(res, 403, { error: "Cross-origin requests are not allowed" });
+      if (!isJsonRequest(req)) return send(res, 415, { error: "Expected content-type: application/json" });
+    }
 
     if (req.method === "GET" && p === "/api/reports") return send(res, 200, await listReports());
 
@@ -156,6 +195,10 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`BlindSpot running at http://localhost:${PORT}`);
+// A report still "running" on disk belongs to a test that died with a previous server process.
+await markInterruptedReports().catch((err) => console.error("Could not check for interrupted reports", err));
+
+server.listen(PORT, HOST, () => {
+  const shown = HOST === "0.0.0.0" || HOST === "::" ? "localhost" : HOST.includes(":") ? `[${HOST}]` : HOST;
+  console.log(`BlindSpot running at http://${shown}:${PORT}`);
 });

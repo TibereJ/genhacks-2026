@@ -4,8 +4,11 @@
 // http://localhost:6379/ or other internal services. This module refuses URLs whose host
 // resolves to a private, loopback, link-local or otherwise non-public address.
 //
-// Limitation: only the first URL is checked. Redirects, links followed by the agent and
-// DNS rebinding are not covered here; that needs request interception in the browser session.
+// The server checks the URL that starts a test, and BrowserSession.open runs checkPublicTarget on
+// every request the browser makes (navigations, assets, new tabs, each hop of a redirect chain).
+// Not covered: DNS rebinding (Chromium resolves the hostname again itself after this check) and
+// WebSockets (context.route does not see them). Public deployments must also block private ranges
+// at the network level; see "Known limits" in docs/DEPLOY.md.
 import { lookup as dnsLookup } from "node:dns/promises";
 import { isIP } from "node:net";
 

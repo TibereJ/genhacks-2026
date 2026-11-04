@@ -28,6 +28,7 @@ docker run --rm --init --ipc=host -p 3000:3000 --env-file .env blindspot
 | Variable | Default | Meaning |
 |---|---|---|
 | `PORT` | `3000` | HTTP port |
+| `HOST` | `127.0.0.1` | Interface the server listens on. The default only accepts connections from the same machine; the Docker image sets `0.0.0.0` so the published port works. Anyone who can reach the port can start tests, so only listen on `0.0.0.0` behind `BLINDSPOT_PUBLIC=1` or authentication |
 | `ANTHROPIC_API_KEY` | none | Claude API key for the AI agent. Without it only the scripted demo works |
 | `BLINDSPOT_MODEL` | `claude-opus-5-5` | Model used by the agent (`claude-haiku-5-5` is much cheaper) |
 | `BLINDSPOT_MAX_RUNS` | `2` | Maximum number of tests running at the same time (each one is a Chromium instance) |
@@ -37,6 +38,14 @@ docker run --rm --init --ipc=host -p 3000:3000 --env-file .env blindspot
 
 Pass secrets through your host's secret manager or `--env-file`, never in the image: `.env` is excluded by
 `.dockerignore`.
+
+## Request checks
+
+Every `POST` route (start a test, the external agent API) only accepts `content-type: application/json` (other
+types get `415`), and refuses with `403` a request whose `Origin` header names another host than the request's
+`Host` (or `X-Forwarded-Host`, for reverse proxies that rewrite `Host`). Together they stop other websites from
+starting tests through a visitor's browser (CSRF). Clients without an `Origin` header, like `curl`, are not
+affected.
 
 ## Security warning: public instances
 
@@ -54,18 +63,27 @@ So for a public deployment (for example the hackathon demo):
    - refuses URLs whose hostname resolves to a private, loopback, link-local or otherwise non-public address
      (IPv4 `0/8`, `10/8`, `100.64/10`, `127/8`, `169.254/16`, `172.16/12`, `192.168/16`, multicast...;
      IPv6 `::1`, `fc00::/7`, `fe80::/10`, multicast, and IPv4-mapped forms like `::ffff:127.0.0.1`), except its
-     own `/demo/` pages;
+     own `/demo/` pages. The same check runs on every request the test browser makes: page loads, assets,
+     links the agent follows, new tabs, and each hop of a redirect chain;
    - only allows the scripted agent (the demo clinic before/after), unless `BLINDSPOT_ALLOW_CLAUDE=1`.
 2. Keep the Claude agent disabled publicly. If you need it, put the instance behind authentication (your host's
    access control, a reverse proxy with basic auth, or a VPN) before setting `BLINDSPOT_ALLOW_CLAUDE=1`, and set a
    spending limit on the API key in the Anthropic console.
 3. Keep `BLINDSPOT_MAX_RUNS` low.
 
-Known limits of the URL guard (`src/core/url-guard.ts`): it checks the URL that starts the test. A public page can
-still redirect, or the agent can follow a link, to an internal address, and a hostname can resolve differently
-when the browser loads it (DNS rebinding). Closing those gaps needs request interception inside the browser
-session (Playwright `page.route`) or a network policy that blocks private ranges for the container. For a public
-instance, also run it on a host or network where the container cannot reach anything sensitive.
+### Known limits
+
+The URL guard (`src/core/url-guard.ts`) does not cover everything:
+
+- **DNS rebinding**: the guard resolves a hostname, then Chromium resolves it again by itself when it connects.
+  A hostile DNS server can answer with a public address the first time and a private one the second time.
+- **WebSockets**: Playwright's request interception does not see WebSocket connections, so a page can open one
+  to a private address.
+
+So a public deployment must also block private ranges at the network level: an egress firewall, or a container
+network policy, that stops the container from reaching `10/8`, `172.16/12`, `192.168/16`, `100.64/10`,
+`169.254/16` (cloud metadata) and the IPv6 private ranges (`fc00::/7`, `fe80::/10`). Run nothing else in the
+container, and run it on a host or network where it cannot reach anything sensitive.
 
 ## Deployxa
 

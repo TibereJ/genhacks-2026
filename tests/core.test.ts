@@ -26,6 +26,8 @@ const PAGES: Record<string, string> = {
       <a href="/redirect">Partner site</a>
     </main></body></html>`,
   "/done": `<!doctype html><html lang="en"><head><title>Thanks</title></head><body><main><h1>Message sent</h1></main></body></html>`,
+  "/tabs": `<!doctype html><html lang="en"><head><title>Tabs</title></head><body><main>
+    <h1>Links</h1><a href="/done" target="_blank">Open thanks in a new tab</a></main></body></html>`,
 };
 
 let server: http.Server;
@@ -126,6 +128,65 @@ describe("agent loop", () => {
   });
 });
 
+/** A brain that replays fixed turns (then repeats the last one) and records what it was told. */
+function recordingBrain(turns: { name: string; input: unknown }[][]) {
+  const received: { id: string; content: string; isError?: boolean }[][] = [];
+  let i = 0;
+  let n = 0;
+  const next = async () => ({ calls: turns[Math.min(i++, turns.length - 1)].map((c) => ({ ...c, id: `t${++n}` })), text: "" });
+  return {
+    received,
+    calls: () => n,
+    brain: {
+      model: "test",
+      start: next,
+      continue: async (o: { id: string; content: string; isError?: boolean }[]) => { received.push(o); return next(); },
+      nudge: next,
+    },
+  };
+}
+
+describe("agent loop limits", () => {
+  it("refuses finish in the same turn as an action and keeps going", async () => {
+    // Transcript ids are stable for the same page, so read them from a first visit.
+    const snap = await (async () => { const s = await BrowserSession.open(`${base}/form`); try { return await s.snapshot(); } finally { await s.close(); } })();
+    const name = [...snap.elements.values()].find((e) => e.role === "textbox" && e.name === "Name")!;
+    const r = recordingBrain([
+      [
+        { name: "type_text", input: { id: name.id, text: "Alex", reason: "fill" } },
+        { name: "finish", input: { status: "success", summary: "Too early." } },
+        { name: "report_issue", input: { severity: "minor", title: "After finish", description: "d", wcag: [], fix: "f", element_id: null, blocking: false } },
+      ],
+      [{ name: "finish", input: { status: "blocked", summary: "Looked first." } }],
+    ]);
+    const report = await runTest({ url: `${base}/form`, task: "t", brain: r.brain });
+    expect(report.status).toBe("blocked");
+    expect(report.summary).toBe("Looked first.");
+    expect(report.steps.map((s) => s.action.type)).toEqual(["type", "finish"]);
+    const firstAnswers = r.received[0];
+    expect(firstAnswers.map((o) => o.id)).toEqual(["t1", "t2", "t3"]);
+    expect(firstAnswers[1]).toMatchObject({ isError: true, content: "Look at the result of your action before finishing." });
+    expect(firstAnswers[2].content).toBe("Issue recorded.");
+  });
+
+  it("stops with step_limit after maxTurns brain turns, even without actions", async () => {
+    const r = recordingBrain([[{ name: "report_issue", input: { severity: "minor", title: "Again", description: "d", wcag: [], fix: "f", element_id: null, blocking: false } }]]);
+    const report = await runTest({ url: `${base}/form`, task: "t", brain: r.brain, maxSteps: 2 });
+    expect(report.status).toBe("step_limit");
+    expect(r.calls()).toBe(4); // default maxTurns = 2 × maxSteps
+    expect(report.summary).toContain("all 4 turns");
+    expect(report.issues.filter((i) => i.title === "Again")).toHaveLength(4);
+  });
+
+  it("counts turns without tool calls too", async () => {
+    let turns = 0;
+    const brain = { model: "test", start: async () => { turns++; return { calls: [], text: "" }; }, continue: async () => { turns++; return { calls: [], text: "" }; }, nudge: async () => { turns++; return { calls: [], text: "" }; } };
+    const report = await runTest({ url: `${base}/form`, task: "t", brain, maxSteps: 1, maxTurns: 2 });
+    expect(report.status).toBe("step_limit");
+    expect(turns).toBe(2);
+  });
+});
+
 describe("composite widgets", () => {
   it("reports focus inside a date field as focus on the date field", async () => {
     const { buildSnapshot } = await import("../src/core/ax-tree.js");
@@ -150,6 +211,45 @@ describe("browser safety and states", () => {
       expect(snap.text).toContain('checkbox "I accept the terms" (not checked)');
       const out = await s.act({ type: "click", id: box.id }, snap);
       expect(out.result).toContain('checkbox "I accept the terms" is now checked');
+    } finally {
+      await s.close();
+    }
+  });
+
+  it("follows a link into a new tab, and back closes that tab", async () => {
+    const s = await BrowserSession.open(`${base}/tabs`);
+    try {
+      const snap = await s.snapshot();
+      const link = [...snap.elements.values()].find((e) => e.role === "link")!;
+      const opened = await s.act({ type: "click", id: link.id }, snap);
+      expect(opened.ok).toBe(true);
+      expect(opened.result).toContain('A new tab opened: "Thanks".');
+      expect(opened.snapshot.text).toContain("Message sent");
+      expect(s.page.url()).toBe(`${base}/done`);
+
+      const back = await s.act({ type: "back" }, opened.snapshot);
+      expect(back.ok).toBe(true);
+      expect(back.result).toContain('This tab closed. Back on the previous tab: "Tabs".');
+      expect(s.page.url()).toBe(`${base}/tabs`);
+      expect(s.page.context().pages()).toHaveLength(1);
+    } finally {
+      await s.close();
+    }
+  });
+
+  it("retries a snapshot once when a navigation destroyed the page mid-read", async () => {
+    const s = await BrowserSession.open(`${base}/tabs`);
+    try {
+      const cdp = (s as unknown as { cdp: { send: (...a: unknown[]) => Promise<unknown> } }).cdp;
+      const real = cdp.send.bind(cdp);
+      let failures = 0;
+      cdp.send = async (...a: unknown[]) => {
+        if (failures === 0) { failures++; throw new Error("Protocol error: Execution context was destroyed."); }
+        return real(...a);
+      };
+      const snap = await s.snapshot();
+      expect(failures).toBe(1);
+      expect(snap.title).toBe("Tabs");
     } finally {
       await s.close();
     }

@@ -10,7 +10,8 @@ export class ClaudeBrain implements Brain {
   private readonly messages: Anthropic.Beta.BetaMessageParam[] = [];
 
   constructor(readonly model: string = process.env.BLINDSPOT_MODEL || DEFAULT_MODEL, client?: Anthropic) {
-    this.client = client ?? new Anthropic();
+    // A test is tens of calls: retry rate limits, overloads and network errors a few more times than the default 2.
+    this.client = client ?? new Anthropic({ maxRetries: 4 });
   }
 
   start(task: string, transcript: string): Promise<BrainTurn> {
