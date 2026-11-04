@@ -14,6 +14,8 @@ COPY . .
 RUN mkdir -p /app/reports && chown -R pwuser:pwuser /app/reports
 
 ENV PORT=3000
+# The server listens on 127.0.0.1 by default; inside a container it must accept connections from outside.
+ENV HOST=0.0.0.0
 EXPOSE 3000
 
 # Non-root user provided by the Playwright image.

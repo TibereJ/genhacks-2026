@@ -28,6 +28,7 @@ docker run --rm --init --ipc=host -p 3000:3000 --env-file .env blindspot
 | Variable | Default | Meaning |
 |---|---|---|
 | `PORT` | `3000` | HTTP port |
+| `HOST` | `127.0.0.1` | Interface the server listens on. The default only accepts connections from the same machine; the Docker image sets `0.0.0.0` so the published port works. Anyone who can reach the port can start tests, so only listen on `0.0.0.0` behind `BLINDSPOT_PUBLIC=1` or authentication |
 | `ANTHROPIC_API_KEY` | none | Claude API key for the AI agent. Without it only the scripted demo works |
 | `BLINDSPOT_MODEL` | `claude-opus-5-5` | Model used by the agent (`claude-haiku-5-5` is much cheaper) |
 | `BLINDSPOT_MAX_RUNS` | `2` | Maximum number of tests running at the same time (each one is a Chromium instance) |
@@ -37,6 +38,14 @@ docker run --rm --init --ipc=host -p 3000:3000 --env-file .env blindspot
 
 Pass secrets through your host's secret manager or `--env-file`, never in the image: `.env` is excluded by
 `.dockerignore`.
+
+## Request checks
+
+Every `POST` route (start a test, the external agent API) only accepts `content-type: application/json` (other
+types get `415`), and refuses with `403` a request whose `Origin` header names another host than the request's
+`Host` (or `X-Forwarded-Host`, for reverse proxies that rewrite `Host`). Together they stop other websites from
+starting tests through a visitor's browser (CSRF). Clients without an `Origin` header, like `curl`, are not
+affected.
 
 ## Security warning: public instances
 
