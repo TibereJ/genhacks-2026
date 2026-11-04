@@ -244,7 +244,7 @@ Devpost "Built with" tags: `typescript` `node.js` `claude` `anthropic` `claude-c
 
 # Demo video script
 
-The draft cut is **2:22**, captioned, made from Playwright recordings of the real app, with no voiceover yet. The
+The draft cut is **2:39** (Screen off design), captioned, made from Playwright recordings of the real app, with no voiceover yet. The
 voiceover below follows its order. Hard limit 3:00: the two optional inserts (MCP clip, architecture slide) bring
 it to about 2:50 at most. Times are approximate: align each line to the draft's captions. About 330 spoken words;
 speak calmly and let the Listen audio play.
