@@ -9,7 +9,10 @@
     "start": "tsx src/server.ts",
     "blindspot": "tsx src/cli.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "examples": "tsx src/examples.ts",
+    "mcp": "tsx src/mcp.ts",
+    "ci": "tsx src/ci.ts"
   },
   "engines": {
     "node": ">=20"

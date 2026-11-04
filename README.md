@@ -1,5 +1,7 @@
 # BlindSpot
 
+[![BlindSpot CI](https://github.com/TibereJ/genhacks-2026/actions/workflows/blindspot.yml/badge.svg)](https://github.com/TibereJ/genhacks-2026/actions/workflows/blindspot.yml)
+
 **Lighthouse checks rules. BlindSpot checks whether a blind person can actually use your site.**
 
 Give BlindSpot a URL and a task in plain language ("Book an appointment with Dr. Lee"). An AI agent tries to
@@ -25,17 +27,22 @@ Built solo for [GenHacks 2026](https://genhacks-open.devpost.com), track *AI, Ag
 
 BlindSpot tests the **journey**, not just the markup.
 
-## Result on the demo clinic
+## Results on the demo sites
 
-The repository ships a fictional clinic, *Maple Grove Clinic*, in two versions that are **pixel-identical** (a test
-compares byte-equal screenshots). Only the accessibility tree differs.
+The repository ships two fictional sites, *Maple Grove Clinic* (book an appointment) and *GreenCart* (grocery
+checkout), each in two versions that are **pixel-identical** (tests compare byte-equal screenshots). Only the
+accessibility tree differs.
 
 | Version | Agent result | Score | Issues |
 |---|---|---|---|
-| `demo-site/bad/` | **Blocked** after 12 steps: "Time slots cannot be selected" | 0/100 | 15 |
+| `demo-site/bad/` | **Blocked** after 11 steps: "Time slots cannot be selected" | 0/100 | 15 |
 | `demo-site/fixed/` | **Success**: appointment booked | 100/100 | 0 |
+| `demo-site/shop/bad/` (GreenCart grocery checkout) | **Blocked** after 13 steps: "Terms of sale cannot be accepted" | 0/100 | 8 |
+| `demo-site/shop/fixed/` | **Success**: order placed | 100/100 | 0 |
 
-These are from a run where Claude played the screen reader user through BlindSpot's external-agent API. The time
+These are real runs where Claude (in Claude Code) played the screen reader user through BlindSpot's external-agent
+API. All four reports ship in `examples/reports/`: run `npm run examples` and open http://localhost:3000 to browse
+them without an API key. On the clinic, the time
 slots are clickable `<div>`s: a screen reader announces them as plain text, and pressing Tab jumps from the date
 field straight to "Full name". Submitting anyway shows a red "Please choose a time slot" message that is never
 announced. A sighted mouse user books without noticing anything.
@@ -173,6 +180,14 @@ Open <http://localhost:3000>, click **Demo: inaccessible clinic** (or **Demo: fi
 agent works. On each step, **Listen** reads aloud what the agent heard (Web Speech API). Once both clinics have been
 tested, tick both runs (or use **Compare with…** on a report) for the before / after view. Reports can be
 downloaded as Markdown or copied as a GitHub issue.
+
+### Browse the example reports
+
+```bash
+npm run examples
+```
+
+Opens the UI on `examples/reports/` (the four real agent runs above).
 
 ### CLI
 
