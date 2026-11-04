@@ -92,6 +92,13 @@ describe("reportToMarkdown", () => {
     expect(md).not.toContain("## Summary");
   });
 
+  it("says a finished run without a score was not scored, and why", () => {
+    const first = (over: Partial<Report>) => reportToMarkdown(report({ score: undefined, ...over })).split("\n")[0];
+    expect(first({ status: "inconclusive" })).toBe("# BlindSpot: Inconclusive, not scored (inconclusive)");
+    expect(first({ status: "error" })).toBe("# BlindSpot: Error, not scored (error)");
+    expect(first({ status: "inconclusive" })).not.toContain("pending");
+  });
+
   it("lists issues blocking first, then by severity", () => {
     const md = reportToMarkdown(
       report({

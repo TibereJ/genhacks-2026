@@ -5,7 +5,7 @@ import type { Issue } from "./types.js";
 export type ScanFinding = Omit<Issue, "id" | "stepIndex" | "source" | "blocking">;
 
 interface DomFinding {
-  kind: "img-no-alt" | "clickable-not-operable" | "placeholder-only" | "no-lang";
+  kind: "img-no-alt" | "clickable-not-operable" | "link-no-href" | "placeholder-only" | "no-lang";
   html: string;
   text: string;
 }
@@ -124,6 +124,19 @@ export async function scanPage(page: Page, snapshot: Snapshot): Promise<ScanFind
     });
   }
 
+  const hrefless = dom.filter((d) => d.kind === "link-no-href");
+  if (hrefless.length) {
+    const sample = hrefless.slice(0, 4).map((c) => `"${c.text}"`).join(", ");
+    findings.push({
+      severity: "moderate",
+      title: "Links without href may not respond to Enter",
+      description: `${hrefless.length} link${hrefless.length > 1 ? "s" : ""} on "${pageLabel}" ${hrefless.length > 1 ? "have" : "has"} no href (for example ${sample}). Keyboard and screen reader users can reach ${hrefless.length > 1 ? "them" : "it"} with Tab, but pressing Enter does nothing unless the page also handles the key, and ${hrefless.length > 1 ? "they are" : "it is"} not announced as a real link.`,
+      wcag: ["2.1.1 Keyboard", "4.1.2 Name, Role, Value"],
+      fix: 'Use <a href> for navigation, or <button> for an action:\n<a href="/audio/episode-12.mp3" download>Download audio</a>\n<button type="button">Play</button>',
+      element: { role: "link", name: hrefless[0].text, html: hrefless[0].html },
+    });
+  }
+
   const placeholders = dom.filter((d) => d.kind === "placeholder-only");
   if (placeholders.length) {
     findings.push({
@@ -168,20 +181,40 @@ const DOM_CHECKS = `(() => {
   });
 
   const NATIVE = "a[href], button, input, select, textarea, summary, label, option, [contenteditable='true']";
+  const FORM_CONTROLS = "input:not([type=hidden]), select, textarea";
+  const OTHER_NATIVE = "a[href], button, summary, [contenteditable='true']";
   const ROLES = new Set(["button", "link", "checkbox", "radio", "tab", "menuitem", "option", "switch", "combobox", "slider", "textbox"]);
+  const text = (el) => (el.textContent || "").replace(/\\s+/g, " ").trim().slice(0, 60);
   const seen = new Set();
   document.querySelectorAll("body *").forEach((el) => {
-    // Wrappers around a real control (e.g. a styled <div> holding a checkbox and its label) are fine.
-    if (hidden(el) || el.matches(NATIVE) || el.closest(NATIVE) || el.querySelector(NATIVE)) return;
+    if (hidden(el) || el.matches(NATIVE) || el.closest(NATIVE)) return;
     const role = el.getAttribute("role");
+    // Focusable links without href (<a tabindex="0">) can be reached, but Enter only activates real links
+    // (or elements whose own key handler does it). Chromium reports tabIndex 0 for every <a>, hence the attribute
+    // check: an <a onclick> without tabindex cannot be reached at all, and is reported below.
+    if (el.tagName === "A" && !el.hasAttribute("href") && el.hasAttribute("tabindex") && el.tabIndex >= 0) {
+      const keyHandler = el.hasAttribute("onkeydown") || el.hasAttribute("onkeyup") || el.hasAttribute("onkeypress");
+      if (!((role === "button" || role === "link") && keyHandler)) out.push({ kind: "link-no-href", html: snippet(el), text: text(el) });
+      return;
+    }
     if (role && ROLES.has(role) && el.hasAttribute("tabindex")) return;
-    // Focusable links without href (<a tabindex="0">) are reachable and announced as links.
-    if (el.tagName === "A" && el.tabIndex >= 0) return;
-    const clickable = el.hasAttribute("onclick") || (getComputedStyle(el).cursor === "pointer" && getComputedStyle(el.parentElement).cursor !== "pointer");
+    const onclick = el.hasAttribute("onclick");
+    const clickable = onclick || (getComputedStyle(el).cursor === "pointer" && getComputedStyle(el.parentElement).cursor !== "pointer");
     if (!clickable) return;
+    if (el.querySelector(NATIVE)) {
+      // A styled wrapper around one real control (e.g. a <div> holding a checkbox and its label) is fine: clicks
+      // land on the control. A clickable wrapper around anything else (a product card with onclick holding a
+      // "Details" link) is a mouse-only target of its own.
+      const controls = el.querySelectorAll(FORM_CONTROLS).length;
+      const labels = el.querySelectorAll("label").length;
+      const others = el.querySelectorAll(OTHER_NATIVE).length;
+      if (others === 0 && controls <= 1 && labels <= 1) return;
+      // With only a pointer cursor as a clue, the cursor most likely comes from the controls inside.
+      if (!onclick) return;
+    }
     for (const s of seen) if (s.contains(el)) return;
     seen.add(el);
-    out.push({ kind: "clickable-not-operable", html: snippet(el), text: (el.textContent || "").replace(/\\s+/g, " ").trim().slice(0, 60) });
+    out.push({ kind: "clickable-not-operable", html: snippet(el), text: text(el) });
   });
 
   document.querySelectorAll("input:not([type=hidden]):not([type=submit]):not([type=button]), textarea").forEach((input) => {

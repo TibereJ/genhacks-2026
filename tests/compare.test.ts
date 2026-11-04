@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareIssues, issueMatchKey, orderRuns, scoreDelta } from "../report-ui/format.js";
+import { compareIssues, issueComparability, issueMatchKey, noScoreText, orderRuns, scoreDelta } from "../report-ui/format.js";
 
 type I = { title: string; severity: string; blocking?: boolean; stepIndex?: number; element?: { role: string; name: string } };
 
@@ -66,6 +66,34 @@ describe("scoreDelta", () => {
     expect(scoreDelta(30, 95)).toMatchObject({ value: 65, text: "+65", tone: "good", sentence: "Score up 65 points" });
     expect(scoreDelta(90, 89)).toMatchObject({ value: -1, tone: "bad", sentence: "Score down 1 point" });
     expect(scoreDelta(50, 50)).toMatchObject({ value: 0, text: "±0", tone: "none" });
-    expect(scoreDelta(undefined, 50)).toMatchObject({ value: null, tone: "none" });
+    expect(scoreDelta(undefined, 50)).toMatchObject({ value: null, tone: "none", label: "pending" });
+    expect(scoreDelta(30, 95).label).toBe("points");
+  });
+
+  it("only says pending while a run is still going", () => {
+    expect(scoreDelta(undefined, 50, "running", "success")).toMatchObject({ label: "pending", sentence: "Score change not available yet" });
+    expect(scoreDelta(80, undefined, "success", "inconclusive")).toMatchObject({ value: null, label: "not scored", sentence: "No score change: the after run was not scored" });
+    expect(scoreDelta(undefined, 80, "error", "success").sentence).toBe("No score change: the before run was not scored");
+    expect(scoreDelta(undefined, undefined, "error", "inconclusive").sentence).toBe("No score change: neither run was scored");
+  });
+});
+
+describe("issueComparability", () => {
+  it("refuses to compare issues when a run is inconclusive or failed", () => {
+    expect(issueComparability("blocked", "success")).toEqual({ comparable: true, reason: "" });
+    expect(issueComparability("running", "success").comparable).toBe(true);
+    expect(issueComparability("success", "inconclusive")).toMatchObject({ comparable: false });
+    expect(issueComparability("success", "inconclusive").reason).toContain("the after run was inconclusive");
+    expect(issueComparability("error", "success").reason).toContain("the before run failed");
+    expect(issueComparability("error", "inconclusive").reason).toContain("the before run failed and the after run was inconclusive");
+  });
+});
+
+describe("noScoreText", () => {
+  it("says why a run has no score", () => {
+    expect(noScoreText("running")).toBe("No score yet");
+    expect(noScoreText("inconclusive")).toBe("Not scored: test inconclusive");
+    expect(noScoreText("error")).toBe("Not scored: the test failed");
+    expect(noScoreText(undefined)).toBe("No score");
   });
 });

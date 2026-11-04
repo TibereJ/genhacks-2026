@@ -59,4 +59,8 @@ export function orderRuns<T extends { startedAt?: string }>(a: T, b: T): [T, T];
 export function scoreDelta(
   before: number | undefined,
   after: number | undefined,
-): { value: number | null; text: string; tone: "good" | "bad" | "none"; sentence: string };
+  beforeStatus?: string,
+  afterStatus?: string,
+): { value: number | null; text: string; tone: "good" | "bad" | "none"; label: "points" | "pending" | "not scored"; sentence: string };
+export function noScoreText(status: string | undefined): string;
+export function issueComparability(beforeStatus: string | undefined, afterStatus: string | undefined): { comparable: boolean; reason: string };

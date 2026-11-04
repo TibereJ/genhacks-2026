@@ -25,9 +25,18 @@ Serve the folder with any static file server, at the root or under a sub-path: e
 `<meta name="blindspot-static" content="1">` to `index.html`, which makes the UI read `data/reports.json`,
 `data/reports/<id>/report.json` and `data/reports/<id>/step-N.png` instead of the API. It copies `demo-site/` to
 `demo/`, and writes `data/reports/<id>/report.md` (the Markdown export, made with `reportToMarkdown`) for
-"Download Markdown" and "Copy as GitHub issue". Report data is published as it is.
+"Download Markdown" and "Copy as GitHub issue". Report data is published as it is. A report still `running` is
+refused: wait for it to finish, or delete it.
+
+The output folder is emptied before each build, so the script refuses a folder that is outside the repository, is
+the repository itself, or overlaps (as the same folder, a parent or a child) `src/`, `report-ui/`, `demo-site/`,
+`examples/`, `tests/`, `docs/`, `node_modules/`, `.git/` or `.github/` (compared case-insensitively on Windows,
+after resolving symbolic links). Every build writes a `.blindspot-static` file in it; an existing non-empty folder
+without that file is never deleted.
 
 `.github/workflows/pages.yml` builds and deploys it on every push to `main` (and on demand from the Actions tab).
+The workflow token is read-only (`contents: read`, plus `pages: read` for the build job); only the deploy job gets
+`pages: write` and `id-token: write`.
 **The repository owner must enable Pages once:** Settings → Pages → Build and deployment → Source:
 **GitHub Actions**. Until then the deploy job fails.
 
@@ -58,6 +67,7 @@ docker run --rm --init --ipc=host -p 3000:3000 --env-file .env blindspot
 | `BLINDSPOT_PUBLIC` | unset | `1` for an internet-facing instance: turns on the protections below |
 | `BLINDSPOT_ALLOW_CLAUDE` | unset | With `BLINDSPOT_PUBLIC=1`, `1` re-enables the Claude agent |
 | `BLINDSPOT_REPORTS_DIR` | `reports` | Where reports are written |
+| `BLINDSPOT_ALLOWED_HOSTS` | unset | Only when `HOST` is a loopback address (the default): extra comma-separated host names the server answers to, besides `localhost`, `127.0.0.1` and `[::1]` (ports are ignored), e.g. `blindspot.local` behind a local reverse proxy. See "Request checks" |
 
 Pass secrets through your host's secret manager or `--env-file`, never in the image: `.env` is excluded by
 `.dockerignore`.
@@ -69,6 +79,13 @@ types get `415`), and refuses with `403` a request whose `Origin` header names a
 `Host` (or `X-Forwarded-Host`, for reverse proxies that rewrite `Host`). Together they stop other websites from
 starting tests through a visitor's browser (CSRF). Clients without an `Origin` header, like `curl`, are not
 affected.
+
+When the server listens on a loopback address (`HOST` is `127.0.0.1`, the default, `localhost` or `::1`), it also
+answers `403` to every request (GET and POST) whose `Host` header is not `localhost`, `127.0.0.1` or `[::1]` (any
+port), or a name listed in `BLINDSPOT_ALLOWED_HOSTS`. This stops **DNS rebinding**: a hostile site pointing its
+own domain at `127.0.0.1` so that the visitor's browser treats the local server as same-origin and can read the
+reports or start tests. With `HOST=0.0.0.0` (Docker, public instances) this check is off: put the instance behind
+a reverse proxy that only forwards your own domain.
 
 ## Security warning: public instances
 

@@ -16,6 +16,42 @@ const ROOT = process.cwd();
 const MAX_CONCURRENT_RUNS = Number(process.env.BLINDSPOT_MAX_RUNS || 2);
 let activeRuns = 0;
 
+/** True for an interface only this machine can reach: localhost, 127.0.0.0/8, ::1. */
+function isLoopbackHost(host: string): boolean {
+  const h = host.trim().toLowerCase().replace(/^\[|\]$/g, "");
+  return h === "localhost" || h === "::1" || h === "0:0:0:0:0:0:0:1" || /^(::ffff:)?127\.\d+\.\d+\.\d+$/.test(h);
+}
+
+/** The hostname of a Host header value, lowercase, without the port (IPv6 keeps its brackets), or null if invalid. */
+function hostnameOf(value: string): string | null {
+  try {
+    const { hostname, username, password, pathname, search, hash } = new URL(`http://${value.trim()}`);
+    if (username || password || pathname !== "/" || search || hash) return null;
+    return hostname;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * DNS rebinding: a hostile site can point its own domain at 127.0.0.1, so the visitor's browser sends it requests
+ * that pass the Origin check (same origin, from the browser's point of view) and can read the answers. On a
+ * loopback interface, only accept the Host names this machine uses, plus BLINDSPOT_ALLOWED_HOSTS.
+ */
+const ALLOWED_HOSTS: Set<string> | null = isLoopbackHost(HOST)
+  ? new Set(
+      ["localhost", "127.0.0.1", "[::1]", HOST.includes(":") && !HOST.startsWith("[") ? `[${HOST}]` : HOST, ...(process.env.BLINDSPOT_ALLOWED_HOSTS ?? "").split(",")]
+        .map((h) => (h.trim() ? hostnameOf(h) : null))
+        .filter((h): h is string => h !== null),
+    )
+  : null;
+
+function isAllowedHost(req: http.IncomingMessage): boolean {
+  if (!ALLOWED_HOSTS) return true; // listening on the network (Docker, public instance): any Host
+  const hostname = typeof req.headers.host === "string" ? hostnameOf(req.headers.host) : null;
+  return hostname !== null && ALLOWED_HOSTS.has(hostname);
+}
+
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml", ".jpg": "image/jpeg",
@@ -89,6 +125,10 @@ function isSameOrigin(req: http.IncomingMessage): boolean {
 
 const server = http.createServer(async (req, res) => {
   try {
+    if (!isAllowedHost(req)) {
+      res.writeHead(403, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+      return void res.end("Forbidden: unknown Host header. To reach this server under another name, add it to BLINDSPOT_ALLOWED_HOSTS.\n");
+    }
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname;
 

@@ -1,4 +1,4 @@
-import { chromium, type Browser, type BrowserContext, type CDPSession, type Page } from "playwright";
+import { chromium, type Browser, type BrowserContext, type CDPSession, type LaunchOptions, type Page } from "playwright";
 import { buildSnapshot, type AXNode, type Snapshot, type SnapshotElement } from "./ax-tree.js";
 
 export type BrowserAction =
@@ -18,16 +18,35 @@ export interface ActionOutcome {
 
 /**
  * Full Chromium in headless mode is closer to real Chrome than Playwright's lighter headless shell (and uses
- * the system certificate store on Linux). Fall back to the default build if it isn't installed.
- * Override with BLINDSPOT_BROWSER_CHANNEL (e.g. "chrome", "msedge", or "default" for the headless shell).
+ * the system certificate store on Linux). Falls back to the default build only when full Chromium isn't installed
+ * ("Executable doesn't exist"), saying so on stderr; any other failure is thrown.
+ * Override with BLINDSPOT_BROWSER_CHANNEL (e.g. "chrome", "msedge", or "default" for the headless shell): a channel
+ * chosen there never falls back.
  */
-async function launchBrowser(): Promise<Browser> {
-  const channel = process.env.BLINDSPOT_BROWSER_CHANNEL || "chromium";
-  if (channel === "default") return chromium.launch();
+export async function launchBrowser(
+  launch: (options?: LaunchOptions) => Promise<Browser> = (options) => chromium.launch(options),
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<Browser> {
+  const explicit = env.BLINDSPOT_BROWSER_CHANNEL?.trim();
+  const channel = explicit || "chromium";
+  if (channel === "default") return launch();
   try {
-    return await chromium.launch({ channel });
-  } catch {
-    return chromium.launch();
+    return await launch({ channel });
+  } catch (err) {
+    const first = (err as Error).message ?? String(err);
+    if (explicit) {
+      throw new Error(`Could not start the browser channel "${channel}" set in BLINDSPOT_BROWSER_CHANNEL: ${first}`, { cause: err });
+    }
+    if (!/Executable doesn't exist/i.test(first)) throw err;
+    console.error(`BlindSpot: full Chromium is not installed (${first.split("\n")[0]}). Falling back to Playwright's default headless browser.`);
+    try {
+      return await launch();
+    } catch (second) {
+      throw new Error(
+        `Could not start a browser.\nFull Chromium: ${first}\nDefault build: ${(second as Error).message ?? String(second)}`,
+        { cause: second },
+      );
+    }
   }
 }
 
@@ -40,13 +59,18 @@ const ALLOWED_KEYS = new Set(["Enter", "Escape", "Tab", "Shift+Tab", "Space", "A
  *
  * Tabs: when an action opens a new tab (target="_blank", window.open), the session switches to it, as a screen
  * reader would, and says so in the result. The previous tab stays open: "back" in a tab that has no history of its
- * own closes it and returns to the previous tab.
+ * own closes it and returns to the previous tab. A tab opened later (by a timer, after the action settled) is picked
+ * up at the next action or snapshot, and a tab that closes itself (a popup) sends the session back to the previous
+ * one. When several tabs open at once, the one opened by the current tab wins; tabs that stay on about:blank are
+ * ignored until they load something.
  */
 export class BrowserSession {
   /** Tabs we left for a new one, most recent last. */
   private readonly previousTabs: Page[] = [];
-  /** Pages opened since the current action started. */
+  /** Pages opened since we last looked (the listener stays on for the whole session). */
   private openedPages: Page[] = [];
+  /** New tabs still on about:blank: adopted later if they navigate somewhere. */
+  private blankPages: Page[] = [];
 
   private constructor(
     private readonly browser: Browser,
@@ -128,13 +152,21 @@ export class BrowserSession {
   }
 
   async snapshot(): Promise<Snapshot> {
+    return (await this.observe()).snapshot;
+  }
+
+  /** Switches tabs if needed (see syncTabs), then reads the transcript. */
+  private async observe(): Promise<{ snapshot: Snapshot; tab?: TabChange }> {
+    let tab = await this.syncTabs();
     try {
-      return await this.readSnapshot();
+      return { snapshot: await this.readSnapshot(), tab };
     } catch {
       // A navigation in progress (redirect, script, late form submit) destroys the document mid-read
-      // ("Execution context was destroyed"): wait for the new page and try once more.
+      // ("Execution context was destroyed"): wait for the new page and try once more. The tab may also
+      // have closed itself in the meantime.
       await this.currentPage.waitForLoadState("load", { timeout: 15_000 }).catch(() => {});
-      return this.readSnapshot();
+      tab = (await this.syncTabs()) ?? tab;
+      return { snapshot: await this.readSnapshot(), tab };
     }
   }
 
@@ -154,22 +186,51 @@ export class BrowserSession {
     await page.bringToFront().catch(() => {});
   }
 
-  /** If the last action opened a tab, switch to it. Returns true when it did. */
-  private async adoptNewTab(): Promise<boolean> {
-    const opened = this.openedPages.filter((p) => !p.isClosed());
-    this.openedPages = [];
-    const next = opened.at(-1);
-    if (!next) return false;
-    await next.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => {});
-    if (next.isClosed()) return false;
-    this.previousTabs.push(this.currentPage);
-    await this.switchTo(next);
+  /**
+   * Puts the session on the tab a screen reader user would be on now: a tab opened since we last looked (preferring
+   * one opened by the current tab, ignoring tabs that stay on about:blank), or, if the current tab closed itself,
+   * the previous tab. Returns what changed.
+   */
+  private async syncTabs(): Promise<TabChange | undefined> {
+    const next = await this.pickNewTab();
+    if (next) {
+      if (!this.currentPage.isClosed()) this.previousTabs.push(this.currentPage);
+      await this.switchTo(next);
+      await this.settle();
+      return "opened";
+    }
+    if (!this.currentPage.isClosed()) return undefined;
+    let previous: Page | undefined;
+    while ((previous = this.previousTabs.pop()) && previous.isClosed());
+    previous ??= this.context.pages().filter((p) => !p.isClosed()).at(-1);
+    if (!previous) throw new Error("Every tab of the browser was closed.");
+    await this.switchTo(previous);
     await this.settle();
-    return true;
+    return "closed";
+  }
+
+  private async pickNewTab(): Promise<Page | undefined> {
+    const candidates = [...this.blankPages, ...this.openedPages].filter((p, i, all) => !p.isClosed() && all.indexOf(p) === i && p !== this.currentPage);
+    this.openedPages = [];
+    this.blankPages = [];
+    if (!candidates.length) return undefined;
+    await Promise.all(candidates.map((p) => p.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => {})));
+    const loaded: Page[] = [];
+    for (const p of candidates) {
+      if (p.isClosed()) continue;
+      if (p.url() === "about:blank" || p.url() === "") this.blankPages.push(p);
+      else loaded.push(p);
+    }
+    if (!loaded.length) return undefined;
+    const current = this.currentPage.isClosed() ? undefined : this.currentPage;
+    const openers = await Promise.all(loaded.map((p) => p.opener().catch(() => null)));
+    const fromCurrent = loaded.filter((_, i) => current && openers[i] === current);
+    return (fromCurrent.length ? fromCurrent : loaded).at(-1);
   }
 
   /** Screenshot for human readers of the report, with the target element outlined. */
   async screenshot(path: string, highlight?: SnapshotElement): Promise<void> {
+    if (this.currentPage.isClosed()) return; // the tab closed itself: act() reports it
     let objectId: string | undefined;
     if (highlight) {
       objectId = await this.resolve(highlight).catch(() => undefined);
@@ -182,7 +243,12 @@ export class BrowserSession {
         }`).catch(() => {});
       }
     }
-    await this.currentPage.screenshot({ path, fullPage: false });
+    try {
+      await this.currentPage.screenshot({ path, fullPage: false });
+    } catch (err) {
+      if (!this.currentPage.isClosed()) throw err;
+      return;
+    }
     if (objectId) {
       await this.call(objectId, `function () {
         this.style.outline = this.dataset.bsOutline || "";
@@ -193,8 +259,11 @@ export class BrowserSession {
   }
 
   async act(action: BrowserAction, before: Snapshot): Promise<ActionOutcome> {
-    const fail = async (result: string): Promise<ActionOutcome> => ({ ok: false, result, snapshot: await this.snapshot() });
-    this.openedPages = [];
+    const fail = async (result: string): Promise<ActionOutcome> => {
+      const { snapshot, tab } = await this.observe();
+      return { ok: false, result: tab ? `${result} ${describeChange(before, snapshot, action, undefined, tab)}` : result, snapshot };
+    };
+    if (this.currentPage.isClosed()) return fail("The tab you were on closed by itself, so the action was not performed.");
     let tab: TabChange | undefined;
 
     let el: SnapshotElement | undefined;
@@ -280,18 +349,19 @@ export class BrowserSession {
         }
       }
     } catch (err) {
-      return fail(`The action failed: ${(err as Error).message.split("\n")[0]}`);
+      // An action that makes the tab close itself (a popup's "Done" button) can fail half-way: that is not an error.
+      if (!this.currentPage.isClosed()) return fail(`The action failed: ${(err as Error).message.split("\n")[0]}`);
     }
 
     await this.settle();
-    if (await this.adoptNewTab()) tab = "opened";
-    const after = await this.snapshot();
-    return { ok: true, result: describeChange(before, after, action, el, tab), snapshot: after };
+    const { snapshot: after, tab: changed } = await this.observe();
+    return { ok: true, result: describeChange(before, after, action, el, changed ?? tab), snapshot: after };
   }
 
   /** Wait for navigation and scripts triggered by an action to finish. */
   private async settle(): Promise<void> {
-    await this.currentPage.waitForTimeout(350);
+    if (this.currentPage.isClosed()) return;
+    await this.currentPage.waitForTimeout(350).catch(() => {});
     await this.currentPage.waitForLoadState("load", { timeout: 15_000 }).catch(() => {});
     await this.currentPage.waitForLoadState("networkidle", { timeout: 3_000 }).catch(() => {});
   }
