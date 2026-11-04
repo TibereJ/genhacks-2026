@@ -24,7 +24,7 @@ export function scorePill(score) {
 }
 
 /** Big circular gauge for the report header. */
-export function scoreGauge(score) {
+export function scoreGauge(score, status) {
   const has = typeof score === "number";
   const value = has ? Math.max(0, Math.min(100, score)) : 0;
   const r = 52;
@@ -35,7 +35,7 @@ export function scoreGauge(score) {
     {
       class: `gauge tone-${tone}`,
       role: "img",
-      "aria-label": has ? `Accessibility score: ${Math.round(value)} out of 100. ${scoreVerdict(score)}.` : "Score pending",
+      "aria-label": has ? `Accessibility score: ${Math.round(value)} out of 100. ${scoreVerdict(score)}.` : scoreVerdict(score, status),
     },
     s(
       "svg",
@@ -57,7 +57,7 @@ export function scoreGauge(score) {
       h("span", { class: "gauge-number" }, has ? String(Math.round(value)) : "–"),
       h("span", { class: "gauge-of" }, "/ 100"),
     ),
-    h("p", { class: "gauge-verdict", "aria-hidden": "true" }, scoreVerdict(score)),
+    h("p", { class: "gauge-verdict", "aria-hidden": "true" }, scoreVerdict(score, status)),
   );
 }
 

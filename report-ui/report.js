@@ -301,7 +301,7 @@ function renderHead(head, r, steps, issues) {
           )
         : null,
     ),
-    h("div", { class: "head-score" }, scoreGauge(r.score), h("p", { class: "gauge-caption" }, "Screen reader score")),
+    h("div", { class: "head-score" }, scoreGauge(r.score, r.status), h("p", { class: "gauge-caption" }, "Screen reader score")),
   );
 }
 

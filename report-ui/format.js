@@ -41,11 +41,13 @@ export function scoreTone(score) {
 }
 
 /** Short verdict sentence under the score. */
-export function scoreVerdict(score) {
+export function scoreVerdict(score, status) {
   const tone = scoreTone(score);
   if (tone === "good") return "Usable with a screen reader";
   if (tone === "warn") return "Usable, with friction";
   if (tone === "bad") return "Hard or impossible to use";
+  if (status === "inconclusive") return "Not scored: test inconclusive";
+  if (status === "error") return "Not scored: the test failed";
   return "Score pending";
 }
 

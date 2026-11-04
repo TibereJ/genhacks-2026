@@ -32,7 +32,7 @@ export const STATUS_LABELS: Record<string, string>;
 export function statusLabel(status: string | undefined): string;
 export function statusTone(status: string | undefined): "good" | "bad" | "warn" | "info";
 export function scoreTone(score: number | undefined): "good" | "warn" | "bad" | "none";
-export function scoreVerdict(score: number | undefined): string;
+export function scoreVerdict(score: number | undefined, status?: string): string;
 export function sortIssues<T extends IssueLike>(issues: T[] | undefined): T[];
 export function countBySeverity(issues: IssueLike[] | undefined): Record<Severity, number>;
 export function actionSegments(action: ActionLike | undefined): Segment[];

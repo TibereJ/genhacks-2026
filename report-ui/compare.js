@@ -148,7 +148,7 @@ function runCard(label, r) {
     "article",
     { class: `card cmp-run cmp-${label.toLowerCase()}`, "aria-labelledby": titleId },
     h("h2", { id: titleId, class: "cmp-run-label" }, label),
-    scoreGauge(r.score),
+    scoreGauge(r.score, r.status),
     h("div", { class: "cmp-run-status" }, statusBadge(r.status)),
     h(
       "ul",
