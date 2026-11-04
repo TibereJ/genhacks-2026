@@ -1,7 +1,7 @@
 // Reusable UI pieces shared by the home and report views.
 
 import { h, s, icon } from "./dom.js";
-import { statusLabel, statusTone, scoreTone, scoreVerdict } from "./format.js";
+import { noScoreText, statusLabel, statusTone, scoreTone, scoreVerdict } from "./format.js";
 
 export function statusBadge(status) {
   return h(
@@ -12,14 +12,14 @@ export function statusBadge(status) {
   );
 }
 
-/** Small round score used in lists. */
-export function scorePill(score) {
+/** Small round score used in lists. Pass the run status so a missing score says why. */
+export function scorePill(score, status) {
   const has = typeof score === "number";
   return h(
     "span",
     { class: `score-pill tone-${scoreTone(score)}` },
     h("span", { "aria-hidden": "true" }, has ? String(Math.round(score)) : "–"),
-    h("span", { class: "sr-only" }, has ? `Score ${Math.round(score)} out of 100` : "No score yet"),
+    h("span", { class: "sr-only" }, has ? `Score ${Math.round(score)} out of 100` : noScoreText(status)),
   );
 }
 

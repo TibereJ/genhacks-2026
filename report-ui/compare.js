@@ -3,7 +3,7 @@
 
 import { h, icon, replaceChildren } from "./dom.js";
 import { getReport } from "./api.js";
-import { compareIssues, duration, prettyUrl, relativeTime, scoreDelta, statusLabel } from "./format.js";
+import { compareIssues, duration, issueComparability, prettyUrl, relativeTime, scoreDelta, statusLabel } from "./format.js";
 import { statusBadge, scoreGauge, elementChip, wcagChip, emptyState, errorBox } from "./components.js";
 
 const POLL_MS = 1500;
@@ -76,7 +76,9 @@ function header(title, ...extra) {
 
 function renderComparison(before, after) {
   const { fixed, stillPresent, added } = compareIssues(before.issues ?? [], after.issues ?? []);
-  const delta = scoreDelta(before.score, after.score);
+  const delta = scoreDelta(before.score, after.score, before.status, after.status);
+  // An inconclusive or failed run did not test the whole task: an issue missing from it proves nothing.
+  const { comparable, reason } = issueComparability(before.status, after.status);
   const sameTask = String(before.task ?? "").trim() === String(after.task ?? "").trim();
   const running = before.status === "running" || after.status === "running";
 
@@ -87,6 +89,7 @@ function renderComparison(before, after) {
       sameTask ? after.task || "Untitled task" : "Two different tasks",
       sameTask ? null : h("p", { class: "cmp-note" }, icon("alert"), "These runs did not test the same task, so the comparison may be misleading."),
       running ? h("p", { class: "cmp-note", role: "status" }, h("span", { class: "spinner", "aria-hidden": "true" }), "A run is still in progress. This page updates on its own.") : null,
+      comparable ? null : h("p", { class: "cmp-note cmp-not-comparable" }, icon("alert"), reason),
     ),
     h(
       "section",
@@ -97,7 +100,7 @@ function renderComparison(before, after) {
         { class: `cmp-delta tone-${delta.tone}` },
         h("span", { class: "cmp-delta-arrow", "aria-hidden": "true" }, icon("arrow")),
         h("p", { class: "cmp-delta-num", "aria-hidden": "true" }, delta.text),
-        h("p", { class: "cmp-delta-label", "aria-hidden": "true" }, delta.value === null ? "pending" : "points"),
+        h("p", { class: "cmp-delta-label", "aria-hidden": "true" }, delta.label),
         h("p", { class: "sr-only" }, `${delta.sentence}.`),
       ),
       runCard("After", after),
@@ -105,7 +108,7 @@ function renderComparison(before, after) {
     h(
       "nav",
       { class: "jump", "aria-label": "Comparison sections" },
-      jumpLink("cmp-fixed-title", `${fixed.length} fixed`),
+      jumpLink("cmp-fixed-title", comparable ? `${fixed.length} fixed` : "fixed: not compared"),
       jumpLink("cmp-still-title", `${stillPresent.length} still present`),
       jumpLink("cmp-new-title", `${added.length} new`),
     ),
@@ -115,8 +118,11 @@ function renderComparison(before, after) {
       iconName: "check",
       title: "Fixed",
       note: "Found before, gone after.",
-      items: fixed.map((i) => ({ issue: i })),
-      empty: before.issues?.length ? "None of the earlier issues were fixed." : "The earlier run had no issues.",
+      items: comparable ? fixed.map((i) => ({ issue: i })) : [],
+      count: comparable ? undefined : "not compared",
+      empty: !comparable
+        ? "Not compared: one of these runs did not test the whole task, so earlier issues cannot be called fixed."
+        : before.issues?.length ? "None of the earlier issues were fixed." : "The earlier run had no issues.",
     }),
     issueSection({
       id: "cmp-still-title",
@@ -184,7 +190,7 @@ function jumpLink(targetId, text) {
   );
 }
 
-function issueSection({ id, tone, iconName, title, note, items, empty }) {
+function issueSection({ id, tone, iconName, title, note, items, empty, count }) {
   return h(
     "section",
     { class: `cmp-section cmp-${tone}`, "aria-labelledby": id },
@@ -197,7 +203,7 @@ function issueSection({ id, tone, iconName, title, note, items, empty }) {
         h("span", { class: `cmp-section-icon tone-${tone}` }, icon(iconName)),
         title,
         " ",
-        h("span", { class: "count" }, `(${items.length})`),
+        h("span", { class: "count" }, `(${count ?? items.length})`),
       ),
       h("p", { class: "section-note" }, note),
     ),

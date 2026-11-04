@@ -155,7 +155,11 @@ export function reportToMarkdown(report: Report): string {
   const issues = sortIssuesForExport(Array.isArray(report.issues) ? report.issues : []);
   const r = { ...report, steps, issues };
   const status = STATUS_LABELS[report.status] ?? inline(String(report.status));
-  const score = typeof report.score === "number" ? `score ${Math.round(report.score)}/100` : "score pending";
+  const score = typeof report.score === "number"
+    ? `score ${Math.round(report.score)}/100`
+    : report.status === "running" ? "score pending"
+    : report.status === "inconclusive" || report.status === "error" ? `not scored (${report.status})`
+    : "not scored";
   const blocking = issues.filter((i) => i.blocking).length;
   const out: string[] = [];
 

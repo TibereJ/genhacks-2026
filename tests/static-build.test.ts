@@ -18,6 +18,8 @@ const EXAMPLE_COUNT = readdirSync(new URL("../examples/reports/", import.meta.ur
 const SUB_PATH = "/genhacks-2026/";
 const BAD_CLINIC = "20261104164439-947unj";
 const FIXED_CLINIC = "20261104164505-l2g8gy";
+const NODEJS = "20261104172502-oh6mrq"; // success, 3 issues
+const PYPI = "20261104172549-si9xd8"; // inconclusive (bot check), no score
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -317,6 +319,18 @@ describe("static demo in a browser, under a sub-path", () => {
     expect(await page.locator(".cmp-delta-num").innerText()).toBe("+100");
     await expect(page.locator("#cmp-fixed-title").innerText()).resolves.toContain("Fixed");
     if (shots) await page.screenshot({ path: path.join(shots, "compare.png") });
+
+    // Compared with an inconclusive run: no score change, and the earlier issues are not called fixed.
+    await page.goto(`${base}#/compare/${NODEJS}/${PYPI}`);
+    await page.locator(".cmp-delta-num").waitFor();
+    await expect(page.locator(".cmp-not-comparable").innerText()).resolves.toContain("Issues cannot be compared: the after run was inconclusive");
+    expect(await page.locator(".cmp-delta-label").innerText()).toBe("not scored");
+    expect(await page.locator(".cmp-delta .sr-only").innerText()).toBe("No score change: the after run was not scored.");
+    await expect(page.locator("#cmp-fixed-title").innerText()).resolves.toContain("(not compared)");
+    expect(await page.locator(".cmp-good li.cmp-issue").count()).toBe(0);
+    await expect(page.locator(".cmp-good .empty").innerText()).resolves.toContain("Not compared");
+    // The unscored run's gauge says why.
+    expect(await page.locator(".cmp-after .gauge").getAttribute("aria-label")).toBe("Not scored: test inconclusive");
 
     expect(problems).toEqual([]);
     // Every request stayed under the sub-path (no /api/ or /reports/ at the site root).
