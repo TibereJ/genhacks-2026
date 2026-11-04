@@ -5,7 +5,7 @@ import { runTest } from "./core/agent.js";
 import { ClaudeBrain } from "./core/brains/claude.js";
 import { ScriptedBrain, clinicDemoPlan } from "./core/brains/scripted.js";
 import { callAgentSession, startAgentSession } from "./core/brains/external.js";
-import { listReports, loadReport, newReportId, reportDir } from "./core/report.js";
+import { listReports, loadReport, markInterruptedReports, newReportId, reportDir } from "./core/report.js";
 import { reportToMarkdown } from "./core/export.js";
 import { checkPublicTarget, claudeAllowed, isPublicInstance } from "./core/url-guard.js";
 
@@ -194,6 +194,9 @@ const server = http.createServer(async (req, res) => {
     if (!res.headersSent) send(res, 500, { error: "Internal error" });
   }
 });
+
+// A report still "running" on disk belongs to a test that died with a previous server process.
+await markInterruptedReports().catch((err) => console.error("Could not check for interrupted reports", err));
 
 server.listen(PORT, HOST, () => {
   const shown = HOST === "0.0.0.0" || HOST === "::" ? "localhost" : HOST.includes(":") ? `[${HOST}]` : HOST;

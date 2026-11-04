@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdtemp } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
@@ -22,8 +22,20 @@ const freePort = () =>
     });
   });
 
+const report = (id: string) => ({
+  id, url: "http://example.com/", task: "t", model: "scripted", status: "running", summary: "",
+  startedAt: new Date().toISOString(), steps: [], issues: [],
+});
+
 beforeAll(async () => {
   reports = await mkdtemp(path.join(os.tmpdir(), "blindspot-server-"));
+  // A test left "running" by a dead process, and one still owned by a live process (this test runner).
+  for (const id of ["stale-run", "live-run"]) {
+    await mkdir(path.join(reports, id));
+    await writeFile(path.join(reports, id, "report.json"), JSON.stringify(report(id)));
+  }
+  await writeFile(path.join(reports, "live-run", "running.pid"), String(process.pid));
+
   const port = await freePort();
   base = `http://127.0.0.1:${port}`;
   child = spawn(process.execPath, ["--import", "tsx", "src/server.ts"], {
@@ -77,4 +89,12 @@ describe("HTTP server", () => {
     expect((await fetch(`${base}/demo/bad/index.html`)).status).toBe(200);
   });
 
+  it("marks tests interrupted by a restart as errors at startup", async () => {
+    const stale = JSON.parse(await readFile(path.join(reports, "stale-run", "report.json"), "utf8"));
+    expect(stale.status).toBe("error");
+    expect(stale.error).toBe("Interrupted: the BlindSpot server restarted during this test.");
+    expect(stale.finishedAt).toBeTruthy();
+    const live = JSON.parse(await readFile(path.join(reports, "live-run", "report.json"), "utf8"));
+    expect(live.status).toBe("running");
+  });
 });

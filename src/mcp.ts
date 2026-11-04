@@ -7,6 +7,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { callAgentSession, startAgentSession } from "./core/brains/external.js";
 import { TOOLS, TOOL_INPUTS, type ToolName } from "./core/tools.js";
+import { markInterruptedReports } from "./core/report.js";
 
 // MCP server: lets a coding agent (Claude Code, or any MCP client) act as BlindSpot's brain.
 // The agent never sees the page: every tool answers with what a screen reader would announce.
@@ -103,6 +104,9 @@ for (const tool of TOOLS) {
     },
   );
 }
+
+// Tests left "running" by a previous MCP process that died would otherwise look live forever.
+await markInterruptedReports().catch((err) => console.error("Could not check for interrupted reports", err));
 
 const transport = new StdioServerTransport();
 // Open browsers keep the process alive: exit when the client goes away.
