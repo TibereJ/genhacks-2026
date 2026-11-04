@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GreenCart - Fresh groceries delivered</title>
+  <link rel="icon" href="../shared/img/logo-mark.svg">
+  <link rel="stylesheet" href="../shared/shop.css">
+</head>
+<body>
+  <p class="promo-bar">Free delivery on orders over $35 · Same-day pickup at <strong>4 Market Square</strong></p>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <img class="brand-mark" src="../shared/img/logo-mark.svg" alt="" width="38" height="38">
+        <span class="brand-name">Green<span>Cart</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a class="nav-link" href="index.html" aria-current="page">Shop</a></li>
+          <li><a class="nav-link" href="index.html#essentials">Fresh produce</a></li>
+          <li><a class="nav-link" href="index.html#why">Why GreenCart</a></li>
+        </ul>
+      </nav>
+      <p class="header-delivery"><strong>Delivering to Maple Grove</strong>Next slot: tomorrow, 8:00</p>
+      <a class="cart-link" href="cart.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2.5 3.5h3l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5l1.6-6.8H6.4"/></svg>
+        <span>Cart</span>
+        <span class="cart-badge" data-cart-badge aria-hidden="true" hidden>0</span><span class="visually-hidden" data-cart-count-text> (0 items)</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="hero">
+        <div>
+          <span class="hero-eyebrow">This week at GreenCart</span>
+          <h1 class="hero-title">Fresh groceries, delivered tomorrow morning</h1>
+          <p class="hero-lead">Fruit, bread and dairy from farms around Maple Grove. Order by 22:00 and we deliver between 8:00 and 12:00.</p>
+          <ul class="hero-perks">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Picked this morning</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>No plastic bags</li>
+          </ul>
+        </div>
+        <div class="hero-art">
+          <img class="art-1" src="../shared/img/bread.svg" alt="" width="170" height="170">
+          <img class="art-2" src="../shared/img/apples.svg" alt="" width="150" height="150">
+          <img class="art-3" src="../shared/img/bananas.svg" alt="" width="160" height="160">
+        </div>
+      </section>
+
+      <section class="section" id="essentials">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">This week's essentials</h2>
+            <p class="section-sub">Choose a quantity, then add to your cart.</p>
+          </div>
+          <p class="section-note">Prices include tax</p>
+        </div>
+
+        <ul class="product-grid">
+          <li class="product-card" data-product="apples">
+            <div class="product-media tint-red">
+              <span class="product-tag">Local</span>
+              <img src="../shared/img/apples.svg" alt="" width="112" height="112">
+            </div>
+            <div class="product-body">
+              <h3 class="product-name">Apples</h3>
+              <p class="product-meta">Gala, Hillside Orchard</p>
+              <p class="product-price">$3.20 <span>/ kg</span></p>
+              <div class="product-actions">
+                <div class="stepper">
+                  <button class="stepper-btn" type="button" data-step="-1" aria-label="Decrease apples quantity">−</button>
+                  <label class="visually-hidden" for="qty-apples">Apples quantity in kg</label>
+                  <input class="qty-value" type="number" id="qty-apples" name="qty-apples" min="1" max="20" step="1" value="1" inputmode="numeric" data-qty>
+                  <button class="stepper-btn" type="button" data-step="1" aria-label="Increase apples quantity">+</button>
+                </div>
+                <button class="add-btn" type="button" data-add>Add<span class="visually-hidden"> apples to cart</span></button>
+              </div>
+            </div>
+          </li>
+          <li class="product-card" data-product="bread">
+            <div class="product-media tint-wheat">
+              <span class="product-tag">Baked today</span>
+              <img src="../shared/img/bread.svg" alt="" width="112" height="112">
+            </div>
+            <div class="product-body">
+              <h3 class="product-name">Bread loaf</h3>
+              <p class="product-meta">Sourdough, 800 g</p>
+              <p class="product-price">$2.80 <span>/ loaf</span></p>
+              <div class="product-actions">
+                <div class="stepper">
+                  <button class="stepper-btn" type="button" data-step="-1" aria-label="Decrease bread quantity">−</button>
+                  <label class="visually-hidden" for="qty-bread">Bread quantity in loaves</label>
+                  <input class="qty-value" type="number" id="qty-bread" name="qty-bread" min="1" max="20" step="1" value="1" inputmode="numeric" data-qty>
+                  <button class="stepper-btn" type="button" data-step="1" aria-label="Increase bread quantity">+</button>
+                </div>
+                <button class="add-btn" type="button" data-add>Add<span class="visually-hidden"> bread to cart</span></button>
+              </div>
+            </div>
+          </li>
+          <li class="product-card" data-product="milk">
+            <div class="product-media tint-blue">
+              <img src="../shared/img/milk.svg" alt="" width="112" height="112">
+            </div>
+            <div class="product-body">
+              <h3 class="product-name">Milk</h3>
+              <p class="product-meta">Whole milk, 1 L bottle</p>
+              <p class="product-price">$1.45 <span>/ bottle</span></p>
+              <div class="product-actions">
+                <div class="stepper">
+                  <button class="stepper-btn" type="button" data-step="-1" aria-label="Decrease milk quantity">−</button>
+                  <label class="visually-hidden" for="qty-milk">Milk quantity in bottles</label>
+                  <input class="qty-value" type="number" id="qty-milk" name="qty-milk" min="1" max="20" step="1" value="1" inputmode="numeric" data-qty>
+                  <button class="stepper-btn" type="button" data-step="1" aria-label="Increase milk quantity">+</button>
+                </div>
+                <button class="add-btn" type="button" data-add>Add<span class="visually-hidden"> milk to cart</span></button>
+              </div>
+            </div>
+          </li>
+          <li class="product-card" data-product="eggs">
+            <div class="product-media tint-cream">
+              <span class="product-tag">Free range</span>
+              <img src="../shared/img/eggs.svg" alt="" width="112" height="112">
+            </div>
+            <div class="product-body">
+              <h3 class="product-name">Eggs</h3>
+              <p class="product-meta">Box of 6, large</p>
+              <p class="product-price">$3.10 <span>/ box</span></p>
+              <div class="product-actions">
+                <div class="stepper">
+                  <button class="stepper-btn" type="button" data-step="-1" aria-label="Decrease eggs quantity">−</button>
+                  <label class="visually-hidden" for="qty-eggs">Eggs quantity in boxes</label>
+                  <input class="qty-value" type="number" id="qty-eggs" name="qty-eggs" min="1" max="20" step="1" value="1" inputmode="numeric" data-qty>
+                  <button class="stepper-btn" type="button" data-step="1" aria-label="Increase eggs quantity">+</button>
+                </div>
+                <button class="add-btn" type="button" data-add>Add<span class="visually-hidden"> eggs to cart</span></button>
+              </div>
+            </div>
+          </li>
+          <li class="product-card" data-product="bananas">
+            <div class="product-media tint-yellow">
+              <img src="../shared/img/bananas.svg" alt="" width="112" height="112">
+            </div>
+            <div class="product-body">
+              <h3 class="product-name">Bananas</h3>
+              <p class="product-meta">Fairtrade, Ecuador</p>
+              <p class="product-price">$1.90 <span>/ kg</span></p>
+              <div class="product-actions">
+                <div class="stepper">
+                  <button class="stepper-btn" type="button" data-step="-1" aria-label="Decrease bananas quantity">−</button>
+                  <label class="visually-hidden" for="qty-bananas">Bananas quantity in kg</label>
+                  <input class="qty-value" type="number" id="qty-bananas" name="qty-bananas" min="1" max="20" step="1" value="1" inputmode="numeric" data-qty>
+                  <button class="stepper-btn" type="button" data-step="1" aria-label="Increase bananas quantity">+</button>
+                </div>
+                <button class="add-btn" type="button" data-add>Add<span class="visually-hidden"> bananas to cart</span></button>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <p class="visually-hidden" role="status" id="cart-status"></p>
+      </section>
+
+      <section class="benefits" id="why" aria-label="Why GreenCart">
+        <div class="benefit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+          <div><strong>Next-morning delivery</strong><span>Order by 22:00, at your door between 8:00 and 12:00.</span></div>
+        </div>
+        <div class="benefit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20c0-9 6-15 16-16-1 10-7 16-16 16zM4 20l8-8"/></svg>
+          <div><strong>Local farms first</strong><span>Most of our produce travels less than 50 km.</span></div>
+        </div>
+        <div class="benefit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M5 10l1 10h12l1-10M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+          <div><strong>Free store pickup</strong><span>Ready in 2 hours at 4 Market Square.</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-title">GreenCart</p>
+          <p class="footer-text">Fresh groceries from local farms, delivered to your door in Maple Grove.</p>
+        </div>
+        <div>
+          <p class="footer-title">Store</p>
+          <p class="footer-text">4 Market Square, Maple Grove</p>
+          <p class="footer-text">Open daily, 7:00 to 21:00</p>
+        </div>
+        <div>
+          <p class="footer-title">Help</p>
+          <p class="footer-text">Phone: 555-0199</p>
+          <p class="footer-text">help@greencart.example</p>
+        </div>
+      </div>
+      <p class="footer-bottom">GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.</p>
+    </div>
+  </footer>
+
+  <div class="consent-backdrop" id="consent" hidden>
+    <div class="consent-box" role="dialog" aria-modal="true" aria-labelledby="consent-title" aria-describedby="consent-text">
+      <button class="consent-close" type="button" aria-label="Accept all and close" data-consent-accept>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <img class="consent-icon" src="../shared/img/cookie.svg" alt="" width="48" height="48">
+      <h2 class="consent-title" id="consent-title">We value your privacy</h2>
+      <p class="consent-text" id="consent-text">We use cookies to keep your cart, remember your delivery address and improve your shopping. You can change your choice at any time in your account settings.</p>
+      <div class="consent-actions">
+        <button class="btn btn-primary" type="button" data-consent-accept><span>Accept all</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/catalog.js"></script>
+  <script src="consent.js"></script>
+  <script src="shop.js"></script>
+</body>
+</html>

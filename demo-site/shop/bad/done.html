@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order placed - GreenCart</title>
+  <link rel="icon" href="../shared/img/logo-mark.svg">
+  <link rel="stylesheet" href="../shared/shop.css">
+</head>
+<body>
+  <p class="promo-bar">Free delivery on orders over $35 · Same-day pickup at <strong>4 Market Square</strong></p>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <img class="brand-mark" src="../shared/img/logo-mark.svg" alt="" width="38" height="38">
+        <span class="brand-name">Green<span>Cart</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a class="nav-link" href="index.html">Shop</a></li>
+          <li><a class="nav-link" href="index.html#essentials">Fresh produce</a></li>
+          <li><a class="nav-link" href="index.html#why">Why GreenCart</a></li>
+        </ul>
+      </nav>
+      <p class="header-delivery"><strong>Delivering to Maple Grove</strong>Next slot: tomorrow, 8:00</p>
+      <a class="cart-link" href="cart.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2.5 3.5h3l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5l1.6-6.8H6.4"/></svg>
+        <span>Cart</span>
+        <span class="cart-badge" data-cart-badge hidden>0</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="card done-card">
+        <div class="done-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <h1 class="page-title" data-done-title>Order placed</h1>
+        <p class="done-lead" data-done-lead>Thanks! We are getting your groceries ready.</p>
+        <div data-done-details>
+          <ul class="line-items" data-lines></ul>
+          <dl class="done-details">
+            <div class="done-row"><dt>Order number</dt><dd data-field="number"></dd></div>
+            <div class="done-row"><dt>Name</dt><dd data-field="name"></dd></div>
+            <div class="done-row"><dt>Delivery</dt><dd data-field="delivery"></dd></div>
+            <div class="done-row"><dt>Address</dt><dd data-field="address"></dd></div>
+            <div class="done-row"><dt>Total</dt><dd data-field="total"></dd></div>
+          </dl>
+        </div>
+        <div class="done-actions"><a class="btn btn-ghost" href="index.html">Back to the shop</a></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-title">GreenCart</p>
+          <p class="footer-text">Fresh groceries from local farms, delivered to your door in Maple Grove.</p>
+        </div>
+        <div>
+          <p class="footer-title">Store</p>
+          <p class="footer-text">4 Market Square, Maple Grove</p>
+          <p class="footer-text">Open daily, 7:00 to 21:00</p>
+        </div>
+        <div>
+          <p class="footer-title">Help</p>
+          <p class="footer-text">Phone: 555-0199</p>
+          <p class="footer-text">help@greencart.example</p>
+        </div>
+      </div>
+      <p class="footer-bottom">GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.</p>
+    </div>
+  </footer>
+
+  <div class="consent-backdrop" id="consent" hidden>
+    <div class="consent-box">
+      <div class="consent-close" tabindex="0" data-consent-accept>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </div>
+      <img class="consent-icon" src="../shared/img/cookie.svg" alt="" width="48" height="48">
+      <div class="consent-title">We value your privacy</div>
+      <p class="consent-text">We use cookies to keep your cart, remember your delivery address and improve your shopping. You can change your choice at any time in your account settings.</p>
+      <div class="consent-actions">
+        <div class="btn btn-primary" data-consent-accept><span>Accept all</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/catalog.js"></script>
+  <script src="consent.js"></script>
+  <script src="../shared/done.js"></script>
+</body>
+</html>
