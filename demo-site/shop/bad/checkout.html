@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout - GreenCart</title>
+  <link rel="icon" href="../shared/img/logo-mark.svg">
+  <link rel="stylesheet" href="../shared/shop.css">
+</head>
+<body>
+  <p class="promo-bar">Free delivery on orders over $35 · Same-day pickup at <strong>4 Market Square</strong></p>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <img class="brand-mark" src="../shared/img/logo-mark.svg" alt="" width="38" height="38">
+        <span class="brand-name">Green<span>Cart</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a class="nav-link" href="index.html">Shop</a></li>
+          <li><a class="nav-link" href="index.html#essentials">Fresh produce</a></li>
+          <li><a class="nav-link" href="index.html#why">Why GreenCart</a></li>
+        </ul>
+      </nav>
+      <p class="header-delivery"><strong>Delivering to Maple Grove</strong>Next slot: tomorrow, 8:00</p>
+      <a class="cart-link" href="cart.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2.5 3.5h3l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5l1.6-6.8H6.4"/></svg>
+        <span>Cart</span>
+        <span class="cart-badge" data-cart-badge hidden>0</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="page-head">
+        <h1 class="page-title">Checkout</h1>
+        <p class="page-lead">Almost there. Tell us how you want to get your groceries.</p>
+      </div>
+
+      <div class="cart-layout">
+        <form class="card checkout-form" id="checkout-form" novalidate>
+          <div class="form-section">
+            <div class="legend-as-title">Delivery method</div>
+            <div class="delivery-options">
+              <div class="delivery-card" role="button" data-delivery="home">
+                <span class="delivery-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
+                <span class="delivery-text">
+                  <span class="delivery-title">Home delivery</span>
+                  <span class="delivery-desc">Tomorrow, 8:00 to 12:00</span>
+                  <span class="delivery-price">$4.99</span>
+                </span>
+                <span class="delivery-dot"></span>
+              </div>
+              <div class="delivery-card is-selected" role="button" data-delivery="pickup">
+                <span class="delivery-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M5 10l1 10h12l1-10M9 10V6a3 3 0 0 1 6 0v4"/></svg></span>
+                <span class="delivery-text">
+                  <span class="delivery-title">Store pickup</span>
+                  <span class="delivery-desc">Ready in 2 hours, 4 Market Square</span>
+                  <span class="delivery-price">Free</span>
+                </span>
+                <span class="delivery-dot"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2 class="form-section-title">Your details</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label" for="name">Full name</label>
+                <input class="input" type="text" id="name" name="name" autocomplete="name">
+              </div>
+              <div class="field">
+                <label class="field-label" for="address">Address</label>
+                <input class="input" type="text" id="address" name="address" autocomplete="street-address">
+              </div>
+            </div>
+
+            <div class="terms" data-terms>
+              <div class="checkbox" data-terms-box></div>
+              <span class="terms-text"><span>I accept the terms of sale and the privacy policy</span><small>Required to place your order.</small></span>
+            </div>
+          </div>
+
+          <p class="form-error" id="form-error"></p>
+
+          <div class="form-actions">
+            <button class="btn btn-primary btn-block" type="submit">Place order</button>
+            <p class="secure-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Pay on delivery or at pickup. No card needed.</p>
+          </div>
+        </form>
+
+        <aside class="card summary-card" aria-label="Order summary">
+          <h2 class="summary-title">Order summary</h2>
+          <ul class="line-items" data-lines></ul>
+          <p class="empty-note" data-empty hidden>Your cart is empty.</p>
+          <div class="summary-rows">
+            <p class="summary-row"><span>Subtotal</span><span data-subtotal>$0.00</span></p>
+            <p class="summary-row"><span>Delivery</span><span data-fee>Free</span></p>
+            <p class="summary-row summary-total"><span>Total</span><span data-total>$0.00</span></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-title">GreenCart</p>
+          <p class="footer-text">Fresh groceries from local farms, delivered to your door in Maple Grove.</p>
+        </div>
+        <div>
+          <p class="footer-title">Store</p>
+          <p class="footer-text">4 Market Square, Maple Grove</p>
+          <p class="footer-text">Open daily, 7:00 to 21:00</p>
+        </div>
+        <div>
+          <p class="footer-title">Help</p>
+          <p class="footer-text">Phone: 555-0199</p>
+          <p class="footer-text">help@greencart.example</p>
+        </div>
+      </div>
+      <p class="footer-bottom">GreenCart is a fictional store created for the BlindSpot demo. No real orders are placed.</p>
+    </div>
+  </footer>
+
+  <div class="consent-backdrop" id="consent" hidden>
+    <div class="consent-box">
+      <div class="consent-close" tabindex="0" data-consent-accept>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </div>
+      <img class="consent-icon" src="../shared/img/cookie.svg" alt="" width="48" height="48">
+      <div class="consent-title">We value your privacy</div>
+      <p class="consent-text">We use cookies to keep your cart, remember your delivery address and improve your shopping. You can change your choice at any time in your account settings.</p>
+      <div class="consent-actions">
+        <div class="btn btn-primary" data-consent-accept><span>Accept all</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/catalog.js"></script>
+  <script src="consent.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>
