@@ -25,7 +25,14 @@ Serve the folder with any static file server, at the root or under a sub-path: e
 `<meta name="blindspot-static" content="1">` to `index.html`, which makes the UI read `data/reports.json`,
 `data/reports/<id>/report.json` and `data/reports/<id>/step-N.png` instead of the API. It copies `demo-site/` to
 `demo/`, and writes `data/reports/<id>/report.md` (the Markdown export, made with `reportToMarkdown`) for
-"Download Markdown" and "Copy as GitHub issue". Report data is published as it is.
+"Download Markdown" and "Copy as GitHub issue". Report data is published as it is. A report still `running` is
+refused: wait for it to finish, or delete it.
+
+The output folder is emptied before each build, so the script refuses a folder that is outside the repository, is
+the repository itself, or overlaps (as the same folder, a parent or a child) `src/`, `report-ui/`, `demo-site/`,
+`examples/`, `tests/`, `docs/`, `node_modules/`, `.git/` or `.github/` (compared case-insensitively on Windows,
+after resolving symbolic links). Every build writes a `.blindspot-static` file in it; an existing non-empty folder
+without that file is never deleted.
 
 `.github/workflows/pages.yml` builds and deploys it on every push to `main` (and on demand from the Actions tab).
 **The repository owner must enable Pages once:** Settings → Pages → Build and deployment → Source:
