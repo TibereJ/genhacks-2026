@@ -2,7 +2,7 @@
 
 import { h, icon, replaceChildren } from "./dom.js";
 import { listReports, startRun, FIXTURE_MODE } from "./api.js";
-import { prettyUrl, relativeTime } from "./format.js";
+import { orderRuns, prettyUrl, relativeTime } from "./format.js";
 import { statusBadge, scorePill, emptyState, errorBox } from "./components.js";
 
 const DEMO_TASK =
@@ -130,16 +130,77 @@ export function renderHome(root) {
 
   // ---- runs list ----
   const runsBody = h("div", { class: "runs-body", "aria-busy": "true" }, h("p", { class: "muted" }, "Loading runs…"));
+  let runsKey = "";
+  let runs = [];
+  /** Ids of the runs ticked for a before / after comparison. Survives list refreshes. */
+  const selected = new Set();
+
+  const compareHint = h("p", { class: "compare-hint", id: "compare-hint", "aria-live": "polite" });
+  const compareBtn = h(
+    "button",
+    {
+      type: "button",
+      class: "btn btn-sm btn-primary",
+      disabled: true,
+      "aria-describedby": "compare-hint",
+      onclick: () => {
+        const picked = runs.filter((r) => selected.has(r.id));
+        if (picked.length !== 2) return;
+        const [before, after] = orderRuns(picked[0], picked[1]);
+        location.hash = `#/compare/${encodeURIComponent(before.id)}/${encodeURIComponent(after.id)}`;
+      },
+    },
+    icon("compare"),
+    "Compare selected",
+  );
+  const compareBar = h("div", { class: "compare-bar", hidden: true }, compareHint, compareBtn);
+
+  function updateCompareBar() {
+    const n = selected.size;
+    compareBtn.disabled = n !== 2;
+    compareHint.textContent =
+      n === 0
+        ? "Tick two runs to compare them before and after."
+        : n === 1
+          ? "1 run selected. Tick one more to compare."
+          : n === 2
+            ? "2 runs selected. The older one is shown as Before."
+            : `${n} runs selected. Untick ${n - 2} to compare exactly two.`;
+  }
+
+  function onPick(e) {
+    const id = e.target.dataset.id;
+    if (e.target.checked) selected.add(id);
+    else selected.delete(id);
+    e.target.closest(".run-row")?.classList.toggle("is-picked", e.target.checked);
+    updateCompareBar();
+  }
 
   async function loadRuns() {
     try {
-      const runs = await listReports();
+      const list = await listReports();
       if (!alive) return;
       runsBody.setAttribute("aria-busy", "false");
-      if (!Array.isArray(runs) || runs.length === 0) {
-        replaceChildren(runsBody, emptyState("No runs yet", "Launch a test above, or try one of the demo presets."));
-      } else {
-        replaceChildren(runsBody, h("ul", { class: "runs", role: "list" }, runs.map(runItem)));
+      runs = Array.isArray(list) ? list : [];
+      const known = new Set(runs.map((r) => r.id));
+      for (const id of selected) if (!known.has(id)) selected.delete(id);
+      compareBar.hidden = runs.length < 2;
+      updateCompareBar();
+      // Only rebuild the list when it changed, so focus and ticks are not disturbed while polling.
+      const k = JSON.stringify(runs);
+      if (k !== runsKey) {
+        runsKey = k;
+        const focusedId = runsBody.contains(document.activeElement) ? document.activeElement.dataset?.id : undefined;
+        const focusedKind = document.activeElement?.tagName;
+        if (runs.length === 0) {
+          replaceChildren(runsBody, emptyState("No runs yet", "Launch a test above, or try one of the demo presets."));
+        } else {
+          replaceChildren(runsBody, h("ul", { class: "runs", role: "list" }, runs.map((r) => runItem(r, selected.has(r.id), onPick))));
+        }
+        if (focusedId) {
+          const sel = focusedKind === "INPUT" ? "input" : "a";
+          [...runsBody.querySelectorAll(`${sel}[data-id]`)].find((el) => el.dataset.id === focusedId)?.focus({ preventScroll: true });
+        }
       }
       if (runs?.some?.((r) => r.status === "running")) listTimer = setTimeout(loadRuns, LIST_REFRESH_MS);
     } catch (err) {
@@ -191,6 +252,7 @@ export function renderHome(root) {
         "section",
         { class: "runs-section", "aria-labelledby": "runs-title" },
         h("div", { class: "section-head" }, h("h2", { id: "runs-title" }, "Recent runs"), FIXTURE_MODE ? h("span", { class: "badge status-info" }, "Sample data") : null),
+        compareBar,
         runsBody,
       ),
     ),
@@ -216,14 +278,20 @@ function howItem(iconName, title, text) {
   );
 }
 
-function runItem(run) {
+function runItem(run, picked, onPick) {
   const when = relativeTime(run.startedAt);
   return h(
     "li",
-    {},
+    { class: `run-row${picked ? " is-picked" : ""}` },
+    h(
+      "label",
+      { class: "run-pick" },
+      h("input", { type: "checkbox", checked: picked, dataset: { id: run.id }, onchange: onPick }),
+      h("span", { class: "sr-only" }, `Compare: ${run.task || "(no task)"}, ${prettyUrl(run.url)}${when ? `, ${when}` : ""}`),
+    ),
     h(
       "a",
-      { class: "run", href: `#/report/${encodeURIComponent(run.id)}` },
+      { class: "run", href: `#/report/${encodeURIComponent(run.id)}`, dataset: { id: run.id } },
       scorePill(run.score),
       h(
         "span",

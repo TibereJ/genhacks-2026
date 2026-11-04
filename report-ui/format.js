@@ -236,3 +236,57 @@ export function prettyUrl(url) {
     return String(url ?? "");
   }
 }
+
+// ---------------------------------------------------------------- before / after comparison
+
+/** Issues are the "same" across two runs when title, element role and element name match. */
+export function issueMatchKey(issue) {
+  const norm = (v) => String(v ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+  return JSON.stringify([norm(issue?.title), norm(issue?.element?.role), norm(issue?.element?.name)]);
+}
+
+/**
+ * Split issues into fixed (only before), still present (in both) and added (only after).
+ * Duplicates are matched one to one. Still-present entries carry both versions.
+ * Each list is sorted like the report (blocking first, then severity); still present by the "after" issue.
+ */
+export function compareIssues(beforeIssues, afterIssues) {
+  const pool = new Map();
+  for (const issue of afterIssues ?? []) {
+    const key = issueMatchKey(issue);
+    if (!pool.has(key)) pool.set(key, []);
+    pool.get(key).push(issue);
+  }
+  const fixed = [];
+  const pairs = new Map(); // after issue -> { before, after }
+  for (const issue of beforeIssues ?? []) {
+    const match = pool.get(issueMatchKey(issue))?.shift();
+    if (match) pairs.set(match, { before: issue, after: match });
+    else fixed.push(issue);
+  }
+  const added = (afterIssues ?? []).filter((i) => !pairs.has(i));
+  return {
+    fixed: sortIssues(fixed),
+    stillPresent: sortIssues([...pairs.keys()]).map((after) => pairs.get(after)),
+    added: sortIssues(added),
+  };
+}
+
+/** Order two runs so the one that started first is "before". */
+export function orderRuns(a, b) {
+  const ta = Date.parse(a?.startedAt);
+  const tb = Date.parse(b?.startedAt);
+  return !Number.isNaN(ta) && !Number.isNaN(tb) && tb < ta ? [b, a] : [a, b];
+}
+
+/** Score change from before to after: { value, text: "+57", tone, sentence }. value is null when a score is missing. */
+export function scoreDelta(before, after) {
+  if (typeof before !== "number" || typeof after !== "number") {
+    return { value: null, text: "–", tone: "none", sentence: "Score change not available yet" };
+  }
+  const value = Math.round(after) - Math.round(before);
+  const pts = (n) => `${n} point${n === 1 ? "" : "s"}`;
+  if (value > 0) return { value, text: `+${value}`, tone: "good", sentence: `Score up ${pts(value)}` };
+  if (value < 0) return { value, text: `−${-value}`, tone: "bad", sentence: `Score down ${pts(-value)}` };
+  return { value, text: "±0", tone: "none", sentence: "Score unchanged" };
+}

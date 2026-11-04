@@ -19,6 +19,7 @@ import {
 import { statusBadge, scoreGauge, elementChip, wcagChip, emptyState, errorBox } from "./components.js";
 import { speak, stopSpeaking, SPEECH_SUPPORTED } from "./speech.js";
 import { openLightbox } from "./lightbox.js";
+import { reportActions } from "./report-actions.js";
 
 const POLL_MS = 1500;
 const RETRY_MS = 3000;
@@ -42,6 +43,8 @@ export function renderReport(root, id) {
     h("div", { class: "head-main" }, h("p", { class: "head-kicker" }, "Report"), h("h1", { id: "page-title", tabindex: "-1" }, "Loading report…")),
   );
   const liveRegion = h("div", { class: "live-banner", role: "status", "aria-live": "polite" });
+  // Export / compare toolbar, filled in once the run has finished.
+  const actionsSlot = h("div", { class: "report-actions-slot" });
   const issuesCount = h("span", { class: "count" });
   const severitySummary = h("div", { class: "sev-summary" });
   const issuesBody = h("div", { class: "issues-body" });
@@ -54,6 +57,7 @@ export function renderReport(root, id) {
     { class: "report" },
     h("nav", { class: "crumbs", "aria-label": "Breadcrumb" }, h("a", { href: "#/", class: "back-link" }, icon("back"), "All runs")),
     head,
+    actionsSlot,
     liveRegion,
     h(
       "nav",
@@ -121,6 +125,8 @@ export function renderReport(root, id) {
       renderHead(head, r, steps, issues);
       if (hadFocus) document.getElementById("page-title")?.focus({ preventScroll: true });
     }
+
+    if (!running && !actionsSlot.hasChildNodes()) replaceChildren(actionsSlot, reportActions(r));
 
     // Live status
     if (running) {

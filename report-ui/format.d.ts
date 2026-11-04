@@ -44,3 +44,18 @@ export function relativeTime(iso: string, now?: number): string;
 export function duration(startIso: string | undefined, endIso: string | undefined): string;
 export function screenshotUrl(reportId: string, file: string | undefined): string | null;
 export function prettyUrl(url: string | undefined): string;
+
+export interface MatchableIssue extends IssueLike {
+  title: string;
+  element?: { role: string; name: string };
+}
+export function issueMatchKey(issue: MatchableIssue | undefined): string;
+export function compareIssues<T extends MatchableIssue>(
+  beforeIssues: T[] | undefined,
+  afterIssues: T[] | undefined,
+): { fixed: T[]; stillPresent: { before: T; after: T }[]; added: T[] };
+export function orderRuns<T extends { startedAt?: string }>(a: T, b: T): [T, T];
+export function scoreDelta(
+  before: number | undefined,
+  after: number | undefined,
+): { value: number | null; text: string; tone: "good" | "bad" | "none"; sentence: string };

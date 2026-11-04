@@ -1030,7 +1030,8 @@ select:focus-visible {
 .gauge-label {
   position: absolute;
   top: 0;
-  left: 0;
+  /* Centered over the ring, which is centered in the wider .gauge. */
+  left: calc(50% - 84px);
   width: 168px;
   height: 168px;
   display: flex;
@@ -2106,6 +2107,349 @@ a.chip:hover {
   border-radius: 10px;
   background: #fff;
   box-shadow: var(--shadow-lg);
+}
+
+/* ------------------------------------------------------------------ report toolbar: export + compare */
+
+.report-actions-slot:empty {
+  display: none;
+}
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.action-group {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.action-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-row .btn {
+  text-decoration: none;
+}
+
+.action-prefix {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.action-note {
+  font-size: 0.9rem;
+  max-width: 36em;
+}
+
+.compare-select {
+  width: auto;
+  max-width: 100%;
+  min-height: 34px;
+  padding: 4px 10px;
+  font-size: 0.875rem;
+}
+
+.copy-status.tone-bad {
+  color: var(--bad);
+}
+
+@media (max-width: 560px) {
+  .report-actions {
+    padding: 16px;
+  }
+  .action-compare,
+  .compare-select {
+    width: 100%;
+  }
+  .action-compare .action-row .btn {
+    flex: 1 1 auto;
+  }
+}
+
+/* ------------------------------------------------------------------ home: pick runs to compare */
+
+.compare-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+}
+
+.compare-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.run-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.run-row > .run {
+  flex: 1;
+  min-width: 0;
+}
+
+.run-pick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.run-pick:hover {
+  border-color: var(--accent);
+}
+
+.run-pick:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.run-pick input {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.run-pick input:focus-visible {
+  outline: none;
+}
+
+.run-row.is-picked .run-pick,
+.run-row.is-picked .run {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ------------------------------------------------------------------ compare view */
+
+.cmp-body {
+  display: grid;
+  gap: 24px;
+}
+
+.cmp-head {
+  padding: 24px;
+}
+
+@media (min-width: 820px) {
+  .cmp-head {
+    padding: 28px 36px;
+  }
+}
+
+.cmp-head h1 {
+  font-size: clamp(1.35rem, 1rem + 1.4vw, 1.9rem);
+  max-width: 40em;
+}
+
+.cmp-head .error-box {
+  margin-top: 16px;
+}
+
+.cmp-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--warn);
+  font-weight: 600;
+  font-size: 0.925rem;
+}
+
+.cmp-scores {
+  display: grid;
+  gap: 16px;
+  align-items: stretch;
+}
+
+@media (min-width: 760px) {
+  .cmp-scores {
+    grid-template-columns: 1fr auto 1fr;
+  }
+}
+
+.cmp-run {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.cmp-run-label {
+  justify-self: stretch;
+  font-size: 0.85rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cmp-after .cmp-run-label {
+  color: var(--accent-strong);
+}
+
+.cmp-run-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.cmp-run-url {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.cmp-run .btn {
+  text-decoration: none;
+}
+
+.cmp-delta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 12px;
+}
+
+.cmp-delta-arrow {
+  color: var(--muted);
+}
+
+.cmp-delta-num {
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cmp-delta-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+@media (max-width: 759px) {
+  .cmp-delta {
+    flex-direction: row;
+    gap: 10px;
+    padding: 0;
+  }
+  .cmp-delta-arrow .icon {
+    transform: rotate(90deg);
+  }
+  .cmp-delta-num {
+    font-size: 2rem;
+  }
+}
+
+.cmp-section {
+  margin-top: 8px;
+}
+
+.cmp-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cmp-section-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+}
+
+.cmp-section-icon .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.cmp-issues {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.cmp-issue {
+  display: grid;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--sev, var(--border-strong));
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 14px 18px;
+}
+
+.cmp-good .cmp-issue-title {
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--good) 70%, transparent);
+  text-decoration-thickness: 2px;
+}
+
+.cmp-issue-title {
+  font-size: 1.05rem;
+}
+
+.cmp-issue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cmp-change {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 /* ------------------------------------------------------------------ motion & contrast preferences */
