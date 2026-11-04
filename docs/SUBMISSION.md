@@ -63,7 +63,7 @@ screen reader announces**. It never sees the page, no pixels, no HTML.
 
 **The demo.** *Maple Grove Clinic* is a fictional clinic site in two versions that are **pixel-identical** (a test
 compares byte-equal screenshots of every page and state). When Claude played the screen reader user on the
-inaccessible version, it was **blocked after 12 steps, score 0/100, 17 issues**. The blocking issue: *"Time slots
+inaccessible version, it was **blocked after 12 steps, score 0/100, 15 issues**. The blocking issue: *"Time slots
 cannot be selected"*. The slots are clickable `<div>`s, so they are announced as plain text, and pressing Tab
 jumps from the date field straight to "Full name". When it submitted anyway, the red "Please choose a time slot"
 error was never announced. On the fixed version, which looks exactly the same, the same agent **booked the
@@ -143,7 +143,7 @@ TypeScript on Node.js.
 
 - The accessibility tree is the real interface for screen reader users, and it can be completely different from
   what you see: two pixel-identical pages can be one usable and one impossible.
-- Framing matters: "17 issues" is easy to postpone; "a blind patient cannot book" is not. Task-based testing
+- Framing matters: "15 issues" is easy to postpone; "a blind patient cannot book" is not. Task-based testing
   turns accessibility from a checklist into a product bug.
 - Designing tools for an AI agent is interface design: small, strict tools, short-lived ids, results phrased as
   what a person would notice, and a system prompt that sets the rules of the role.
